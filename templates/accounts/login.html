@@ -1,0 +1,270 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Connexion — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/contact_styles.css' %}">
+<style>
+    .auth_section {
+        min-height: 80vh;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        padding: 60px 0;
+    }
+    .auth_card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 5px 30px rgba(0,0,0,0.10);
+        overflow: hidden;
+    }
+    .auth_card_left {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #f6a623 100%);
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        color: #fff;
+        min-height: 500px;
+    }
+    .auth_card_left .brand_logo {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: #f6a623;
+        margin-bottom: 10px;
+        letter-spacing: -1px;
+    }
+    .auth_card_left .brand_logo span {
+        color: #fff;
+    }
+    .auth_card_left h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    .auth_card_left p {
+        font-size: 0.95rem;
+        opacity: 0.85;
+        line-height: 1.7;
+    }
+    .auth_card_right {
+        padding: 60px 50px;
+    }
+    .auth_title {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        margin-bottom: 8px;
+    }
+    .auth_subtitle {
+        color: #888;
+        font-size: 0.9rem;
+        margin-bottom: 35px;
+    }
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #444;
+        margin-bottom: 6px;
+    }
+    .form-control {
+        border: 1px solid #e0e0e0;
+        border-radius: 5px;
+        padding: 12px 15px;
+        font-size: 0.9rem;
+        color: #333;
+        transition: border-color 0.2s;
+    }
+    .form-control:focus {
+        border-color: #f6a623;
+        box-shadow: 0 0 0 3px rgba(246, 166, 35, 0.15);
+    }
+    .btn_auth {
+        background: #f6a623;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 13px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        letter-spacing: 0.5px;
+        width: 100%;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .btn_auth:hover {
+        background: #e59520;
+        color: #fff;
+    }
+    .auth_divider {
+        text-align: center;
+        position: relative;
+        margin: 25px 0;
+    }
+    .auth_divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #e0e0e0;
+    }
+    .auth_divider span {
+        background: #fff;
+        padding: 0 15px;
+        color: #999;
+        font-size: 0.85rem;
+        position: relative;
+    }
+    .auth_link {
+        color: #f6a623;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .auth_link:hover {
+        color: #e59520;
+        text-decoration: underline;
+    }
+    .alert_errors {
+        background: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 5px;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: #856404;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="home" style="height: 200px;">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Connexion</h1>
+    </div>
+</div>
+
+<!-- Section Connexion -->
+<div class="auth_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="auth_card">
+                    <div class="row no-gutters">
+
+                        <!-- Côté gauche — Branding -->
+                        <div class="col-lg-5 auth_card_left">
+                            <div>
+                                <div class="brand_logo">Aven<span>SU</span></div>
+                                <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 30px;">Orienta</p>
+                                <h2>Bienvenue sur AvenSU-Orienta</h2>
+                                <p>La plateforme d'orientation post-bac dédiée aux étudiants d'Afrique de l'Ouest. Connectez-vous pour accéder à votre espace personnel.</p>
+                                <div style="margin-top: 30px;">
+                                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                        <i class="fas fa-check-circle" style="color: #f6a623; margin-right: 10px;"></i>
+                                        <span style="font-size: 0.85rem;">Accès au catalogue complet</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                        <i class="fas fa-check-circle" style="color: #f6a623; margin-right: 10px;"></i>
+                                        <span style="font-size: 0.85rem;">Suivi de vos candidatures</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                                        <i class="fas fa-check-circle" style="color: #f6a623; margin-right: 10px;"></i>
+                                        <span style="font-size: 0.85rem;">Messagerie avec les conseillers</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center;">
+                                        <i class="fas fa-check-circle" style="color: #f6a623; margin-right: 10px;"></i>
+                                        <span style="font-size: 0.85rem;">Accès à la communauté</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Côté droit — Formulaire -->
+                        <div class="col-lg-7 auth_card_right">
+
+                            <h2 class="auth_title">Se connecter</h2>
+                            <p class="auth_subtitle">Entrez vos identifiants pour accéder à votre compte.</p>
+
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert_errors">
+                                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            {% if form.errors %}
+                                <div class="alert_errors">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    Identifiants incorrects. Veuillez réessayer.
+                                </div>
+                            {% endif %}
+
+                            <form method="post" action="{% url 'accounts:login' %}">
+                                {% csrf_token %}
+
+                                <div class="form-group">
+                                    <label for="id_email">Adresse e-mail</label>
+                                    <input type="email" name="email" id="id_email" class="form-control{% if form.email.errors %} is-invalid{% endif %}" placeholder="exemple@email.com" value="{{ form.email.value|default:'' }}" required>
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback">{{ form.email.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="id_password" class="d-flex justify-content-between align-items-center">
+                                        Mot de passe
+                                        <a href="{% url 'accounts:password_reset' %}" class="auth_link" style="font-size: 0.82rem; font-weight: 400;">Mot de passe oublié ?</a>
+                                    </label>
+                                    <input type="password" name="password" id="id_password" class="form-control{% if form.password.errors %} is-invalid{% endif %}" placeholder="Votre mot de passe" required>
+                                    {% if form.password.errors %}
+                                        <div class="invalid-feedback">{{ form.password.errors|join:", " }}</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group form-check mb-4">
+                                    <input type="checkbox" class="form-check-input" id="remember_me" name="remember_me">
+                                    <label class="form-check-label" for="remember_me" style="font-size: 0.85rem; color: #666;">Se souvenir de moi</label>
+                                </div>
+
+                                {% if next %}
+                                    <input type="hidden" name="next" value="{{ next }}">
+                                {% endif %}
+
+                                <button type="submit" class="btn_auth">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
+                                </button>
+
+                            </form>
+
+                            <div class="auth_divider">
+                                <span>Pas encore de compte ?</span>
+                            </div>
+
+                            <div class="text-center">
+                                <a href="{% url 'accounts:register' %}" class="btn btn-outline-secondary btn-block" style="border-radius: 5px; padding: 12px; font-weight: 600; font-size: 0.9rem;">
+                                    <i class="fas fa-user-plus mr-2"></i>Créer un compte gratuitement
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

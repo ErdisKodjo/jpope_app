@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ evenement.titre }} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="courses page_section">
+    <div class="container">
+        <h1>{{ evenement.titre }}</h1>
+        <p>{{ evenement.description }}</p>
+        <p>Date : {{ evenement.date_debut }}</p>
+    </div>
+</div>
+{% endblock %}

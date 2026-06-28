@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Établissements — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="home">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/teachers_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Établissements</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                <li class="breadcrumb-item active">Établissements</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="teachers page_section">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section_title text-center">
+                    <h1>Établissements d'enseignement supérieur</h1>
+                    <p>Découvrez les meilleures institutions d'Afrique de l'Ouest</p>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            {% for etablissement in etablissements %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-university fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">
+                            <a href="{% url 'catalog:etablissement-detail' etablissement.slug %}">{{ etablissement.nom }}</a>
+                        </h5>
+                        <p class="card-text text-muted">{{ etablissement.ville }}, {{ etablissement.pays }}</p>
+                        <span class="badge badge-secondary">{{ etablissement.get_type_display }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col text-center py-5">
+                <i class="fas fa-university fa-3x text-muted mb-3 d-block"></i>
+                <h4 class="text-muted">Aucun établissement disponible</h4>
+                <p>Les établissements seront bientôt ajoutés.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

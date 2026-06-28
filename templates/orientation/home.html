@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Orientation — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="home">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/search_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Tests d'Orientation</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                <li class="breadcrumb-item active">Orientation</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <div class="section_title">
+                    <h1>Découvrez votre voie</h1>
+                    <p>Passez nos tests d'orientation pour recevoir des recommandations personnalisées</p>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-4 text-center mb-4">
+                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
+                <h4>Test de personnalité</h4>
+                <p>Découvrez vos aptitudes et centres d'intérêt</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
+                <h4>Analyse de profil</h4>
+                <p>Analysez vos résultats scolaires pour trouver les formations adaptées</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                <h4>Recommandations</h4>
+                <p>Recevez une liste de formations et établissements correspondant à votre profil</p>
+            </div>
+        </div>
+        {% if not request.user.is_authenticated %}
+        <div class="row mt-3">
+            <div class="col text-center">
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-user-plus mr-2"></i>S'inscrire pour commencer
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

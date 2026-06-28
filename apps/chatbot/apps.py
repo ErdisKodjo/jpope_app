@@ -1,0 +1,14 @@
+"""
+Configuration de l'app chatbot.
+"""
+from django.apps import AppConfig
+from django.utils.translation import gettext_lazy as _
+
+
+class ChatbotConfig(AppConfig):
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "apps.chatbot"
+    verbose_name = _("Chatbot IA")
+
+    def ready(self):
+        pass  # Import signals here if needed

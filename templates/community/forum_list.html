@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Communauté — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<div class="page_title_container">
+    <div class="page_title_background" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
+    <div class="page_title_overlay"></div>
+    <div class="page_title_content d-flex flex-column align-items-center justify-content-center">
+        <h1 class="page_title">Communauté</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Communauté</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="courses page_section">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section_title text-center">
+                    <h1>Forums de discussion</h1>
+                    <p>Échangez avec d'autres étudiants, conseillers et représentants d'établissements</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            {% for forum in forums %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <a href="{% url 'community:forum-detail' forum.pk %}">{{ forum.nom }}</a>
+                        </h5>
+                        <p class="card-text text-muted">{{ forum.description|truncatewords:20 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">{{ forum.thread_set.count }} discussions</small>
+                            <a href="{% url 'community:forum-detail' forum.pk %}" class="btn btn-sm btn-outline-primary">Voir les discussions</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col text-center py-5">
+                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Aucun forum disponible pour le moment</h4>
+                <p>La communauté sera bientôt disponible.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,467 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AvenSU-Orienta — Votre avenir commence ici{% endblock %}
+
+{% block content %}
+
+<!-- Hero Slider -->
+<div class="home">
+    <div class="hero_slider_container">
+        <div class="hero_slider owl-carousel">
+
+            <!-- Slide 1 -->
+            <div class="hero_slide">
+                <div class="hero_slide_background" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+                <div class="hero_slide_container d-flex flex-column align-items-center justify-content-center">
+                    <div class="hero_slide_content text-center">
+                        <h1 data-animation-in="fadeInUp" data-animation-out="animate-out fadeOut">
+                            Trouvez la formation <span>idéale</span> pour votre avenir !
+                        </h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 2 -->
+            <div class="hero_slide">
+                <div class="hero_slide_background" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+                <div class="hero_slide_container d-flex flex-column align-items-center justify-content-center">
+                    <div class="hero_slide_content text-center">
+                        <h1 data-animation-in="fadeInUp" data-animation-out="animate-out fadeOut">
+                            Orientez votre <span>parcours</span> avec confiance !
+                        </h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="hero_slide">
+                <div class="hero_slide_background" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+                <div class="hero_slide_container d-flex flex-column align-items-center justify-content-center">
+                    <div class="hero_slide_content text-center">
+                        <h1 data-animation-in="fadeInUp" data-animation-out="animate-out fadeOut">
+                            Des milliers d'<span>établissements</span> à votre portée !
+                        </h1>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="hero_slider_left hero_slider_nav trans_200"><span class="trans_200">précédent</span></div>
+        <div class="hero_slider_right hero_slider_nav trans_200"><span class="trans_200">suivant</span></div>
+    </div>
+</div>
+
+<!-- Hero Boxes -->
+<div class="hero_boxes">
+    <div class="hero_boxes_inner">
+        <div class="container">
+            <div class="row">
+
+                <div class="col-lg-4 hero_box_col">
+                    <div class="hero_box d-flex flex-row align-items-center justify-content-start">
+                        <img src="{% static 'images/earth-globe.svg' %}" class="svg" alt="Formations">
+                        <div class="hero_box_content">
+                            <h2 class="hero_box_title">Formations disponibles</h2>
+                            <a href="{% url 'catalog:formation-list' %}" class="hero_box_link">Voir toutes</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 hero_box_col">
+                    <div class="hero_box d-flex flex-row align-items-center justify-content-start">
+                        <img src="{% static 'images/books.svg' %}" class="svg" alt="Établissements">
+                        <div class="hero_box_content">
+                            <h2 class="hero_box_title">Établissements</h2>
+                            <a href="{% url 'catalog:etablissement-list' %}" class="hero_box_link">Découvrir</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 hero_box_col">
+                    <div class="hero_box d-flex flex-row align-items-center justify-content-start">
+                        <img src="{% static 'images/professor.svg' %}" class="svg" alt="Conseils">
+                        <div class="hero_box_content">
+                            <h2 class="hero_box_title">Conseils d'orientation</h2>
+                            <a href="{% url 'orientation:home' %}" class="hero_box_link">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formations Populaires -->
+<div class="popular page_section">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section_title text-center">
+                    <h1>Formations Populaires</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="row course_boxes">
+
+            <!-- Carte Formation 1 -->
+            <div class="col-lg-4 course_box">
+                <div class="card">
+                    <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="Licence Informatique">
+                    <div class="card-body text-center">
+                        <div class="card-title"><a href="{% url 'catalog:formation-list' %}">Licence en Informatique</a></div>
+                        <div class="card-text">Programmation, réseaux, intelligence artificielle...</div>
+                    </div>
+                    <div class="price_box d-flex flex-row align-items-center">
+                        <div class="course_author_image">
+                            <img src="{% static 'images/author.jpg' %}" alt="Établissement">
+                        </div>
+                        <div class="course_author_name">Université de Lomé, <span>Togo</span></div>
+                        <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Public</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte Formation 2 -->
+            <div class="col-lg-4 course_box">
+                <div class="card">
+                    <img class="card-img-top" src="{% static 'images/course_2.jpg' %}" alt="BTS Gestion">
+                    <div class="card-body text-center">
+                        <div class="card-title"><a href="{% url 'catalog:formation-list' %}">BTS Gestion Commerciale</a></div>
+                        <div class="card-text">Commerce, marketing, entrepreneuriat...</div>
+                    </div>
+                    <div class="price_box d-flex flex-row align-items-center">
+                        <div class="course_author_image">
+                            <img src="{% static 'images/author.jpg' %}" alt="Établissement">
+                        </div>
+                        <div class="course_author_name">IUGB, <span>Côte d'Ivoire</span></div>
+                        <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Privé</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte Formation 3 -->
+            <div class="col-lg-4 course_box">
+                <div class="card">
+                    <img class="card-img-top" src="{% static 'images/course_3.jpg' %}" alt="Médecine">
+                    <div class="card-body text-center">
+                        <div class="card-title"><a href="{% url 'catalog:formation-list' %}">Médecine Générale</a></div>
+                        <div class="card-text">Sciences de la santé, chirurgie, pharmacie...</div>
+                    </div>
+                    <div class="price_box d-flex flex-row align-items-center">
+                        <div class="course_author_image">
+                            <img src="{% static 'images/author.jpg' %}" alt="Établissement">
+                        </div>
+                        <div class="course_author_name">UCAD, <span>Sénégal</span></div>
+                        <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Public</span></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="row mt-4">
+            <div class="col text-center">
+                <a href="{% url 'catalog:formation-list' %}" class="button button_1 trans_200" style="display:inline-block; padding: 12px 30px;">
+                    Voir toutes les formations
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inscription / Recherche -->
+<div class="register">
+    <div class="container-fluid">
+        <div class="row row-eq-height">
+
+            <!-- Inscription -->
+            <div class="col-lg-6 nopadding">
+                <div class="register_section d-flex flex-column align-items-center justify-content-center">
+                    <div class="register_content text-center">
+                        <h1 class="register_title">Inscrivez-vous <span>gratuitement</span> et accédez à toutes nos ressources d'orientation</h1>
+                        <p class="register_text">Rejoignez notre communauté d'étudiants et de conseillers d'orientation. Comparez des établissements, posez vos questions et préparez votre avenir en toute sérénité.</p>
+                        <div class="button button_1 register_button mx-auto trans_200">
+                            <a href="{% url 'accounts:register' %}">S'inscrire maintenant</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recherche -->
+            <div class="col-lg-6 nopadding">
+                <div class="search_section d-flex flex-column align-items-center justify-content-center">
+                    <div class="search_background" style="background-image:url({% static 'images/search_background.jpg' %});"></div>
+                    <div class="search_content text-center">
+                        <h1 class="search_title">Rechercher une formation</h1>
+                        <form id="search_form" class="search_form" action="{% url 'catalog:formation-list' %}" method="get">
+                            <input id="search_form_name" class="input_field search_form_name" type="text" name="q" placeholder="Nom de la formation" required="required" data-error="Le nom de la formation est requis.">
+                            <input id="search_form_category" class="input_field search_form_category" type="text" name="domaine" placeholder="Domaine (ex: informatique, santé)">
+                            <input id="search_form_degree" class="input_field search_form_degree" type="text" name="niveau" placeholder="Niveau (ex: Licence, Master, BTS)">
+                            <button id="search_submit_button" type="submit" class="search_submit_button trans_200" value="Submit">Rechercher</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Services / Avantages -->
+<div class="services page_section">
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="section_title text-center">
+                    <h1>Nos Services</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="row services_row">
+
+            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
+                <div class="icon_container d-flex flex-column justify-content-end">
+                    <img src="{% static 'images/earth-globe.svg' %}" alt="">
+                </div>
+                <h3>Catalogue de formations</h3>
+                <p>Accédez à des centaines de formations proposées par les meilleures universités et grandes écoles d'Afrique de l'Ouest.</p>
+            </div>
+
+            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
+                <div class="icon_container d-flex flex-column justify-content-end">
+                    <img src="{% static 'images/exam.svg' %}" alt="">
+                </div>
+                <h3>Comparaison d'établissements</h3>
+                <p>Comparez les établissements selon leurs critères : coûts, débouchés, localisation, avis d'anciens étudiants et bien plus.</p>
+            </div>
+
+            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
+                <div class="icon_container d-flex flex-column justify-content-end">
+                    <img src="{% static 'images/books.svg' %}" alt="">
+                </div>
+                <h3>Ressources d'orientation</h3>
+                <p>Des guides, articles et vidéos pour vous aider à prendre les bonnes décisions après le baccalauréat.</p>
+            </div>
+
+            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
+                <div class="icon_container d-flex flex-column justify-content-end">
+                    <img src="{% static 'images/professor.svg' %}" alt="">
+                </div>
+                <h3>Conseillers d'orientation</h3>
+                <p>Échangez avec des conseillers expérimentés qui vous accompagnent dans votre projet d'études supérieures.</p>
+            </div>
+
+            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
+                <div class="icon_container d-flex flex-column justify-content-end">
+                    <img src="{% static 'images/blackboard.svg' %}" alt="">
+                </div>
+                <h3>Événements &amp; Salons</h3>
+                <p>Restez informé des journées portes ouvertes, salons d'orientation et événements étudiants dans toute la région.</p>
+            </div>
+
+            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
+                <div class="icon_container d-flex flex-column justify-content-end">
+                    <img src="{% static 'images/mortarboard.svg' %}" alt="">
+                </div>
+                <h3>Communauté étudiante</h3>
+                <p>Rejoignez une communauté active d'étudiants et partagez vos expériences pour aider les futurs bacheliers.</p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Témoignages -->
+<div class="testimonials page_section">
+    <div class="testimonials_background_container prlx_parent">
+        <div class="testimonials_background prlx" style="background-image:url({% static 'images/testimonials_background.jpg' %})"></div>
+    </div>
+    <div class="container">
+
+        <div class="row">
+            <div class="col">
+                <div class="section_title text-center">
+                    <h1>Ce que disent nos étudiants</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-10 offset-lg-1">
+                <div class="testimonials_slider_container">
+                    <div class="owl-carousel owl-theme testimonials_slider">
+
+                        <!-- Témoignage 1 -->
+                        <div class="owl-item">
+                            <div class="testimonials_item text-center">
+                                <div class="quote">"</div>
+                                <p class="testimonials_text">Grâce à AvenSU-Orienta, j'ai pu comparer plusieurs universités et choisir la licence en informatique qui correspondait exactement à mon projet. Le processus d'inscription était clair et les conseillers très disponibles.</p>
+                                <div class="testimonial_user">
+                                    <div class="testimonial_image mx-auto">
+                                        <img src="{% static 'images/testimonials_user.jpg' %}" alt="Amina Diallo">
+                                    </div>
+                                    <div class="testimonial_name">Amina Diallo</div>
+                                    <div class="testimonial_title">Étudiante en Informatique — Dakar, Sénégal</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Témoignage 2 -->
+                        <div class="owl-item">
+                            <div class="testimonials_item text-center">
+                                <div class="quote">"</div>
+                                <p class="testimonials_text">Je ne savais pas quelle filière choisir après mon bac. AvenSU-Orienta m'a mis en contact avec un conseiller qui a écouté mes ambitions et m'a guidé vers une formation en gestion qui me passionne aujourd'hui.</p>
+                                <div class="testimonial_user">
+                                    <div class="testimonial_image mx-auto">
+                                        <img src="{% static 'images/testimonials_user.jpg' %}" alt="Kwame Asante">
+                                    </div>
+                                    <div class="testimonial_name">Kwame Asante</div>
+                                    <div class="testimonial_title">Étudiant en Gestion — Accra, Ghana</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Témoignage 3 -->
+                        <div class="owl-item">
+                            <div class="testimonials_item text-center">
+                                <div class="quote">"</div>
+                                <p class="testimonials_text">En tant que parent, j'avais du mal à comprendre les options disponibles pour ma fille. AvenSU-Orienta m'a fourni toutes les informations nécessaires sur les coûts, les bourses et les débouchés professionnels.</p>
+                                <div class="testimonial_user">
+                                    <div class="testimonial_image mx-auto">
+                                        <img src="{% static 'images/testimonials_user.jpg' %}" alt="Marie-Claire Kouassi">
+                                    </div>
+                                    <div class="testimonial_name">Marie-Claire Kouassi</div>
+                                    <div class="testimonial_title">Parent d'étudiant — Abidjan, Côte d'Ivoire</div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Événements à venir -->
+<div class="events page_section">
+    <div class="container">
+
+        <div class="row">
+            <div class="col">
+                <div class="section_title text-center">
+                    <h1>Événements à venir</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="event_items">
+
+            <!-- Événement 1 -->
+            <div class="row event_item">
+                <div class="col">
+                    <div class="row d-flex flex-row align-items-end">
+
+                        <div class="col-lg-2 order-lg-1 order-2">
+                            <div class="event_date d-flex flex-column align-items-center justify-content-center">
+                                <div class="event_day">15</div>
+                                <div class="event_month">Juillet</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 order-lg-2 order-3">
+                            <div class="event_content">
+                                <div class="event_name"><a class="trans_200" href="{% url 'events:event-list' %}">Salon de l'Orientation Post-Bac — Lomé 2026</a></div>
+                                <div class="event_location">Palais des Congrès, Lomé — Togo</div>
+                                <p>Rencontrez des représentants de plus de 50 établissements et obtenez des conseils personnalisés pour votre orientation.</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 order-lg-3 order-1">
+                            <div class="event_image">
+                                <img src="{% static 'images/event_1.jpg' %}" alt="Salon d'orientation">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Événement 2 -->
+            <div class="row event_item">
+                <div class="col">
+                    <div class="row d-flex flex-row align-items-end">
+
+                        <div class="col-lg-2 order-lg-1 order-2">
+                            <div class="event_date d-flex flex-column align-items-center justify-content-center">
+                                <div class="event_day">22</div>
+                                <div class="event_month">Août</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 order-lg-2 order-3">
+                            <div class="event_content">
+                                <div class="event_name"><a class="trans_200" href="{% url 'events:event-list' %}">Journée Portes Ouvertes — Université de Dakar</a></div>
+                                <div class="event_location">Université Cheikh Anta Diop, Dakar — Sénégal</div>
+                                <p>Découvrez les filières, rencontrez les enseignants et visitez le campus lors de cette journée exceptionnelle.</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 order-lg-3 order-1">
+                            <div class="event_image">
+                                <img src="{% static 'images/event_2.jpg' %}" alt="Journée portes ouvertes">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Événement 3 -->
+            <div class="row event_item">
+                <div class="col">
+                    <div class="row d-flex flex-row align-items-end">
+
+                        <div class="col-lg-2 order-lg-1 order-2">
+                            <div class="event_date d-flex flex-column align-items-center justify-content-center">
+                                <div class="event_day">10</div>
+                                <div class="event_month">Sept.</div>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6 order-lg-2 order-3">
+                            <div class="event_content">
+                                <div class="event_name"><a class="trans_200" href="{% url 'events:event-list' %}">Webinaire : Choisir sa filière après le Bac</a></div>
+                                <div class="event_location">En ligne — Accessible depuis toute l'Afrique de l'Ouest</div>
+                                <p>Un webinaire interactif animé par nos conseillers pour vous aider à définir votre projet professionnel et choisir la bonne formation.</p>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-4 order-lg-3 order-1">
+                            <div class="event_image">
+                                <img src="{% static 'images/event_3.jpg' %}" alt="Webinaire orientation">
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/custom.js' %}"></script>
+{% endblock %}
+
+

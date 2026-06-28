@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Erreur serveur (500) — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error_section {
+        min-height: 70vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 80px 0;
+        text-align: center;
+        background: #f8f9fa;
+    }
+    .error_number {
+        font-size: 8rem;
+        font-weight: 900;
+        color: #dc3545;
+        line-height: 1;
+        margin-bottom: 20px;
+        text-shadow: 3px 3px 0 rgba(220, 53, 69, 0.15);
+    }
+    .error_title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #1a1a2e;
+        margin-bottom: 15px;
+    }
+    .error_text {
+        font-size: 1rem;
+        color: #777;
+        max-width: 540px;
+        margin: 0 auto 35px;
+        line-height: 1.7;
+    }
+    .error_icon {
+        font-size: 5rem;
+        color: #e0e0e0;
+        margin-bottom: 25px;
+    }
+    .btn_home {
+        background: #f6a623;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        padding: 13px 35px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: inline-block;
+        margin: 5px;
+        transition: background 0.2s;
+    }
+    .btn_home:hover {
+        background: #e59520;
+        color: #fff;
+        text-decoration: none;
+    }
+    .btn_back {
+        background: transparent;
+        color: #555;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        padding: 11px 35px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-decoration: none;
+        display: inline-block;
+        margin: 5px;
+        transition: all 0.2s;
+    }
+    .btn_back:hover {
+        border-color: #f6a623;
+        color: #f6a623;
+        text-decoration: none;
+    }
+    .info_box {
+        background: #fff8ee;
+        border: 1px solid #f6a623;
+        border-radius: 8px;
+        padding: 20px 25px;
+        max-width: 480px;
+        margin: 0 auto 30px;
+        text-align: left;
+    }
+    .info_box p { margin: 0; font-size: 0.88rem; color: #666; }
+    .info_box strong { color: #1a1a2e; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="home" style="height: 180px;">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Erreur serveur</h1>
+    </div>
+</div>
+
+<!-- Section Erreur 500 -->
+<div class="error_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+
+                <div class="error_icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+
+                <div class="error_number">500</div>
+
+                <h1 class="error_title">Une erreur est survenue</h1>
+
+                <p class="error_text">
+                    Nous rencontrons un problème technique temporaire.
+                    Notre équipe a été notifiée et travaille à résoudre le problème aussi vite que possible.
+                </p>
+
+                <div class="info_box">
+                    <p><strong><i class="fas fa-info-circle mr-2" style="color: #f6a623;"></i>Que faire ?</strong></p>
+                    <ul style="margin: 10px 0 0; padding-left: 18px; font-size: 0.88rem; color: #666;">
+                        <li style="margin-bottom: 6px;">Rafraîchissez la page dans quelques instants</li>
+                        <li style="margin-bottom: 6px;">Revenez à la page d'accueil</li>
+                        <li>Contactez-nous si le problème persiste</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <a href="{% url 'home' %}" class="btn_home">
+                        <i class="fas fa-home mr-2"></i>Retour à l'accueil
+                    </a>
+                    <a href="{% url 'contact' %}" class="btn_back">
+                        <i class="fas fa-envelope mr-2"></i>Nous contacter
+                    </a>
+                </div>
+
+                <p style="color: #bbb; font-size: 0.82rem; margin-top: 40px;">
+                    Si le problème persiste, écrivez-nous à
+                    <a href="mailto:contact@avensu-orienta.com" style="color: #f6a623; text-decoration: none;">contact@avensu-orienta.com</a>
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,339 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Catalogue des Formations — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/courses_styles.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/courses_responsive.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="home">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Formations</h1>
+        <!-- Fil d'Ariane -->
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center" style="background: transparent;">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}" style="color: #fff;">Accueil</a></li>
+                <li class="breadcrumb-item active" style="color: rgba(255,255,255,0.7);" aria-current="page">Formations</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Catalogue -->
+<div class="popular page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Sidebar Filtres -->
+            <div class="col-lg-3">
+                <div class="sidebar" style="background: #f8f9fa; padding: 25px; border-radius: 5px; margin-bottom: 30px;">
+                    <h4 style="margin-bottom: 20px; font-weight: 700; color: #333;">Filtrer les formations</h4>
+
+                    <form method="get" action="{% url 'catalog:formation-list' %}">
+
+                        <!-- Filtre Domaine -->
+                        <div class="filter_group" style="margin-bottom: 20px;">
+                            <h6 style="font-weight: 600; color: #555; margin-bottom: 10px;">Domaine</h6>
+                            <select name="domaine" class="form-control" style="border-radius: 3px;">
+                                <option value="">Tous les domaines</option>
+                                <option value="informatique" {% if request.GET.domaine == 'informatique' %}selected{% endif %}>Informatique &amp; Numérique</option>
+                                <option value="gestion" {% if request.GET.domaine == 'gestion' %}selected{% endif %}>Gestion &amp; Commerce</option>
+                                <option value="sante" {% if request.GET.domaine == 'sante' %}selected{% endif %}>Santé &amp; Sciences</option>
+                                <option value="droit" {% if request.GET.domaine == 'droit' %}selected{% endif %}>Droit &amp; Sciences Politiques</option>
+                                <option value="lettres" {% if request.GET.domaine == 'lettres' %}selected{% endif %}>Lettres &amp; Sciences Humaines</option>
+                                <option value="ingenierie" {% if request.GET.domaine == 'ingenierie' %}selected{% endif %}>Ingénierie &amp; Technologie</option>
+                                <option value="arts" {% if request.GET.domaine == 'arts' %}selected{% endif %}>Arts &amp; Culture</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtre Niveau -->
+                        <div class="filter_group" style="margin-bottom: 20px;">
+                            <h6 style="font-weight: 600; color: #555; margin-bottom: 10px;">Niveau</h6>
+                            <select name="niveau" class="form-control" style="border-radius: 3px;">
+                                <option value="">Tous les niveaux</option>
+                                <option value="bts" {% if request.GET.niveau == 'bts' %}selected{% endif %}>BTS (Bac+2)</option>
+                                <option value="licence" {% if request.GET.niveau == 'licence' %}selected{% endif %}>Licence (Bac+3)</option>
+                                <option value="master" {% if request.GET.niveau == 'master' %}selected{% endif %}>Master (Bac+5)</option>
+                                <option value="doctorat" {% if request.GET.niveau == 'doctorat' %}selected{% endif %}>Doctorat (Bac+8)</option>
+                                <option value="ingenieur" {% if request.GET.niveau == 'ingenieur' %}selected{% endif %}>Diplôme d'Ingénieur</option>
+                                <option value="medecine" {% if request.GET.niveau == 'medecine' %}selected{% endif %}>Études de Médecine</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtre Ville -->
+                        <div class="filter_group" style="margin-bottom: 20px;">
+                            <h6 style="font-weight: 600; color: #555; margin-bottom: 10px;">Ville / Pays</h6>
+                            <select name="ville" class="form-control" style="border-radius: 3px;">
+                                <option value="">Toutes les villes</option>
+                                <option value="lome" {% if request.GET.ville == 'lome' %}selected{% endif %}>Lomé — Togo</option>
+                                <option value="dakar" {% if request.GET.ville == 'dakar' %}selected{% endif %}>Dakar — Sénégal</option>
+                                <option value="abidjan" {% if request.GET.ville == 'abidjan' %}selected{% endif %}>Abidjan — Côte d'Ivoire</option>
+                                <option value="accra" {% if request.GET.ville == 'accra' %}selected{% endif %}>Accra — Ghana</option>
+                                <option value="cotonou" {% if request.GET.ville == 'cotonou' %}selected{% endif %}>Cotonou — Bénin</option>
+                                <option value="bamako" {% if request.GET.ville == 'bamako' %}selected{% endif %}>Bamako — Mali</option>
+                                <option value="ouagadougou" {% if request.GET.ville == 'ouagadougou' %}selected{% endif %}>Ouagadougou — Burkina Faso</option>
+                                <option value="conakry" {% if request.GET.ville == 'conakry' %}selected{% endif %}>Conakry — Guinée</option>
+                            </select>
+                        </div>
+
+                        <!-- Filtre Budget -->
+                        <div class="filter_group" style="margin-bottom: 25px;">
+                            <h6 style="font-weight: 600; color: #555; margin-bottom: 10px;">Budget max (FCFA/an)</h6>
+                            <select name="budget" class="form-control" style="border-radius: 3px;">
+                                <option value="">Tous les budgets</option>
+                                <option value="200000" {% if request.GET.budget == '200000' %}selected{% endif %}>Moins de 200 000 FCFA</option>
+                                <option value="500000" {% if request.GET.budget == '500000' %}selected{% endif %}>Moins de 500 000 FCFA</option>
+                                <option value="1000000" {% if request.GET.budget == '1000000' %}selected{% endif %}>Moins de 1 000 000 FCFA</option>
+                                <option value="2000000" {% if request.GET.budget == '2000000' %}selected{% endif %}>Moins de 2 000 000 FCFA</option>
+                                <option value="gratuit" {% if request.GET.budget == 'gratuit' %}selected{% endif %}>Gratuit (public)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-block trans_200" style="background: #f6a623; color: #fff; border-radius: 3px; font-weight: 600; padding: 10px;">
+                            Appliquer les filtres
+                        </button>
+
+                        {% if request.GET %}
+                        <a href="{% url 'catalog:formation-list' %}" class="btn btn-block btn-outline-secondary mt-2" style="border-radius: 3px; font-size: 0.85rem;">
+                            Réinitialiser
+                        </a>
+                        {% endif %}
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Grille des Formations -->
+            <div class="col-lg-9">
+
+                <div class="row mb-3 align-items-center">
+                    <div class="col">
+                        <h5 style="color: #555; font-size: 0.95rem;">
+                            {% if formations %}
+                                {{ formations.paginator.count }} formation{{ formations.paginator.count|pluralize }} trouvée{{ formations.paginator.count|pluralize }}
+                            {% else %}
+                                Catalogue des formations
+                            {% endif %}
+                        </h5>
+                    </div>
+                </div>
+
+                <div class="row course_boxes">
+                    {% for formation in formations %}
+
+                    <!-- Carte Formation -->
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            {% if formation.image %}
+                                <img class="card-img-top" src="{{ formation.image.url }}" alt="{{ formation.nom }}">
+                            {% else %}
+                                <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="{{ formation.nom }}">
+                            {% endif %}
+                            <div class="card-body text-center">
+                                <div class="card-title">
+                                    <a href="{% url 'catalog:detail' formation.pk %}">{{ formation.nom }}</a>
+                                </div>
+                                <div class="card-text">
+                                    {{ formation.domaine|title }} &mdash; {{ formation.niveau }}
+                                </div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image">
+                                    {% if formation.etablissement.logo %}
+                                        <img src="{{ formation.etablissement.logo.url }}" alt="{{ formation.etablissement.nom }}">
+                                    {% else %}
+                                        <img src="{% static 'images/author.jpg' %}" alt="{{ formation.etablissement.nom }}">
+                                    {% endif %}
+                                </div>
+                                <div class="course_author_name">
+                                    {{ formation.etablissement.nom }}, <span>{{ formation.etablissement.ville }}</span>
+                                </div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center">
+                                    {% if formation.cout_annuel %}
+                                        <span>{{ formation.cout_annuel|floatformat:0 }} FCFA</span>
+                                    {% else %}
+                                        <span>Gratuit</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% empty %}
+
+                    <!-- Formations fictives si pas de données -->
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="Licence Informatique">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Licence en Informatique</a></div>
+                                <div class="card-text">Informatique &mdash; Licence (Bac+3)</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">Université de Lomé, <span>Togo</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Gratuit</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_2.jpg' %}" alt="BTS Gestion">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">BTS Gestion Commerciale</a></div>
+                                <div class="card-text">Gestion &mdash; BTS (Bac+2)</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">IUGB, <span>Côte d'Ivoire</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>450 000 FCFA</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_3.jpg' %}" alt="Médecine">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Médecine Générale</a></div>
+                                <div class="card-text">Santé &mdash; Études longues</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">UCAD, <span>Sénégal</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Gratuit</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_4.jpg' %}" alt="Droit">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Licence en Droit</a></div>
+                                <div class="card-text">Droit &mdash; Licence (Bac+3)</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">Université d'Abomey-Calavi, <span>Bénin</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Gratuit</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_5.jpg' %}" alt="Master Finance">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Master Finance &amp; Comptabilité</a></div>
+                                <div class="card-text">Gestion &mdash; Master (Bac+5)</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">CESAG, <span>Sénégal</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>1 200 000 FCFA</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_6.jpg' %}" alt="Génie Civil">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Génie Civil &amp; Bâtiment</a></div>
+                                <div class="card-text">Ingénierie &mdash; Diplôme d'ingénieur</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">ESTP, <span>Côte d'Ivoire</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>900 000 FCFA</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_7.jpg' %}" alt="Marketing Digital">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Marketing Digital</a></div>
+                                <div class="card-text">Commerce &mdash; BTS (Bac+2)</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">ISM, <span>Sénégal</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>600 000 FCFA</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 course_box">
+                        <div class="card">
+                            <img class="card-img-top" src="{% static 'images/course_8.jpg' %}" alt="Sciences de l'Éducation">
+                            <div class="card-body text-center">
+                                <div class="card-title"><a href="#">Sciences de l'Éducation</a></div>
+                                <div class="card-text">Sciences Humaines &mdash; Licence (Bac+3)</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_image"><img src="{% static 'images/author.jpg' %}" alt=""></div>
+                                <div class="course_author_name">Université de Bamako, <span>Mali</span></div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Gratuit</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if formations.has_other_pages %}
+                <div class="row mt-4">
+                    <div class="col">
+                        <nav aria-label="Navigation des pages">
+                            <ul class="pagination justify-content-center">
+                                {% if formations.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ formations.previous_page_number }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">&laquo; Précédent</a>
+                                    </li>
+                                {% endif %}
+
+                                {% for num in formations.paginator.page_range %}
+                                    {% if formations.number == num %}
+                                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                    {% elif num > formations.number|add:'-3' and num < formations.number|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+
+                                {% if formations.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ formations.next_page_number }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">Suivant &raquo;</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/courses_custom.js' %}"></script>
+{% endblock %}
+

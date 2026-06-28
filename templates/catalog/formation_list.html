@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Formations — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/courses_styles.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/courses_responsive.css' %}">
+{% endblock %}
+
+{% block content %}
+<!-- En-tête de page -->
+<div class="home">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Formations</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                <li class="breadcrumb-item active">Formations</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="courses page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Sidebar filtres -->
+            <div class="col-lg-3">
+                <div class="courses_sidebar">
+                    <div class="courses_sidebar_section">
+                        <div class="courses_sidebar_section_title">Recherche</div>
+                        <form method="get">
+                            <input type="text" name="q" class="form-control mb-2" placeholder="Nom de la formation..." value="{{ request.GET.q }}">
+                            <select name="niveau" class="form-control mb-2">
+                                <option value="">Tous les niveaux</option>
+                                <option value="BTS">BTS</option>
+                                <option value="LICENCE">Licence</option>
+                                <option value="MASTER">Master</option>
+                                <option value="INGENIEUR">Ingénieur</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-block">Filtrer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des formations -->
+            <div class="col-lg-9">
+                <div class="row course_boxes">
+                    {% for formation in formations %}
+                    <div class="col-lg-6 course_box mb-4">
+                        <div class="card h-100">
+                            <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="{{ formation.nom }}">
+                            <div class="card-body text-center">
+                                <div class="card-title">
+                                    <a href="{% url 'catalog:formation-detail' formation.slug %}">{{ formation.nom }}</a>
+                                </div>
+                                <div class="card-text text-muted">{{ formation.etablissement.nom }}</div>
+                                <div class="badge badge-info">{{ formation.get_niveau_display }}</div>
+                            </div>
+                            <div class="price_box d-flex flex-row align-items-center">
+                                <div class="course_author_name ml-3">
+                                    <i class="fas fa-map-marker-alt mr-1"></i>{{ formation.etablissement.ville }}
+                                </div>
+                                <div class="course_price d-flex flex-column align-items-center justify-content-center ml-auto mr-3">
+                                    <span>{{ formation.cout_annuel|floatformat:0 }} FCFA</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col text-center py-5">
+                        <i class="fas fa-graduation-cap fa-3x text-muted mb-3 d-block"></i>
+                        <h4 class="text-muted">Aucune formation disponible</h4>
+                        <p>Les formations seront bientôt ajoutées.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                {% if is_paginated %}
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Pagination">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                            </li>
+                            {% endif %}
+                            <li class="page-item active">
+                                <span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                            </li>
+                            {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

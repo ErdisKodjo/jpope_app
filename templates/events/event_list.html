@@ -1,0 +1,271 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Événements — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/news_styles.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/news_responsive.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="home">
+    <div class="home_background_container prlx_parent">
+        <div class="home_background prlx" style="background-image:url({% static 'images/news_background.jpg' %})"></div>
+    </div>
+    <div class="home_content">
+        <h1>Événements</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center" style="background: transparent;">
+                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}" style="color: #fff;">Accueil</a></li>
+                <li class="breadcrumb-item active" style="color: rgba(255,255,255,0.7);" aria-current="page">Événements</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<!-- Contenu événements -->
+<div class="page_section">
+    <div class="container">
+
+        <!-- Filtres rapides -->
+        <div class="row mb-4">
+            <div class="col">
+                <div class="d-flex flex-wrap" style="gap: 10px;">
+                    <a href="{% url 'events:event-list' %}" class="btn {% if not request.GET.type %}btn-warning{% else %}btn-outline-secondary{% endif %} btn-sm">Tous</a>
+                    <a href="?type=salon" class="btn {% if request.GET.type == 'salon' %}btn-warning{% else %}btn-outline-secondary{% endif %} btn-sm">Salons d'orientation</a>
+                    <a href="?type=portes_ouvertes" class="btn {% if request.GET.type == 'portes_ouvertes' %}btn-warning{% else %}btn-outline-secondary{% endif %} btn-sm">Journées portes ouvertes</a>
+                    <a href="?type=webinaire" class="btn {% if request.GET.type == 'webinaire' %}btn-warning{% else %}btn-outline-secondary{% endif %} btn-sm">Webinaires</a>
+                    <a href="?type=ceremonie" class="btn {% if request.GET.type == 'ceremonie' %}btn-warning{% else %}btn-outline-secondary{% endif %} btn-sm">Cérémonies</a>
+                    <a href="?type=concours" class="btn {% if request.GET.type == 'concours' %}btn-warning{% else %}btn-outline-secondary{% endif %} btn-sm">Concours &amp; Examens</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- Cartes d'événements -->
+            <div class="col-lg-8">
+
+                {% for event in events %}
+
+                <!-- Événement dynamique -->
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 5px; overflow: hidden;">
+                    <div class="row no-gutters">
+                        <div class="col-md-4">
+                            {% if event.image %}
+                                <img src="{{ event.image.url }}" class="card-img" alt="{{ event.titre }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/event_1.jpg' %}" class="card-img" alt="{{ event.titre }}" style="height: 200px; object-fit: cover;">
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge badge-warning mr-2" style="font-size: 0.75rem;">{{ event.get_type_display }}</span>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt mr-1"></i>
+                                        {{ event.date_debut|date:"d F Y" }}
+                                    </small>
+                                </div>
+                                <h5 class="card-title">
+                                    <a href="{% url 'events:detail' event.pk %}" style="color: #333; text-decoration: none;">{{ event.titre }}</a>
+                                </h5>
+                                <p class="card-text text-muted" style="font-size: 0.9rem;">
+                                    <i class="fas fa-map-marker-alt mr-1"></i> {{ event.lieu }}
+                                </p>
+                                <p class="card-text" style="font-size: 0.9rem;">{{ event.description|truncatewords:20 }}</p>
+                                <a href="{% url 'events:detail' event.pk %}" class="btn btn-sm btn-outline-warning">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% empty %}
+
+                <!-- Événements fictifs si pas de données -->
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 5px; overflow: hidden;">
+                    <div class="row no-gutters">
+                        <div class="col-md-4">
+                            <img src="{% static 'images/event_1.jpg' %}" class="card-img" alt="Salon d'orientation" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge badge-warning mr-2" style="font-size: 0.75rem;">Salon</span>
+                                    <small class="text-muted"><i class="fas fa-calendar-alt mr-1"></i>15 Juillet 2026</small>
+                                </div>
+                                <h5 class="card-title"><a href="#" style="color: #333; text-decoration: none;">Salon de l'Orientation Post-Bac — Lomé 2026</a></h5>
+                                <p class="card-text text-muted" style="font-size: 0.9rem;"><i class="fas fa-map-marker-alt mr-1"></i> Palais des Congrès, Lomé — Togo</p>
+                                <p class="card-text" style="font-size: 0.9rem;">Rencontrez des représentants de plus de 50 établissements et obtenez des conseils personnalisés pour votre orientation.</p>
+                                <a href="#" class="btn btn-sm btn-outline-warning">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 5px; overflow: hidden;">
+                    <div class="row no-gutters">
+                        <div class="col-md-4">
+                            <img src="{% static 'images/event_2.jpg' %}" class="card-img" alt="Portes ouvertes" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge badge-info mr-2" style="font-size: 0.75rem;">Portes ouvertes</span>
+                                    <small class="text-muted"><i class="fas fa-calendar-alt mr-1"></i>22 Août 2026</small>
+                                </div>
+                                <h5 class="card-title"><a href="#" style="color: #333; text-decoration: none;">Journée Portes Ouvertes — Université de Dakar</a></h5>
+                                <p class="card-text text-muted" style="font-size: 0.9rem;"><i class="fas fa-map-marker-alt mr-1"></i> Université Cheikh Anta Diop, Dakar — Sénégal</p>
+                                <p class="card-text" style="font-size: 0.9rem;">Découvrez les filières, rencontrez les enseignants et visitez le campus lors de cette journée exceptionnelle.</p>
+                                <a href="#" class="btn btn-sm btn-outline-warning">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 5px; overflow: hidden;">
+                    <div class="row no-gutters">
+                        <div class="col-md-4">
+                            <img src="{% static 'images/event_3.jpg' %}" class="card-img" alt="Webinaire" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge badge-success mr-2" style="font-size: 0.75rem;">Webinaire</span>
+                                    <small class="text-muted"><i class="fas fa-calendar-alt mr-1"></i>10 Septembre 2026</small>
+                                </div>
+                                <h5 class="card-title"><a href="#" style="color: #333; text-decoration: none;">Webinaire : Choisir sa filière après le Bac</a></h5>
+                                <p class="card-text text-muted" style="font-size: 0.9rem;"><i class="fas fa-map-marker-alt mr-1"></i> En ligne — Accessible depuis toute l'Afrique</p>
+                                <p class="card-text" style="font-size: 0.9rem;">Un webinaire interactif animé par nos conseillers pour vous aider à définir votre projet professionnel.</p>
+                                <a href="#" class="btn btn-sm btn-outline-warning">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08); border-radius: 5px; overflow: hidden;">
+                    <div class="row no-gutters">
+                        <div class="col-md-4">
+                            <img src="{% static 'images/news_1.jpg' %}" class="card-img" alt="Concours" style="height: 200px; object-fit: cover;">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-2">
+                                    <span class="badge badge-danger mr-2" style="font-size: 0.75rem;">Concours</span>
+                                    <small class="text-muted"><i class="fas fa-calendar-alt mr-1"></i>05 Octobre 2026</small>
+                                </div>
+                                <h5 class="card-title"><a href="#" style="color: #333; text-decoration: none;">Concours d'entrée — École Polytechnique d'Abomey-Calavi</a></h5>
+                                <p class="card-text text-muted" style="font-size: 0.9rem;"><i class="fas fa-map-marker-alt mr-1"></i> Abomey-Calavi, Bénin</p>
+                                <p class="card-text" style="font-size: 0.9rem;">Inscriptions ouvertes pour le concours d'entrée en cycle ingénieur. Places limitées — inscrivez-vous dès maintenant.</p>
+                                <a href="#" class="btn btn-sm btn-outline-warning">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if events.has_other_pages %}
+                <nav aria-label="Navigation des pages" class="mt-3">
+                    <ul class="pagination justify-content-center">
+                        {% if events.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ events.previous_page_number }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">&laquo;</a>
+                            </li>
+                        {% endif %}
+                        {% for num in events.paginator.page_range %}
+                            {% if events.number == num %}
+                                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                            {% elif num > events.number|add:'-3' and num < events.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        {% if events.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ events.next_page_number }}{% for k, v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">&raquo;</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+
+                <!-- Recherche -->
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+                    <div class="card-body">
+                        <h6 style="font-weight: 700; margin-bottom: 15px;">Rechercher un événement</h6>
+                        <form method="get" action="{% url 'events:event-list' %}">
+                            <div class="input-group">
+                                <input type="text" name="q" class="form-control" placeholder="Mot-clé..." value="{{ request.GET.q }}">
+                                <div class="input-group-append">
+                                    <button class="btn btn-warning" type="submit"><i class="fas fa-search"></i></button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Prochains événements -->
+                <div class="card mb-4" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+                    <div class="card-body">
+                        <h6 style="font-weight: 700; margin-bottom: 15px;">Prochains événements</h6>
+                        <div class="d-flex align-items-start mb-3">
+                            <img src="{% static 'images/latest_1.jpg' %}" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 3px; margin-right: 10px; flex-shrink: 0;">
+                            <div>
+                                <a href="#" style="color: #333; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Salon de l'Orientation — Lomé</a>
+                                <p style="color: #999; font-size: 0.8rem; margin: 0;"><i class="fas fa-calendar-alt mr-1"></i> 15 Juillet 2026</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start mb-3">
+                            <img src="{% static 'images/latest_2.jpg' %}" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 3px; margin-right: 10px; flex-shrink: 0;">
+                            <div>
+                                <a href="#" style="color: #333; font-size: 0.85rem; font-weight: 600; text-decoration: none;">JPO — Université de Dakar</a>
+                                <p style="color: #999; font-size: 0.8rem; margin: 0;"><i class="fas fa-calendar-alt mr-1"></i> 22 Août 2026</p>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <img src="{% static 'images/latest_3.jpg' %}" alt="" style="width: 60px; height: 60px; object-fit: cover; border-radius: 3px; margin-right: 10px; flex-shrink: 0;">
+                            <div>
+                                <a href="#" style="color: #333; font-size: 0.85rem; font-weight: 600; text-decoration: none;">Webinaire : Choisir sa filière</a>
+                                <p style="color: #999; font-size: 0.8rem; margin: 0;"><i class="fas fa-calendar-alt mr-1"></i> 10 Septembre 2026</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Types d'événements -->
+                <div class="card" style="border: none; box-shadow: 0 2px 15px rgba(0,0,0,0.08);">
+                    <div class="card-body">
+                        <h6 style="font-weight: 700; margin-bottom: 15px;">Types d'événements</h6>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><a href="?type=salon" style="color: #555; text-decoration: none;"><i class="fas fa-angle-right mr-2" style="color: #f6a623;"></i>Salons d'orientation</a></li>
+                            <li class="mb-2"><a href="?type=portes_ouvertes" style="color: #555; text-decoration: none;"><i class="fas fa-angle-right mr-2" style="color: #f6a623;"></i>Journées portes ouvertes</a></li>
+                            <li class="mb-2"><a href="?type=webinaire" style="color: #555; text-decoration: none;"><i class="fas fa-angle-right mr-2" style="color: #f6a623;"></i>Webinaires</a></li>
+                            <li class="mb-2"><a href="?type=ceremonie" style="color: #555; text-decoration: none;"><i class="fas fa-angle-right mr-2" style="color: #f6a623;"></i>Cérémonies de remise de diplômes</a></li>
+                            <li><a href="?type=concours" style="color: #555; text-decoration: none;"><i class="fas fa-angle-right mr-2" style="color: #f6a623;"></i>Concours &amp; Examens</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/news_custom.js' %}"></script>
+{% endblock %}
+

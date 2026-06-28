@@ -1,0 +1,118 @@
+{% load static %}
+<!-- Footer -->
+<footer class="footer">
+    <div class="container">
+
+        <!-- Newsletter -->
+        <div class="newsletter">
+            <div class="row">
+                <div class="col">
+                    <div class="section_title text-center">
+                        <h1>Abonnez-vous à notre newsletter</h1>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col text-center">
+                    <div class="newsletter_form_container mx-auto">
+                        <div class="newsletter_form d-flex flex-md-row flex-column flex-xs-column align-items-center justify-content-center">
+                            <input id="newsletter_email" class="newsletter_email" type="email" name="email" placeholder="Votre adresse e-mail">
+                            <button id="newsletter_submit" type="button" class="newsletter_submit_btn trans_300">S'abonner</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Content -->
+        <div class="footer_content">
+            <div class="row">
+
+                <!-- À propos -->
+                <div class="col-lg-3 footer_col">
+                    <div class="logo_container">
+                        <div class="logo">
+                            <img src="{% static 'images/logo.png' %}" alt="AvenSU-Orienta">
+                            <span>AvenSU</span>
+                        </div>
+                    </div>
+                    <p class="footer_about_text">AvenSU-Orienta est la plateforme de référence pour l'orientation post-bac des étudiants d'Afrique de l'Ouest. Nous vous aidons à trouver la formation et l'établissement qui correspondent à votre projet.</p>
+                </div>
+
+                <!-- Liens rapides -->
+                <div class="col-lg-3 footer_col">
+                    <div class="footer_column_title">Liens rapides</div>
+                    <div class="footer_column_content">
+                        <ul>
+                            <li class="footer_list_item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                            <li class="footer_list_item"><a href="{% url 'catalog:etablissement-list' %}">Établissements</a></li>
+                            <li class="footer_list_item"><a href="{% url 'events:event-list' %}">Événements</a></li>
+                            <li class="footer_list_item"><a href="{% url 'community:forum-list' %}">Communauté</a></li>
+                            <li class="footer_list_item"><a href="#">Contact</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Formations -->
+                <div class="col-lg-3 footer_col">
+                    <div class="footer_column_title">Formations</div>
+                    <div class="footer_column_content">
+                        <ul>
+                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}">Toutes les formations</a></li>
+                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=informatique">Informatique &amp; Numérique</a></li>
+                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=gestion">Gestion &amp; Commerce</a></li>
+                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=sante">Santé &amp; Sciences</a></li>
+                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=droit">Droit &amp; Lettres</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="col-lg-3 footer_col">
+                    <div class="footer_column_title">Contact</div>
+                    <div class="footer_column_content">
+                        <ul>
+                            <li class="footer_contact_item">
+                                <div class="footer_contact_icon">
+                                    <img src="{% static 'images/placeholder.svg' %}" alt="Adresse">
+                                </div>
+                                Lomé, Togo — Afrique de l'Ouest
+                            </li>
+                            <li class="footer_contact_item">
+                                <div class="footer_contact_icon">
+                                    <img src="{% static 'images/smartphone.svg' %}" alt="Téléphone">
+                                </div>
+                                +228 90 00 00 00
+                            </li>
+                            <li class="footer_contact_item">
+                                <div class="footer_contact_icon">
+                                    <img src="{% static 'images/envelope.svg' %}" alt="Email">
+                                </div>
+                                contact@avensu-orienta.com
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer Copyright -->
+        <div class="footer_bar d-flex flex-column flex-sm-row align-items-center">
+            <div class="footer_copyright">
+                <span>&copy; 2026 AvenSU-Orienta. Tous droits réservés.</span>
+            </div>
+            <div class="footer_social ml-sm-auto">
+                <ul class="menu_social">
+                    <li class="menu_social_item"><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                    <li class="menu_social_item"><a href="#"><i class="fab fa-twitter"></i></a></li>
+                    <li class="menu_social_item"><a href="#"><i class="fab fa-instagram"></i></a></li>
+                    <li class="menu_social_item"><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                    <li class="menu_social_item"><a href="#"><i class="fab fa-youtube"></i></a></li>
+                </ul>
+            </div>
+        </div>
+
+    </div>
+</footer>

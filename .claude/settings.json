@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(New-Item -ItemType Directory -Force \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\catalog\\\\models\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\catalog\\\\api\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\catalog\\\\services\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\catalog\\\\migrations\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\catalog\\\\tests\")",
+      "PowerShell(New-Item -ItemType Directory -Force \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\catalog\\\\fixtures\")",
+      "Bash(Remove-Item \"D:\\\\APPROFONDISSEMENT\\\\ProjetFinal\\\\avensu\\\\apps\\\\dashboard\\\\models.py\" -Force)"
+    ]
+  }
+}

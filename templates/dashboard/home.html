@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau de bord — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section" style="padding-top: 40px;">
+    <div class="container">
+
+        <!-- En-tête -->
+        <div class="row mb-4">
+            <div class="col">
+                <h2>Bonjour, {{ request.user.first_name }} 👋</h2>
+                <p class="text-muted">Voici un aperçu de votre espace personnel.</p>
+            </div>
+        </div>
+
+        <!-- Statistiques rapides -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                        <h4 class="mb-0" id="favoris-count">—</h4>
+                        <small class="text-muted">Favoris</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-success">
+                    <div class="card-body">
+                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                        <h4 class="mb-0" id="voeux-count">—</h4>
+                        <small class="text-muted">Vœux</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-info">
+                    <div class="card-body">
+                        <i class="fas fa-tasks fa-2x text-info mb-2"></i>
+                        <h4 class="mb-0" id="demarches-count">—</h4>
+                        <small class="text-muted">Démarches</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center shadow-sm border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-bell fa-2x text-primary mb-2"></i>
+                        <h4 class="mb-0">0</h4>
+                        <small class="text-muted">Notifications</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liens rapides -->
+        <div class="row mb-4">
+            <div class="col">
+                <h5>Accès rapide</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <a href="{% url 'catalog:formation-list' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
+                    <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
+                    <p class="mb-0">Chercher une formation</p>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{% url 'orientation:home' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
+                    <i class="fas fa-compass fa-2x text-success mb-2"></i>
+                    <p class="mb-0">Test d'orientation</p>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{% url 'events:event-list' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
+                    <i class="fas fa-calendar-alt fa-2x text-warning mb-2"></i>
+                    <p class="mb-0">Voir les événements</p>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{% url 'community:forum-list' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
+                    <i class="fas fa-comments fa-2x text-info mb-2"></i>
+                    <p class="mb-0">Forum communauté</p>
+                </a>
+            </div>
+            <div class="col-md-4 mb-3">
+                <a href="{% url 'accounts:profile' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
+                    <i class="fas fa-user-cog fa-2x text-secondary mb-2"></i>
+                    <p class="mb-0">Mon profil</p>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Charge les stats du dashboard via l'API
+fetch('/api/v1/dashboard/', {
+    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Accept': 'application/json' }
+})
+.then(r => r.json())
+.then(data => {
+    document.getElementById('favoris-count').textContent = data.favoris_count ?? 0;
+    document.getElementById('voeux-count').textContent = data.voeux_count ?? 0;
+    document.getElementById('demarches-count').textContent = data.demarches_count ?? 0;
+})
+.catch(() => {});
+</script>
+{% endblock %}
