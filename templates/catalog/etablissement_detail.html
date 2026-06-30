@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ etablissement.nom }} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="page_header">
+    {% if etablissement.banniere %}
+    <div class="page_header_bg" style="background-image:url({{ etablissement.banniere.url }})"></div>
+    {% else %}
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    {% endif %}
+    <div class="container">
+        <div class="page_header_content">
+            <h1>{{ etablissement.nom }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'catalog:etablissement-list' %}">Établissements</a></li>
+                    <li class="breadcrumb-item active">{{ etablissement.sigle|default:etablissement.nom|truncatechars:30 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- Barre d'identité -->
+        <div class="detail_container mb-5">
+            <div class="d-flex align-items-center flex-wrap" style="gap:var(--space-5);">
+                <div style="width:90px; height:90px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0; border:3px solid var(--color-primary);">
+                    {% if etablissement.logo %}
+                    <img src="{{ etablissement.logo.url }}" alt="{{ etablissement.nom }}" style="width:80px; height:80px; object-fit:contain; border-radius:50%;">
+                    {% else %}
+                    <i class="fas fa-university" style="font-size:36px; color:var(--color-primary);"></i>
+                    {% endif %}
+                </div>
+                <div class="flex-grow-1">
+                    <div style="display:flex; align-items:center; gap:var(--space-3); flex-wrap:wrap; margin-bottom:var(--space-2);">
+                        <h2 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">{{ etablissement.nom }}</h2>
+                        {% if etablissement.sigle %}<span class="tag_badge tag_badge--primary">{{ etablissement.sigle }}</span>{% endif %}
+                        {% if etablissement.is_verified %}<span class="tag_badge tag_badge--success"><i class="fas fa-check-circle mr-1"></i>Vérifié</span>{% endif %}
+                    </div>
+                    <p style="font-size:var(--text-base); color:var(--color-text-muted); margin-bottom:var(--space-3);">
+                        <i class="fas fa-map-marker-alt mr-2"></i>{{ etablissement.adresse|default:etablissement.ville }}, {{ etablissement.pays }}
+                        <span class="mx-3">·</span>
+                        <span class="tag_badge">{{ etablissement.get_type_display }}</span>
+                    </p>
+                    <div style="display:flex; gap:var(--space-4); flex-wrap:wrap;">
+                        {% if etablissement.site_web %}<a href="{{ etablissement.site_web }}" target="_blank" rel="noopener noreferrer" class="comment_button btn_sm"><i class="fas fa-globe mr-1"></i>Site web</a>{% endif %}
+                        {% if etablissement.email %}<a href="mailto:{{ etablissement.email }}" class="btn_ghost btn_sm"><i class="fas fa-envelope mr-1"></i>Contact</a>{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+
+            <!-- Colonne principale -->
+            <div class="col-lg-8">
+
+                <!-- Description -->
+                {% if etablissement.description %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Présentation</h2>
+                    <p class="detail_description">{{ etablissement.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Statistiques -->
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Indicateurs clés</h2>
+                    <div class="row text-center">
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat_item">
+                                <div class="stat_item_value stat_item_value--primary">{{ etablissement.nombre_etudiants|default:"—" }}</div>
+                                <div class="stat_item_label">Étudiants</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat_item">
+                                <div class="stat_item_value stat_item_value--success">{{ etablissement.taux_reussite|floatformat:0|default:"—" }}{% if etablissement.taux_reussite %}%{% endif %}</div>
+                                <div class="stat_item_label">Taux de réussite</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat_item">
+                                <div class="stat_item_value stat_item_value--info">{{ etablissement.taux_insertion_professionnelle|floatformat:0|default:"—" }}{% if etablissement.taux_insertion_professionnelle %}%{% endif %}</div>
+                                <div class="stat_item_label">Insertion prof.</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3 mb-3">
+                            <div class="stat_item">
+                                <div class="stat_item_value stat_item_value--primary">{% if etablissement.classement_national %}#{{ etablissement.classement_national }}{% else %}—{% endif %}</div>
+                                <div class="stat_item_label">Classement</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Domaines enseignés -->
+                {% if etablissement.domaines_enseignes.all %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Domaines enseignés</h2>
+                    <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+                        {% for domaine in etablissement.domaines_enseignes.all %}
+                        <span class="tag_badge tag_badge--primary">{{ domaine.nom }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Formations -->
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Formations proposées</h2>
+                    {% if formations %}
+                    <div class="row">
+                        {% for formation in formations %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card unified_card h-100" style="box-shadow:none; border:var(--border-width) solid var(--color-border-light);">
+                                <div class="unified_card_body">
+                                    <h3 class="unified_card_title" style="font-size:var(--text-base);">
+                                        <a href="{% url 'catalog:formation-detail' formation.slug %}">{{ formation.nom }}</a>
+                                    </h3>
+                                    <div style="display:flex; gap:var(--space-2); flex-wrap:wrap; margin-bottom:var(--space-2);">
+                                        <span class="tag_badge">{{ formation.get_niveau_display }}</span>
+                                        <span class="tag_badge">{{ formation.duree_annees }} an{{ formation.duree_annees|pluralize }}</span>
+                                    </div>
+                                    <p style="font-size:var(--text-sm); color:var(--color-primary); font-weight:var(--weight-bold); margin:0;">{{ formation.cout_annuel|floatformat:0 }} FCFA / an</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="empty_state" style="padding:var(--space-8) var(--space-4);">
+                        <i class="fas fa-graduation-cap empty_state_icon" style="font-size:36px;"></i>
+                        <p>Aucune formation disponible pour le moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Équipements & Labels -->
+                {% if etablissement.equipements %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Équipements</h2>
+                    <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+                        {% for eq in etablissement.equipements %}
+                        <span class="tag_badge"><i class="fas fa-check-circle mr-1" style="color:var(--color-success);"></i>{{ eq }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <!-- Fiche rapide -->
+                <div class="sidebar_section mb-4" style="border-top:4px solid var(--color-primary); border-radius:0 0 var(--radius-md) var(--radius-md); padding-top:var(--space-5);">
+                    <h3 class="sidebar_section_title">Informations pratiques</h3>
+
+                    <div class="detail_meta_item">
+                        <div class="detail_meta_icon"><i class="fas fa-tag"></i></div>
+                        <div>
+                            <span class="detail_meta_label">Type</span>
+                            <span class="detail_meta_value">{{ etablissement.get_type_display }}</span>
+                        </div>
+                    </div>
+                    <div class="detail_meta_item">
+                        <div class="detail_meta_icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <span class="detail_meta_label">Localisation</span>
+                            <span class="detail_meta_value">{{ etablissement.ville }}, {{ etablissement.pays }}</span>
+                        </div>
+                    </div>
+                    {% if etablissement.telephone %}
+                    <div class="detail_meta_item">
+                        <div class="detail_meta_icon"><i class="fas fa-phone"></i></div>
+                        <div>
+                            <span class="detail_meta_label">Téléphone</span>
+                            <span class="detail_meta_value">{{ etablissement.telephone }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if etablissement.email %}
+                    <div class="detail_meta_item">
+                        <div class="detail_meta_icon"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <span class="detail_meta_label">Email</span>
+                            <a href="mailto:{{ etablissement.email }}" class="detail_meta_value" style="color:var(--color-primary);">{{ etablissement.email }}</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if etablissement.frais_scolarite_annuel_min %}
+                    <div class="detail_meta_item">
+                        <div class="detail_meta_icon"><i class="fas fa-money-bill-wave"></i></div>
+                        <div>
+                            <span class="detail_meta_label">Frais de scolarité</span>
+                            <span class="detail_meta_value">{{ etablissement.fourchette_frais }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if etablissement.propose_bourses %}
+                    <div class="mt-3 p-3" style="background:var(--color-success-bg); border-radius:var(--radius-sm); border-left:3px solid var(--color-success);">
+                        <i class="fas fa-award mr-2" style="color:var(--color-success);"></i>
+                        <strong style="font-size:var(--text-sm); color:var(--color-success);">Bourses disponibles</strong>
+                        {% if etablissement.montant_bourse_max %}
+                        <p style="font-size:var(--text-xs); color:var(--color-success); margin:var(--space-1) 0 0;">Jusqu'à {{ etablissement.montant_bourse_max|floatformat:0 }} FCFA</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Réseaux sociaux -->
+                    {% if etablissement.facebook or etablissement.linkedin %}
+                    <div class="mt-4 d-flex" style="gap:var(--space-3);">
+                        {% if etablissement.facebook %}<a href="{{ etablissement.facebook }}" target="_blank" rel="noopener noreferrer" class="btn_ghost btn_sm"><i class="fab fa-facebook-f mr-1"></i>Facebook</a>{% endif %}
+                        {% if etablissement.linkedin %}<a href="{{ etablissement.linkedin }}" target="_blank" rel="noopener noreferrer" class="btn_ghost btn_sm"><i class="fab fa-linkedin-in mr-1"></i>LinkedIn</a>{% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Note globale -->
+                {% if etablissement.note_globale %}
+                <div class="sidebar_section">
+                    <h3 class="sidebar_section_title">Note globale</h3>
+                    <div class="text-center">
+                        <div style="font-size:48px; font-weight:var(--weight-extrabold); color:var(--color-primary); line-height:1;">{{ etablissement.note_globale }}<small style="font-size:var(--text-base); color:var(--color-text-muted);">/5</small></div>
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-2);">
+                            Basé sur {{ etablissement.nombre_avis|default:0 }} avis
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

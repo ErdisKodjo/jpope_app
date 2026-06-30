@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}AvenBot — Assistant d'orientation{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat_layout { display:flex; height:calc(100vh - 80px); overflow:hidden; }
+.chat_sidebar { width:260px; flex-shrink:0; border-right:var(--border-width) solid var(--color-border-light); background:var(--color-bg-card); display:flex; flex-direction:column; }
+.chat_sidebar_header { padding:var(--space-4); border-bottom:var(--border-width) solid var(--color-border-light); }
+.chat_conv_list { flex:1; overflow-y:auto; padding:var(--space-2); }
+.chat_conv_item { padding:var(--space-3); border-radius:var(--radius-md); cursor:pointer; transition:background var(--transition-base); margin-bottom:var(--space-1); font-size:var(--text-sm); color:var(--color-text-muted); }
+.chat_conv_item:hover, .chat_conv_item.active { background:var(--color-primary-bg); color:var(--color-primary); }
+.chat_conv_item .conv_title { font-weight:var(--weight-semibold); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.chat_conv_item .conv_date { font-size:var(--text-xs); margin-top:2px; }
+.chat_main { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.chat_topbar { padding:var(--space-4) var(--space-5); border-bottom:var(--border-width) solid var(--color-border-light); display:flex; align-items:center; gap:var(--space-3); background:var(--color-bg-card); }
+.chat_avatar { width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--color-primary),var(--color-info)); display:flex; align-items:center; justify-content:center; color:#fff; font-size:var(--text-md); flex-shrink:0; }
+.chat_messages { flex:1; overflow-y:auto; padding:var(--space-5); display:flex; flex-direction:column; gap:var(--space-4); }
+.chat_bubble { max-width:72%; padding:var(--space-3) var(--space-4); border-radius:var(--radius-lg); font-size:var(--text-base); line-height:1.6; }
+.chat_bubble--user { background:var(--color-primary); color:#fff; align-self:flex-end; border-bottom-right-radius:var(--radius-sm); }
+.chat_bubble--assistant { background:var(--color-bg-card); border:var(--border-width) solid var(--color-border-light); align-self:flex-start; border-bottom-left-radius:var(--radius-sm); }
+.chat_bubble--assistant p { margin-bottom:var(--space-2); }
+.chat_bubble--assistant p:last-child { margin-bottom:0; }
+.chat_bubble--assistant ul, .chat_bubble--assistant ol { padding-left:var(--space-5); margin-bottom:var(--space-2); }
+.chat_bubble--assistant code { background:var(--color-border-light); padding:1px 5px; border-radius:4px; font-size:0.9em; }
+.chat_typing { display:none; align-self:flex-start; padding:var(--space-3) var(--space-4); background:var(--color-bg-card); border:var(--border-width) solid var(--color-border-light); border-radius:var(--radius-lg); border-bottom-left-radius:var(--radius-sm); }
+.chat_typing span { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--color-text-muted); margin:0 2px; animation:bounce 1.2s infinite; }
+.chat_typing span:nth-child(2) { animation-delay:0.2s; }
+.chat_typing span:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,80%,100% { transform:translateY(0); } 40% { transform:translateY(-6px); } }
+.chat_input_area { padding:var(--space-4) var(--space-5); border-top:var(--border-width) solid var(--color-border-light); background:var(--color-bg-card); }
+.chat_input_row { display:flex; align-items:flex-end; gap:var(--space-3); background:var(--color-bg); border:2px solid var(--color-border-light); border-radius:var(--radius-lg); padding:var(--space-2) var(--space-3); transition:border-color var(--transition-base); }
+.chat_input_row:focus-within { border-color:var(--color-primary); }
+#chatInput { flex:1; border:none; background:transparent; outline:none; resize:none; font-size:var(--text-base); font-family:inherit; color:var(--color-text); max-height:120px; line-height:1.5; padding:var(--space-2) 0; }
+.chat_send_btn { width:38px; height:38px; border-radius:50%; background:var(--color-primary); color:#fff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background var(--transition-base); }
+.chat_send_btn:hover { background:var(--color-deep); }
+.chat_send_btn:disabled { background:var(--color-text-muted); cursor:not-allowed; }
+.chat_empty { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; color:var(--color-text-muted); text-align:center; padding:var(--space-8); }
+.chat_empty_icon { font-size:3rem; margin-bottom:var(--space-4); opacity:0.4; }
+.chat_suggestions { display:flex; flex-wrap:wrap; gap:var(--space-2); justify-content:center; margin-top:var(--space-5); }
+.chat_suggestion_chip { padding:var(--space-2) var(--space-4); border:var(--border-width) solid var(--color-primary); border-radius:var(--radius-full); font-size:var(--text-sm); color:var(--color-primary); cursor:pointer; transition:all var(--transition-base); background:transparent; }
+.chat_suggestion_chip:hover { background:var(--color-primary); color:#fff; }
+@media (max-width:767px) {
+    .chat_sidebar { display:none; }
+    .chat_bubble { max-width:90%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat_layout">
+
+    <!-- Sidebar conversations -->
+    <aside class="chat_sidebar">
+        <div class="chat_sidebar_header">
+            <button id="newConvBtn" class="comment_button btn_sm w-100">
+                <i class="fas fa-plus mr-1"></i>Nouvelle conversation
+            </button>
+        </div>
+        <div class="chat_conv_list" id="convList">
+            {% if conversations %}
+                {% for conv in conversations %}
+                <div class="chat_conv_item" data-conv-id="{{ conv.id }}" onclick="chargerConversation('{{ conv.id }}')">
+                    <div class="conv_title">{{ conv.titre|default:"Nouvelle conversation"|truncatechars:30 }}</div>
+                    <div class="conv_date">{{ conv.updated_at|date:"d/m à H:i" }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p style="font-size:var(--text-sm); color:var(--color-text-muted); padding:var(--space-4); text-align:center;">Aucune conversation</p>
+            {% endif %}
+        </div>
+    </aside>
+
+    <!-- Zone principale -->
+    <div class="chat_main">
+        <div class="chat_topbar">
+            <div class="chat_avatar"><i class="fas fa-robot"></i></div>
+            <div>
+                <strong style="font-size:var(--text-base);">AvenBot</strong>
+                <p class="mb-0" style="font-size:var(--text-xs); color:var(--color-success);">
+                    <i class="fas fa-circle" style="font-size:7px;"></i> En ligne
+                </p>
+            </div>
+            <div class="ml-auto">
+                <a href="{% url 'dashboard:home' %}" class="btn_ghost btn_sm">
+                    <i class="fas fa-times"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        <div class="chat_messages" id="chatMessages">
+            <div class="chat_empty" id="chatEmpty">
+                <div class="chat_avatar" style="width:64px; height:64px; font-size:1.8rem; margin-bottom:var(--space-4);">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h4 style="font-weight:var(--weight-bold); margin-bottom:var(--space-2);">Bonjour{{ contexte_utilisateur.nom|default:"" }} !</h4>
+                <p>Je suis AvenBot, votre assistant d'orientation. Je peux vous aider à choisir une formation, comprendre vos résultats RIASEC ou répondre à vos questions sur les établissements.</p>
+                <div class="chat_suggestions">
+                    <button class="chat_suggestion_chip" onclick="envoyerSuggestion(this)">Quelles formations me correspondent ?</button>
+                    <button class="chat_suggestion_chip" onclick="envoyerSuggestion(this)">Comment interpréter mon profil RIASEC ?</button>
+                    <button class="chat_suggestion_chip" onclick="envoyerSuggestion(this)">Quels sont les concours d'entrée au Togo ?</button>
+                    <button class="chat_suggestion_chip" onclick="envoyerSuggestion(this)">Comment préparer mon dossier d'inscription ?</button>
+                </div>
+            </div>
+            <div class="chat_typing" id="chatTyping">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="chat_input_area">
+            <div class="chat_input_row">
+                <textarea id="chatInput" placeholder="Posez votre question à AvenBot…" rows="1"></textarea>
+                <button class="chat_send_btn" id="sendBtn" title="Envoyer (Entrée)">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2); text-align:center;">
+                Entrée pour envoyer · Maj+Entrée pour sauter une ligne
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+(function () {
+    const CSRF = '{{ csrf_token }}';
+    const API_MSG = '/api/v1/message/';
+    const API_CONV = '/api/v1/conversations/create/';
+    let convId = null;
+    let sending = false;
+
+    const messagesEl = document.getElementById('chatMessages');
+    const inputEl = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const emptyEl = document.getElementById('chatEmpty');
+    const typingEl = document.getElementById('chatTyping');
+
+    // Auto-resize textarea
+    inputEl.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+
+    // Envoyer avec Entrée (Maj+Entrée = saut de ligne)
+    inputEl.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            envoyer();
+        }
+    });
+
+    sendBtn.addEventListener('click', envoyer);
+    document.getElementById('newConvBtn').addEventListener('click', nouvelleConversation);
+
+    function envoyerSuggestion(btn) {
+        inputEl.value = btn.textContent.trim();
+        envoyer();
+    }
+    window.envoyerSuggestion = envoyerSuggestion;
+
+    async function envoyer() {
+        const texte = inputEl.value.trim();
+        if (!texte || sending) return;
+        sending = true;
+        sendBtn.disabled = true;
+        emptyEl.style.display = 'none';
+
+        ajouterBulle('user', texte);
+        inputEl.value = '';
+        inputEl.style.height = 'auto';
+        afficherTyping(true);
+        scrollBas();
+
+        try {
+            const body = { content: texte };
+            if (convId) body.conversation_id = convId;
+
+            const resp = await fetch(API_MSG, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+                body: JSON.stringify(body),
+            });
+
+            if (!resp.ok) throw new Error('Erreur réseau ' + resp.status);
+            const data = await resp.json();
+            convId = data.conversation_id;
+
+            afficherTyping(false);
+            ajouterBulle('assistant', data.assistant_message.contenu);
+            actualiserSidebar(data.conversation_id, texte);
+        } catch (err) {
+            afficherTyping(false);
+            ajouterBulle('assistant', 'Désolé, une erreur est survenue. Veuillez réessayer dans quelques instants.');
+            console.error(err);
+        } finally {
+            sending = false;
+            sendBtn.disabled = false;
+            scrollBas();
+            inputEl.focus();
+        }
+    }
+
+    function ajouterBulle(role, contenu) {
+        const div = document.createElement('div');
+        div.className = 'chat_bubble chat_bubble--' + role;
+        if (role === 'assistant') {
+            div.innerHTML = marked.parse(contenu);
+        } else {
+            div.textContent = contenu;
+        }
+        messagesEl.insertBefore(div, typingEl);
+        scrollBas();
+    }
+
+    function afficherTyping(show) {
+        typingEl.style.display = show ? 'flex' : 'none';
+    }
+
+    function scrollBas() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function nouvelleConversation() {
+        convId = null;
+        // Vider les bulles (garder empty + typing)
+        Array.from(messagesEl.children).forEach(function (child) {
+            if (child.id !== 'chatEmpty' && child.id !== 'chatTyping') child.remove();
+        });
+        emptyEl.style.display = '';
+        // Désactiver highlight sidebar
+        document.querySelectorAll('.chat_conv_item').forEach(function (el) { el.classList.remove('active'); });
+        inputEl.focus();
+    }
+
+    async function chargerConversation(id) {
+        convId = id;
+        // Vider les bulles
+        Array.from(messagesEl.children).forEach(function (child) {
+            if (child.id !== 'chatEmpty' && child.id !== 'chatTyping') child.remove();
+        });
+        emptyEl.style.display = 'none';
+        document.querySelectorAll('.chat_conv_item').forEach(function (el) {
+            el.classList.toggle('active', el.dataset.convId === id);
+        });
+
+        try {
+            const resp = await fetch('/api/v1/conversations/' + id + '/messages/', {
+                headers: { 'X-CSRFToken': CSRF },
+            });
+            if (!resp.ok) return;
+            const messages = await resp.json();
+            messages.forEach(function (msg) {
+                ajouterBulle(msg.role === 'USER' ? 'user' : 'assistant', msg.contenu);
+            });
+        } catch (e) { console.error(e); }
+        inputEl.focus();
+    }
+    window.chargerConversation = chargerConversation;
+
+    function actualiserSidebar(id, titre) {
+        const existing = document.querySelector('.chat_conv_item[data-conv-id="' + id + '"]');
+        if (existing) {
+            existing.classList.add('active');
+            return;
+        }
+        const div = document.createElement('div');
+        div.className = 'chat_conv_item active';
+        div.dataset.convId = id;
+        div.setAttribute('onclick', "chargerConversation('" + id + "')");
+        div.innerHTML = '<div class="conv_title">' + titre.substring(0, 30) + '</div><div class="conv_date">À l\'instant</div>';
+        const list = document.getElementById('convList');
+        list.insertBefore(div, list.firstChild);
+        // Retirer les autres highlights
+        document.querySelectorAll('.chat_conv_item').forEach(function (el) {
+            if (el !== div) el.classList.remove('active');
+        });
+        // Retirer le message "Aucune conversation"
+        const empty = list.querySelector('p');
+        if (empty) empty.remove();
+    }
+})();
+</script>
+{% endblock %}

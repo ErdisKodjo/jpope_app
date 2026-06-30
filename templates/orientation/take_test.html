@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ test.nom }} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<!-- Barre de progression collante -->
+<div class="test_progress_sticky" id="progress_sticky">
+    <div class="container">
+        <div class="test_progress_meta">
+            <span class="test_progress_label">
+                <i class="fas fa-brain mr-1" style="color:var(--color-primary);"></i>
+                {{ test.nom }} — Question <span id="current_q">1</span>&nbsp;/&nbsp;{{ questions|length }}
+            </span>
+            <span class="test_progress_pct"><span id="progress_pct">0</span>%</span>
+        </div>
+        <div class="score_bar_track">
+            <div class="score_bar_fill" id="progress_bar" style="width:0%;"></div>
+        </div>
+    </div>
+</div>
+
+<div class="page_section" style="padding-top:var(--space-6);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7 col-md-9">
+
+                <!-- En-tête -->
+                <div class="text-center mb-5">
+                    <span class="tag_badge tag_badge--info mb-3 d-inline-block">{{ test.get_type_display }}</span>
+                    <h1 style="font-size:var(--text-2xl);">{{ test.nom }}</h1>
+                    <div class="test_info_chips mt-3">
+                        <span class="test_chip">
+                            <i class="fas fa-list-ol"></i>{{ questions|length }} question{{ questions|length|pluralize }}
+                        </span>
+                        <span class="test_chip">
+                            <i class="fas fa-clock"></i>{{ test.duree_estimee_minutes }} min environ
+                        </span>
+                        <span class="test_chip">
+                            <i class="fas fa-keyboard"></i>&#8592; &#8594; navigation clavier
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Formulaire -->
+                <form method="post"
+                      action="{% url 'orientation:submit-test' slug=test.slug %}"
+                      id="test_form"
+                      novalidate>
+                    {% csrf_token %}
+
+                    {% for question in questions %}
+                    <div class="detail_container mb-5 question_block"
+                         id="q_block_{{ forloop.counter }}"
+                         data-index="{{ forloop.counter }}"
+                         {% if not forloop.first %}style="display:none;"{% else %}class="detail_container mb-5 question_block question_block--in"{% endif %}>
+
+                        <!-- Numéro de question -->
+                        <div class="question_num_badge">
+                            <span>{{ forloop.counter }}</span>
+                            Question {{ forloop.counter }} sur {{ questions|length }}
+                        </div>
+
+                        <!-- Contexte situationnel -->
+                        {% if question.contexte %}
+                        <div class="question_context">
+                            <i class="fas fa-info-circle mr-2"></i>{{ question.contexte }}
+                        </div>
+                        {% endif %}
+
+                        <!-- Texte de la question -->
+                        <p class="question_text">{{ question.texte }}</p>
+
+                        <!-- ── Widgets selon le type ── -->
+
+                        {% if question.type == "ECHELLE_LIKERT" %}
+                        <div class="likert_scale">
+                            <div class="likert_labels_row">
+                                <span>{{ question.label_min }}</span>
+                                <span>{{ question.label_max }}</span>
+                            </div>
+                            <div class="likert_row">
+                                <label class="likert_option" data-val="1" for="q_{{ question.id }}_1">
+                                    <input type="radio" class="likert_radio"
+                                           name="answer_{{ question.id }}"
+                                           id="q_{{ question.id }}_1"
+                                           value="1"
+                                           {% if question.obligatoire %}required{% endif %}>
+                                    <span class="likert_label">
+                                        1<small>Pas<br>du tout</small>
+                                    </span>
+                                </label>
+                                <label class="likert_option" data-val="2" for="q_{{ question.id }}_2">
+                                    <input type="radio" class="likert_radio"
+                                           name="answer_{{ question.id }}"
+                                           id="q_{{ question.id }}_2"
+                                           value="2"
+                                           {% if question.obligatoire %}required{% endif %}>
+                                    <span class="likert_label">
+                                        2<small>Plutôt<br>non</small>
+                                    </span>
+                                </label>
+                                <label class="likert_option" data-val="3" for="q_{{ question.id }}_3">
+                                    <input type="radio" class="likert_radio"
+                                           name="answer_{{ question.id }}"
+                                           id="q_{{ question.id }}_3"
+                                           value="3"
+                                           {% if question.obligatoire %}required{% endif %}>
+                                    <span class="likert_label">
+                                        3<small>Neutre</small>
+                                    </span>
+                                </label>
+                                <label class="likert_option" data-val="4" for="q_{{ question.id }}_4">
+                                    <input type="radio" class="likert_radio"
+                                           name="answer_{{ question.id }}"
+                                           id="q_{{ question.id }}_4"
+                                           value="4"
+                                           {% if question.obligatoire %}required{% endif %}>
+                                    <span class="likert_label">
+                                        4<small>Plutôt<br>oui</small>
+                                    </span>
+                                </label>
+                                <label class="likert_option" data-val="5" for="q_{{ question.id }}_5">
+                                    <input type="radio" class="likert_radio"
+                                           name="answer_{{ question.id }}"
+                                           id="q_{{ question.id }}_5"
+                                           value="5"
+                                           {% if question.obligatoire %}required{% endif %}>
+                                    <span class="likert_label">
+                                        5<small>Tout à<br>fait</small>
+                                    </span>
+                                </label>
+                            </div>
+                            <div class="likert_gradient_bar"></div>
+                        </div>
+
+                        {% elif question.type == "CHOIX_UNIQUE" or question.type == "SITUATIONNELLE" %}
+                        <div class="choice_options_list">
+                            {% for choice in question.choices.all %}
+                            {% if choice.is_active %}
+                            <label class="choice_option" for="c_{{ choice.id }}">
+                                <input type="radio"
+                                       class="choice_radio"
+                                       name="answer_{{ question.id }}"
+                                       id="c_{{ choice.id }}"
+                                       value="{{ choice.id }}"
+                                       {% if question.obligatoire %}required{% endif %}>
+                                <span class="choice_marker"><i class="fas fa-check"></i></span>
+                                <span class="choice_text">{{ choice.texte }}</span>
+                            </label>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% elif question.type == "CHOIX_MULTIPLE" %}
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3);">
+                            <i class="fas fa-info-circle mr-1"></i>Plusieurs réponses possibles.
+                        </p>
+                        <div class="choice_options_list">
+                            {% for choice in question.choices.all %}
+                            {% if choice.is_active %}
+                            <label class="choice_option choice_option--checkbox" for="c_{{ choice.id }}">
+                                <input type="checkbox"
+                                       class="choice_radio"
+                                       name="answer_{{ question.id }}"
+                                       id="c_{{ choice.id }}"
+                                       value="{{ choice.id }}">
+                                <span class="choice_marker"><i class="fas fa-check"></i></span>
+                                <span class="choice_text">{{ choice.texte }}</span>
+                            </label>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+
+                        {% else %}
+                        <textarea name="answer_{{ question.id }}"
+                                  class="input_field"
+                                  rows="4"
+                                  placeholder="Votre réponse…"
+                                  style="resize:vertical; min-height:120px;"></textarea>
+                        {% endif %}
+
+                    </div>
+                    {% endfor %}
+
+                    <!-- Navigation -->
+                    <div class="test_nav_bar">
+                        <button type="button" id="btn_prev"
+                                class="btn_ghost btn_sm"
+                                style="display:none;"
+                                onclick="naviguer(-1)"
+                                title="Précédent (←)">
+                            <i class="fas fa-arrow-left mr-1"></i>Précédent
+                        </button>
+                        <div class="spacer"></div>
+                        <button type="button" id="btn_next"
+                                class="comment_button btn_sm"
+                                onclick="naviguer(1)"
+                                title="Suivant (→)">
+                            Suivant <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                        <button type="submit" id="btn_submit"
+                                class="comment_button btn_sm"
+                                style="display:none;">
+                            <i class="fas fa-check-circle mr-1"></i>Terminer le test
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- Lien abandon -->
+                <div class="text-center mt-5 mb-4">
+                    <a href="{% url 'orientation:test-detail' slug=test.slug %}"
+                       style="font-size:var(--text-sm); color:var(--color-text-muted);"
+                       onclick="return confirm('Quitter le test ? Votre progression actuelle sera conservée.')">
+                        <i class="fas fa-times mr-1"></i>Sauvegarder et quitter
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    var total   = {{ questions|length }};
+    var current = 1;
+    var blocks  = Array.from(document.querySelectorAll('.question_block'));
+    var btnPrev = document.getElementById('btn_prev');
+    var btnNext = document.getElementById('btn_next');
+    var btnSub  = document.getElementById('btn_submit');
+
+    /* ── Progress ── */
+    function setProgress(n) {
+        var pct = Math.round(((n - 1) / total) * 100);
+        document.getElementById('current_q').textContent = n;
+        document.getElementById('progress_pct').textContent = pct;
+        document.getElementById('progress_bar').style.width = pct + '%';
+    }
+
+    /* ── Afficher question n ── */
+    function afficher(n) {
+        blocks.forEach(function (b, i) {
+            if (i === n - 1) {
+                b.style.display = 'block';
+                /* déclenche l'animation à chaque apparition */
+                b.classList.remove('question_block--in');
+                void b.offsetWidth; /* reflow pour reset */
+                b.classList.add('question_block--in');
+            } else {
+                b.style.display = 'none';
+                b.classList.remove('question_block--in');
+            }
+        });
+        setProgress(n);
+        btnPrev.style.display = (n > 1) ? 'inline-flex' : 'none';
+        if (n === total) {
+            btnNext.style.display = 'none';
+            btnSub.style.display  = 'inline-flex';
+        } else {
+            btnNext.style.display = 'inline-flex';
+            btnSub.style.display  = 'none';
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* ── Navigation ── */
+    window.naviguer = function (dir) {
+        var next = current + dir;
+        if (next < 1 || next > total) return;
+        current = next;
+        afficher(current);
+    };
+
+    /* ── Clavier ← → ── */
+    document.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'TEXTAREA') return;
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') naviguer(1);
+        if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   naviguer(-1);
+    });
+
+    /* ── Sélection visuelle des choix ── */
+    document.querySelectorAll('.choice_options_list').forEach(function (list) {
+        list.addEventListener('change', function (e) {
+            var input = e.target;
+            if (!input.classList.contains('choice_radio')) return;
+            var isCheckbox = (input.type === 'checkbox');
+            var labels = list.querySelectorAll('.choice_option');
+            if (!isCheckbox) {
+                /* radio : désélectionner tout */
+                labels.forEach(function (l) { l.classList.remove('choice_option--selected'); });
+            }
+            /* cocher / décocher */
+            var lbl = input.closest('.choice_option');
+            if (lbl) {
+                if (isCheckbox) {
+                    lbl.classList.toggle('choice_option--selected', input.checked);
+                } else {
+                    lbl.classList.add('choice_option--selected');
+                }
+            }
+        });
+    });
+
+    /* ── Auto-avance Likert (délai 500ms) ── */
+    document.querySelectorAll('.likert_radio').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            if (current < total) {
+                setTimeout(function () { naviguer(1); }, 500);
+            }
+        });
+    });
+
+    /* ── Init ── */
+    afficher(1);
+})();
+</script>
+{% endblock %}

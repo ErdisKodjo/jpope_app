@@ -1,6 +1,6 @@
 """
 Service Chatbot — Orchestrateur principal.
-Supporte OpenAI et Ollama comme fournisseurs LLM.
+Supporte Anthropic (Claude), OpenAI et Ollama comme fournisseurs LLM.
 """
 import logging
 import time
@@ -213,11 +213,11 @@ class ChatbotService:
 
 class LLMService:
     """
-    Service d'abstraction LLM — supporte OpenAI et Ollama.
+    Service d'abstraction LLM — supporte Anthropic (Claude), OpenAI et Ollama.
     """
 
     def __init__(self):
-        self.provider = CHATBOT_SETTINGS.get("LLM_PROVIDER", "ollama")
+        self.provider = CHATBOT_SETTINGS.get("PROVIDER", "anthropic")
         self.max_tokens = CHATBOT_SETTINGS.get("MAX_TOKENS", 1024)
         self.temperature = CHATBOT_SETTINGS.get("TEMPERATURE", 0.7)
 
@@ -233,10 +233,53 @@ class LLMService:
         Returns:
             dict: {"content": str, "tokens_total": int, "model": str}
         """
-        if self.provider == "openai":
+        if self.provider == "anthropic":
+            return self._appeler_anthropic(messages)
+        elif self.provider == "openai":
             return self._appeler_openai(messages)
         else:
             return self._appeler_ollama(messages)
+
+    def _appeler_anthropic(self, messages: list) -> dict:
+        """Appelle l'API Anthropic Claude."""
+        try:
+            import anthropic
+
+            api_key = CHATBOT_SETTINGS.get("ANTHROPIC_API_KEY", "")
+            model = CHATBOT_SETTINGS.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001")
+
+            # Anthropic sépare le message system des autres messages
+            system_content = ""
+            chat_messages = []
+            for msg in messages:
+                if msg["role"] == "system":
+                    system_content = msg["content"]
+                else:
+                    chat_messages.append({"role": msg["role"], "content": msg["content"]})
+
+            client = anthropic.Anthropic(api_key=api_key)
+            response = client.messages.create(
+                model=model,
+                max_tokens=self.max_tokens,
+                system=system_content,
+                messages=chat_messages,
+            )
+
+            content = response.content[0].text if response.content else ""
+            tokens_total = response.usage.input_tokens + response.usage.output_tokens
+
+            return {
+                "content": content,
+                "tokens_total": tokens_total,
+                "model": model,
+            }
+
+        except ImportError:
+            logger.error("Package 'anthropic' non installé. Installez avec: pip install anthropic")
+            raise
+        except Exception as e:
+            logger.error(f"Erreur API Anthropic: {e}")
+            raise
 
     def _appeler_openai(self, messages: list) -> dict:
         """Appelle l'API OpenAI."""

@@ -3,6 +3,7 @@ from .voeu import Voeu
 from .demarche import DemarcheInscription
 from .agenda import EvenementAgenda, Rappel
 from .checklist import ChecklistItem, ChecklistUtilisateur
+from .evaluation import EvaluationConseiller, StatutEvaluation
 from .enums import (
     TypeFavori, StatutVoeu, PrioriteVoeu,
     TypeDemarche, StatutDemarche,
@@ -17,6 +18,8 @@ __all__ = [
     "Rappel",
     "ChecklistItem",
     "ChecklistUtilisateur",
+    "EvaluationConseiller",
+    "StatutEvaluation",
     "TypeFavori",
     "StatutVoeu",
     "PrioriteVoeu",

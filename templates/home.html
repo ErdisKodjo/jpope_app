@@ -1,467 +1,359 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}AvenSU-Orienta — Votre avenir commence ici{% endblock %}
 
 {% block content %}
 
-<!-- Hero Slider -->
-<div class="home">
-    <div class="hero_slider_container">
-        <div class="hero_slider owl-carousel">
+<!-- HERO SLIDER — rotation CSS, sans jQuery -->
+<div class="hero_slider_container">
+    <div class="hero_css_slider">
 
-            <!-- Slide 1 -->
-            <div class="hero_slide">
-                <div class="hero_slide_background" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
-                <div class="hero_slide_container d-flex flex-column align-items-center justify-content-center">
-                    <div class="hero_slide_content text-center">
-                        <h1 data-animation-in="fadeInUp" data-animation-out="animate-out fadeOut">
-                            Trouvez la formation <span>idéale</span> pour votre avenir !
-                        </h1>
-                    </div>
+        <div class="hero_slide" style="background-image:url('{% static "images/slider_background.jpg" %}');">
+            <div class="hero_slide_container d-flex align-items-center justify-content-center">
+                <div class="hero_slide_content text-center" style="max-width:700px;">
+                    <h6>Bienvenue sur AvenSU-Orienta</h6>
+                    <h1>Choisissez la <span style="color:var(--color-accent);">formation</span> qui vous correspond</h1>
+                    <p>Explorez des centaines de formations, comparez les établissements et bénéficiez d'un accompagnement personnalisé.</p>
+                    <a href="{% url 'catalog:formation-list' %}" class="comment_button mr-3">
+                        <i class="fas fa-search mr-2"></i>Explorer les formations
+                    </a>
+                    <a href="{% url 'orientation:home' %}" class="btn_ghost btn_ghost--white">
+                        Test d'orientation
+                    </a>
                 </div>
             </div>
-
-            <!-- Slide 2 -->
-            <div class="hero_slide">
-                <div class="hero_slide_background" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
-                <div class="hero_slide_container d-flex flex-column align-items-center justify-content-center">
-                    <div class="hero_slide_content text-center">
-                        <h1 data-animation-in="fadeInUp" data-animation-out="animate-out fadeOut">
-                            Orientez votre <span>parcours</span> avec confiance !
-                        </h1>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Slide 3 -->
-            <div class="hero_slide">
-                <div class="hero_slide_background" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
-                <div class="hero_slide_container d-flex flex-column align-items-center justify-content-center">
-                    <div class="hero_slide_content text-center">
-                        <h1 data-animation-in="fadeInUp" data-animation-out="animate-out fadeOut">
-                            Des milliers d'<span>établissements</span> à votre portée !
-                        </h1>
-                    </div>
-                </div>
-            </div>
-
         </div>
 
-        <div class="hero_slider_left hero_slider_nav trans_200"><span class="trans_200">précédent</span></div>
-        <div class="hero_slider_right hero_slider_nav trans_200"><span class="trans_200">suivant</span></div>
+        <div class="hero_slide" style="background-image:url('{% static "images/slider_background.jpg" %}');">
+            <div class="hero_slide_container d-flex align-items-center justify-content-center">
+                <div class="hero_slide_content text-center" style="max-width:700px;">
+                    <h6>Tests RIASEC gratuits</h6>
+                    <h1>Découvrez votre <span style="color:var(--color-accent);">profil</span> d'orientation</h1>
+                    <p>Notre test analyse vos aptitudes et vous recommande les formations les plus adaptées à votre personnalité.</p>
+                    <a href="{% url 'orientation:home' %}" class="comment_button">
+                        <i class="fas fa-compass mr-2"></i>Commencer le test
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero_slide" style="background-image:url('{% static "images/slider_background.jpg" %}');">
+            <div class="hero_slide_container d-flex align-items-center justify-content-center">
+                <div class="hero_slide_content text-center" style="max-width:700px;">
+                    <h6>Communauté active</h6>
+                    <h1>Échangez avec des <span style="color:var(--color-accent);">experts</span></h1>
+                    <p>Posez vos questions et obtenez des conseils de la communauté AvenSU.</p>
+                    <a href="{% url 'community:forum-list' %}" class="comment_button">
+                        <i class="fas fa-comments mr-2"></i>Rejoindre la communauté
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- Hero Boxes -->
+<!-- HERO BOXES -->
 <div class="hero_boxes">
-    <div class="hero_boxes_inner">
-        <div class="container">
-            <div class="row">
-
-                <div class="col-lg-4 hero_box_col">
-                    <div class="hero_box d-flex flex-row align-items-center justify-content-start">
-                        <img src="{% static 'images/earth-globe.svg' %}" class="svg" alt="Formations">
-                        <div class="hero_box_content">
-                            <h2 class="hero_box_title">Formations disponibles</h2>
-                            <a href="{% url 'catalog:formation-list' %}" class="hero_box_link">Voir toutes</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 hero_box_col">
-                    <div class="hero_box d-flex flex-row align-items-center justify-content-start">
-                        <img src="{% static 'images/books.svg' %}" class="svg" alt="Établissements">
-                        <div class="hero_box_content">
-                            <h2 class="hero_box_title">Établissements</h2>
-                            <a href="{% url 'catalog:etablissement-list' %}" class="hero_box_link">Découvrir</a>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-lg-4 hero_box_col">
-                    <div class="hero_box d-flex flex-row align-items-center justify-content-start">
-                        <img src="{% static 'images/professor.svg' %}" class="svg" alt="Conseils">
-                        <div class="hero_box_content">
-                            <h2 class="hero_box_title">Conseils d'orientation</h2>
-                            <a href="{% url 'orientation:home' %}" class="hero_box_link">En savoir plus</a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Formations Populaires -->
-<div class="popular page_section">
     <div class="container">
         <div class="row">
-            <div class="col">
-                <div class="section_title text-center">
-                    <h1>Formations Populaires</h1>
-                </div>
-            </div>
-        </div>
-
-        <div class="row course_boxes">
-
-            <!-- Carte Formation 1 -->
-            <div class="col-lg-4 course_box">
-                <div class="card">
-                    <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="Licence Informatique">
-                    <div class="card-body text-center">
-                        <div class="card-title"><a href="{% url 'catalog:formation-list' %}">Licence en Informatique</a></div>
-                        <div class="card-text">Programmation, réseaux, intelligence artificielle...</div>
-                    </div>
-                    <div class="price_box d-flex flex-row align-items-center">
-                        <div class="course_author_image">
-                            <img src="{% static 'images/author.jpg' %}" alt="Établissement">
-                        </div>
-                        <div class="course_author_name">Université de Lomé, <span>Togo</span></div>
-                        <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Public</span></div>
+            <div class="col-lg-4 hero_box_col">
+                <div class="hero_box">
+                    <div class="hero_box_icon"><i class="fas fa-university"></i></div>
+                    <div class="hero_box_content">
+                        <div class="hero_box_title">Établissements</div>
+                        <p class="hero_box_text">Les meilleures universités et grandes écoles d'Afrique de l'Ouest.</p>
+                        <a href="{% url 'catalog:etablissement-list' %}" class="hero_box_link">Voir tous les établissements <i class="fas fa-arrow-right ml-1"></i></a>
                     </div>
                 </div>
             </div>
-
-            <!-- Carte Formation 2 -->
-            <div class="col-lg-4 course_box">
-                <div class="card">
-                    <img class="card-img-top" src="{% static 'images/course_2.jpg' %}" alt="BTS Gestion">
-                    <div class="card-body text-center">
-                        <div class="card-title"><a href="{% url 'catalog:formation-list' %}">BTS Gestion Commerciale</a></div>
-                        <div class="card-text">Commerce, marketing, entrepreneuriat...</div>
-                    </div>
-                    <div class="price_box d-flex flex-row align-items-center">
-                        <div class="course_author_image">
-                            <img src="{% static 'images/author.jpg' %}" alt="Établissement">
-                        </div>
-                        <div class="course_author_name">IUGB, <span>Côte d'Ivoire</span></div>
-                        <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Privé</span></div>
+            <div class="col-lg-4 hero_box_col">
+                <div class="hero_box">
+                    <div class="hero_box_icon"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="hero_box_content">
+                        <div class="hero_box_title">Formations</div>
+                        <p class="hero_box_text">BTS, Licences, Masters et formations professionnelles.</p>
+                        <a href="{% url 'catalog:formation-list' %}" class="hero_box_link">Explorer le catalogue <i class="fas fa-arrow-right ml-1"></i></a>
                     </div>
                 </div>
             </div>
-
-            <!-- Carte Formation 3 -->
-            <div class="col-lg-4 course_box">
-                <div class="card">
-                    <img class="card-img-top" src="{% static 'images/course_3.jpg' %}" alt="Médecine">
-                    <div class="card-body text-center">
-                        <div class="card-title"><a href="{% url 'catalog:formation-list' %}">Médecine Générale</a></div>
-                        <div class="card-text">Sciences de la santé, chirurgie, pharmacie...</div>
-                    </div>
-                    <div class="price_box d-flex flex-row align-items-center">
-                        <div class="course_author_image">
-                            <img src="{% static 'images/author.jpg' %}" alt="Établissement">
-                        </div>
-                        <div class="course_author_name">UCAD, <span>Sénégal</span></div>
-                        <div class="course_price d-flex flex-column align-items-center justify-content-center"><span>Public</span></div>
+            <div class="col-lg-4 hero_box_col">
+                <div class="hero_box">
+                    <div class="hero_box_icon"><i class="fas fa-compass"></i></div>
+                    <div class="hero_box_content">
+                        <div class="hero_box_title">Orientation</div>
+                        <p class="hero_box_text">Découvrez votre profil RIASEC et recevez des recommandations.</p>
+                        <a href="{% url 'orientation:home' %}" class="hero_box_link">Faire le test <i class="fas fa-arrow-right ml-1"></i></a>
                     </div>
                 </div>
-            </div>
-
-        </div>
-
-        <div class="row mt-4">
-            <div class="col text-center">
-                <a href="{% url 'catalog:formation-list' %}" class="button button_1 trans_200" style="display:inline-block; padding: 12px 30px;">
-                    Voir toutes les formations
-                </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Inscription / Recherche -->
-<div class="register">
-    <div class="container-fluid">
-        <div class="row row-eq-height">
-
-            <!-- Inscription -->
-            <div class="col-lg-6 nopadding">
-                <div class="register_section d-flex flex-column align-items-center justify-content-center">
-                    <div class="register_content text-center">
-                        <h1 class="register_title">Inscrivez-vous <span>gratuitement</span> et accédez à toutes nos ressources d'orientation</h1>
-                        <p class="register_text">Rejoignez notre communauté d'étudiants et de conseillers d'orientation. Comparez des établissements, posez vos questions et préparez votre avenir en toute sérénité.</p>
-                        <div class="button button_1 register_button mx-auto trans_200">
-                            <a href="{% url 'accounts:register' %}">S'inscrire maintenant</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recherche -->
-            <div class="col-lg-6 nopadding">
-                <div class="search_section d-flex flex-column align-items-center justify-content-center">
-                    <div class="search_background" style="background-image:url({% static 'images/search_background.jpg' %});"></div>
-                    <div class="search_content text-center">
-                        <h1 class="search_title">Rechercher une formation</h1>
-                        <form id="search_form" class="search_form" action="{% url 'catalog:formation-list' %}" method="get">
-                            <input id="search_form_name" class="input_field search_form_name" type="text" name="q" placeholder="Nom de la formation" required="required" data-error="Le nom de la formation est requis.">
-                            <input id="search_form_category" class="input_field search_form_category" type="text" name="domaine" placeholder="Domaine (ex: informatique, santé)">
-                            <input id="search_form_degree" class="input_field search_form_degree" type="text" name="niveau" placeholder="Niveau (ex: Licence, Master, BTS)">
-                            <button id="search_submit_button" type="submit" class="search_submit_button trans_200" value="Submit">Rechercher</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
-</div>
-
-<!-- Services / Avantages -->
-<div class="services page_section">
+<!-- FORMATIONS POPULAIRES -->
+<div class="page_section" style="background:var(--color-bg-subtle);">
     <div class="container">
+        <div class="section_title text-center">
+            <h2>Formations populaires</h2>
+            <p>Découvrez les formations les plus recherchées sur la plateforme</p>
+        </div>
+        {% if formations_populaires %}
         <div class="row">
-            <div class="col">
-                <div class="section_title text-center">
-                    <h1>Nos Services</h1>
+            {% for formation in formations_populaires %}
+            <div class="col-sm-6 col-md-4 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
+                    <div class="position-relative">
+                        {% if forloop.counter == 2 %}
+                        <img class="card-img-top" src="{% static 'images/course_2.jpg' %}" alt="{{ formation.nom }}" style="height:180px; object-fit:cover;">
+                        {% elif forloop.counter == 3 %}
+                        <img class="card-img-top" src="{% static 'images/course_3.jpg' %}" alt="{{ formation.nom }}" style="height:180px; object-fit:cover;">
+                        {% else %}
+                        <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="{{ formation.nom }}" style="height:180px; object-fit:cover;">
+                        {% endif %}
+                        <span class="unified_card_domain_badge">{{ formation.domaine.nom }}</span>
+                    </div>
+                    <div class="unified_card_body">
+                        <h3 class="unified_card_title">
+                            <a href="{% url 'catalog:formation-detail' formation.slug %}">{{ formation.nom }}</a>
+                        </h3>
+                        <p class="unified_card_text">{{ formation.description_courte|default:formation.description|truncatewords:15 }}</p>
+                        <span class="tag_badge">{{ formation.get_niveau_display }}</span>
+                    </div>
+                    <div class="unified_card_footer">
+                        <div class="unified_price_box">
+                            <small class="text-muted"><i class="fas fa-university mr-1"></i>{{ formation.etablissement.nom }}</small>
+                            <span class="unified_price">{{ formation.cout_annuel|floatformat:0 }} FCFA</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-graduation-cap fa-3x text-muted mb-3 d-block"></i>
+            <p class="text-muted">Les formations seront bientôt disponibles.</p>
+        </div>
+        {% endif %}
+        <div class="text-center mt-2">
+            <a href="{% url 'catalog:formation-list' %}" class="comment_button"><i class="fas fa-th-large mr-2"></i>Voir toutes les formations</a>
+        </div>
+    </div>
+</div>
+
+<!-- NOS SERVICES -->
+<div class="page_section">
+    <div class="container">
+        <div class="section_title text-center">
+            <h2>Nos services</h2>
+            <p>Tout ce dont vous avez besoin pour réussir votre orientation</p>
+        </div>
+        <div class="row">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="service_card">
+                    <div class="service_card_icon"><i class="fas fa-book-open"></i></div>
+                    <h3>Catalogue complet</h3>
+                    <p>Accédez à des centaines de formations et établissements référencés.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="service_card">
+                    <div class="service_card_icon"><i class="fas fa-brain"></i></div>
+                    <h3>Test RIASEC</h3>
+                    <p>Identifiez vos points forts et recevez des recommandations personnalisées.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="service_card">
+                    <div class="service_card_icon"><i class="fas fa-comments"></i></div>
+                    <h3>Forum communauté</h3>
+                    <p>Échangez avec d'autres étudiants, conseillers et représentants d'établissements.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="service_card">
+                    <div class="service_card_icon"><i class="fas fa-user-tie"></i></div>
+                    <h3>Experts conseillers</h3>
+                    <p>Des professionnels de l'orientation à votre écoute pour vous guider.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="service_card">
+                    <div class="service_card_icon"><i class="fas fa-robot"></i></div>
+                    <h3>Coach IA</h3>
+                    <p>Notre assistant intelligent répond à vos questions d'orientation 24h/24.</p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="service_card">
+                    <div class="service_card_icon"><i class="fas fa-tasks"></i></div>
+                    <h3>Suivi candidatures</h3>
+                    <p>Gérez vos démarches d'inscription avec notre tableau de bord personnalisé.</p>
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="row services_row">
+<!-- ═══════════════════════════════════════
+     BLOC ORIENTATION (accès conditionnel)
+     ════════════════════════════════════════ -->
 
-            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
-                <div class="icon_container d-flex flex-column justify-content-end">
-                    <img src="{% static 'images/earth-globe.svg' %}" alt="">
+{% if request.user.is_authenticated %}
+
+<!-- BLOC ORIENTATION — Utilisateurs connectés uniquement -->
+<div class="page_section orientation_home_section">
+    <div class="container">
+        <div class="section_title text-center">
+            <h2><i class="fas fa-compass mr-2" style="color:var(--color-primary);"></i>Mon espace orientation</h2>
+            <p>Découvrez votre profil et recevez des recommandations personnalisées</p>
+        </div>
+        <div class="row justify-content-center">
+
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="orientation_home_card orientation_home_card--test">
+                    <div class="orientation_home_card_icon">
+                        <i class="fas fa-compass"></i>
+                    </div>
+                    <h3>Test RIASEC</h3>
+                    <p>Passez le test d'orientation et découvrez votre profil parmi les 6 types Holland.</p>
+                    <a href="{% url 'orientation:test-list' %}" class="comment_button w-100">
+                        <i class="fas fa-play-circle mr-2"></i>Commencer le test
+                    </a>
                 </div>
-                <h3>Catalogue de formations</h3>
-                <p>Accédez à des centaines de formations proposées par les meilleures universités et grandes écoles d'Afrique de l'Ouest.</p>
             </div>
 
-            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
-                <div class="icon_container d-flex flex-column justify-content-end">
-                    <img src="{% static 'images/exam.svg' %}" alt="">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="orientation_home_card orientation_home_card--results">
+                    <div class="orientation_home_card_icon" style="background:var(--color-success-bg); color:var(--color-success);">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3>Mes résultats</h3>
+                    <p>Consultez l'historique de vos tests et l'analyse de votre profil d'orientation.</p>
+                    <a href="{% url 'orientation:resultats' %}" class="btn_ghost w-100">
+                        <i class="fas fa-history mr-2"></i>Voir mes résultats
+                    </a>
                 </div>
-                <h3>Comparaison d'établissements</h3>
-                <p>Comparez les établissements selon leurs critères : coûts, débouchés, localisation, avis d'anciens étudiants et bien plus.</p>
             </div>
 
-            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
-                <div class="icon_container d-flex flex-column justify-content-end">
-                    <img src="{% static 'images/books.svg' %}" alt="">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="orientation_home_card orientation_home_card--reco">
+                    <div class="orientation_home_card_icon" style="background:var(--color-info-bg); color:var(--color-info);">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Recommandations</h3>
+                    <p>Formations et métiers sélectionnés pour correspondre à votre profil unique.</p>
+                    <a href="{% url 'orientation:recommandations' %}" class="btn_ghost w-100">
+                        <i class="fas fa-star mr-2"></i>Mes recommandations
+                    </a>
                 </div>
-                <h3>Ressources d'orientation</h3>
-                <p>Des guides, articles et vidéos pour vous aider à prendre les bonnes décisions après le baccalauréat.</p>
-            </div>
-
-            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
-                <div class="icon_container d-flex flex-column justify-content-end">
-                    <img src="{% static 'images/professor.svg' %}" alt="">
-                </div>
-                <h3>Conseillers d'orientation</h3>
-                <p>Échangez avec des conseillers expérimentés qui vous accompagnent dans votre projet d'études supérieures.</p>
-            </div>
-
-            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
-                <div class="icon_container d-flex flex-column justify-content-end">
-                    <img src="{% static 'images/blackboard.svg' %}" alt="">
-                </div>
-                <h3>Événements &amp; Salons</h3>
-                <p>Restez informé des journées portes ouvertes, salons d'orientation et événements étudiants dans toute la région.</p>
-            </div>
-
-            <div class="col-lg-4 service_item text-left d-flex flex-column align-items-start justify-content-start">
-                <div class="icon_container d-flex flex-column justify-content-end">
-                    <img src="{% static 'images/mortarboard.svg' %}" alt="">
-                </div>
-                <h3>Communauté étudiante</h3>
-                <p>Rejoignez une communauté active d'étudiants et partagez vos expériences pour aider les futurs bacheliers.</p>
             </div>
 
         </div>
     </div>
 </div>
 
-<!-- Témoignages -->
-<div class="testimonials page_section">
-    <div class="testimonials_background_container prlx_parent">
-        <div class="testimonials_background prlx" style="background-image:url({% static 'images/testimonials_background.jpg' %})"></div>
-    </div>
-    <div class="container">
+{% else %}
 
-        <div class="row">
-            <div class="col">
-                <div class="section_title text-center">
-                    <h1>Ce que disent nos étudiants</h1>
+<!-- BLOC ORIENTATION — Visiteurs non connectés : teaser + CTA -->
+<div class="cta_section">
+    <div class="container">
+        <div class="row align-items-center justify-content-between" style="gap:var(--space-6);">
+
+            <!-- Texte CTA -->
+            <div class="col-lg-6 text-center text-lg-left">
+                <h2>Trouvez votre voie avec le test d'orientation</h2>
+                <p>Créez un compte gratuit pour accéder au test RIASEC, recevoir des recommandations de formations et suivre vos candidatures.</p>
+                <div style="display:flex; gap:var(--space-3); flex-wrap:wrap; justify-content:flex-start;">
+                    <a href="{% url 'accounts:register' %}" class="comment_button">
+                        <i class="fas fa-user-plus mr-2"></i>Créer un compte gratuit
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn_ghost btn_ghost--white">
+                        Se connecter
+                    </a>
                 </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-lg-10 offset-lg-1">
-                <div class="testimonials_slider_container">
-                    <div class="owl-carousel owl-theme testimonials_slider">
-
-                        <!-- Témoignage 1 -->
-                        <div class="owl-item">
-                            <div class="testimonials_item text-center">
-                                <div class="quote">"</div>
-                                <p class="testimonials_text">Grâce à AvenSU-Orienta, j'ai pu comparer plusieurs universités et choisir la licence en informatique qui correspondait exactement à mon projet. Le processus d'inscription était clair et les conseillers très disponibles.</p>
-                                <div class="testimonial_user">
-                                    <div class="testimonial_image mx-auto">
-                                        <img src="{% static 'images/testimonials_user.jpg' %}" alt="Amina Diallo">
-                                    </div>
-                                    <div class="testimonial_name">Amina Diallo</div>
-                                    <div class="testimonial_title">Étudiante en Informatique — Dakar, Sénégal</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Témoignage 2 -->
-                        <div class="owl-item">
-                            <div class="testimonials_item text-center">
-                                <div class="quote">"</div>
-                                <p class="testimonials_text">Je ne savais pas quelle filière choisir après mon bac. AvenSU-Orienta m'a mis en contact avec un conseiller qui a écouté mes ambitions et m'a guidé vers une formation en gestion qui me passionne aujourd'hui.</p>
-                                <div class="testimonial_user">
-                                    <div class="testimonial_image mx-auto">
-                                        <img src="{% static 'images/testimonials_user.jpg' %}" alt="Kwame Asante">
-                                    </div>
-                                    <div class="testimonial_name">Kwame Asante</div>
-                                    <div class="testimonial_title">Étudiant en Gestion — Accra, Ghana</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Témoignage 3 -->
-                        <div class="owl-item">
-                            <div class="testimonials_item text-center">
-                                <div class="quote">"</div>
-                                <p class="testimonials_text">En tant que parent, j'avais du mal à comprendre les options disponibles pour ma fille. AvenSU-Orienta m'a fourni toutes les informations nécessaires sur les coûts, les bourses et les débouchés professionnels.</p>
-                                <div class="testimonial_user">
-                                    <div class="testimonial_image mx-auto">
-                                        <img src="{% static 'images/testimonials_user.jpg' %}" alt="Marie-Claire Kouassi">
-                                    </div>
-                                    <div class="testimonial_name">Marie-Claire Kouassi</div>
-                                    <div class="testimonial_title">Parent d'étudiant — Abidjan, Côte d'Ivoire</div>
-                                </div>
-                            </div>
-                        </div>
-
+            <!-- Avantages listés -->
+            <div class="col-lg-5 mt-4 mt-lg-0">
+                <div class="cta_benefits_list">
+                    <div class="cta_benefit_item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Test RIASEC gratuit et instantané</span>
+                    </div>
+                    <div class="cta_benefit_item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Recommandations personnalisées de formations</span>
+                    </div>
+                    <div class="cta_benefit_item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Accès à votre tableau de bord étudiant</span>
+                    </div>
+                    <div class="cta_benefit_item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Suivi de vos candidatures</span>
+                    </div>
+                    <div class="cta_benefit_item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Conseils de conseillers d'orientation</span>
                     </div>
                 </div>
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
 
-<!-- Événements à venir -->
-<div class="events page_section">
+{% endif %}
+
+<!-- ÉVÉNEMENTS -->
+<div class="page_section" style="background:var(--color-bg-subtle);">
     <div class="container">
-
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-1);">Événements à venir</h2>
+                <p class="text-muted" style="margin:0; font-size:var(--text-base);">Salons, portes ouvertes et conférences</p>
+            </div>
+            <a href="{% url 'events:event-list' %}" class="comment_button">Tous les événements</a>
+        </div>
         <div class="row">
-            <div class="col">
-                <div class="section_title text-center">
-                    <h1>Événements à venir</h1>
+            {% for evenement in evenements_a_venir %}
+            <div class="col-lg-6 mb-3">
+                <div class="event_item_unified">
+                    <div class="event_date_unified">
+                        <div class="event_day_unified">{{ evenement.date_debut|date:"d" }}</div>
+                        <div class="event_month_unified">{{ evenement.date_debut|date:"M" }}</div>
+                    </div>
+                    <div class="event_body_unified">
+                        <h4>
+                            <a href="{% url 'events:event-detail' evenement.slug %}" style="color:var(--color-text); text-decoration:none;">
+                                {{ evenement.titre }}
+                            </a>
+                        </h4>
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                            {{ evenement.description_courte|default:evenement.description|truncatewords:15 }}
+                        </p>
+                        <small>
+                            {% if evenement.lieu_nom %}
+                            <i class="fas fa-map-marker-alt mr-1 text-muted"></i>{{ evenement.lieu_nom }}{% if evenement.ville %}, {{ evenement.ville }}{% endif %}
+                            {% else %}
+                            <i class="fas fa-globe mr-1 text-muted"></i>{{ evenement.get_format_display }}
+                            {% endif %}
+                        </small>
+                    </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="col-12 text-center py-4">
+                <i class="fas fa-calendar-times fa-2x text-muted mb-2 d-block"></i>
+                <p class="text-muted">Aucun événement à venir pour le moment.</p>
+            </div>
+            {% endfor %}
         </div>
-
-        <div class="event_items">
-
-            <!-- Événement 1 -->
-            <div class="row event_item">
-                <div class="col">
-                    <div class="row d-flex flex-row align-items-end">
-
-                        <div class="col-lg-2 order-lg-1 order-2">
-                            <div class="event_date d-flex flex-column align-items-center justify-content-center">
-                                <div class="event_day">15</div>
-                                <div class="event_month">Juillet</div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 order-lg-2 order-3">
-                            <div class="event_content">
-                                <div class="event_name"><a class="trans_200" href="{% url 'events:event-list' %}">Salon de l'Orientation Post-Bac — Lomé 2026</a></div>
-                                <div class="event_location">Palais des Congrès, Lomé — Togo</div>
-                                <p>Rencontrez des représentants de plus de 50 établissements et obtenez des conseils personnalisés pour votre orientation.</p>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 order-lg-3 order-1">
-                            <div class="event_image">
-                                <img src="{% static 'images/event_1.jpg' %}" alt="Salon d'orientation">
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Événement 2 -->
-            <div class="row event_item">
-                <div class="col">
-                    <div class="row d-flex flex-row align-items-end">
-
-                        <div class="col-lg-2 order-lg-1 order-2">
-                            <div class="event_date d-flex flex-column align-items-center justify-content-center">
-                                <div class="event_day">22</div>
-                                <div class="event_month">Août</div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 order-lg-2 order-3">
-                            <div class="event_content">
-                                <div class="event_name"><a class="trans_200" href="{% url 'events:event-list' %}">Journée Portes Ouvertes — Université de Dakar</a></div>
-                                <div class="event_location">Université Cheikh Anta Diop, Dakar — Sénégal</div>
-                                <p>Découvrez les filières, rencontrez les enseignants et visitez le campus lors de cette journée exceptionnelle.</p>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 order-lg-3 order-1">
-                            <div class="event_image">
-                                <img src="{% static 'images/event_2.jpg' %}" alt="Journée portes ouvertes">
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Événement 3 -->
-            <div class="row event_item">
-                <div class="col">
-                    <div class="row d-flex flex-row align-items-end">
-
-                        <div class="col-lg-2 order-lg-1 order-2">
-                            <div class="event_date d-flex flex-column align-items-center justify-content-center">
-                                <div class="event_day">10</div>
-                                <div class="event_month">Sept.</div>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-6 order-lg-2 order-3">
-                            <div class="event_content">
-                                <div class="event_name"><a class="trans_200" href="{% url 'events:event-list' %}">Webinaire : Choisir sa filière après le Bac</a></div>
-                                <div class="event_location">En ligne — Accessible depuis toute l'Afrique de l'Ouest</div>
-                                <p>Un webinaire interactif animé par nos conseillers pour vous aider à définir votre projet professionnel et choisir la bonne formation.</p>
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4 order-lg-3 order-1">
-                            <div class="event_image">
-                                <img src="{% static 'images/event_3.jpg' %}" alt="Webinaire orientation">
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
     </div>
 </div>
 
 {% endblock %}
-
-{% block extra_js %}
-<script src="{% static 'js/custom.js' %}"></script>
-{% endblock %}
-
 

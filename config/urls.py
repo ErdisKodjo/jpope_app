@@ -23,7 +23,7 @@ urlpatterns = [
     path("api/v1/", include(("apps.accounts.api.urls", "accounts-api"), namespace="accounts-api")),
     path("api/v1/", include(("apps.catalog.api.urls", "catalog-api"), namespace="catalog-api")),
     path("api/v1/", include(("apps.ranking.api.urls", "ranking-api"), namespace="ranking-api")),
-    path("api/v1/", include(("apps.orientation.api.urls", "orientation-api"), namespace="orientation-api")),
+    path("api/v1/orientation/", include(("apps.orientation.api.urls", "orientation-api"), namespace="orientation-api")),
     path("api/v1/", include(("apps.dashboard.api.urls", "dashboard-api"), namespace="dashboard-api")),
     path("api/v1/", include(("apps.events.api.urls", "events-api"), namespace="events-api")),
     path("api/v1/", include(("apps.chatbot.api.urls", "chatbot-api"), namespace="chatbot-api")),
@@ -50,6 +50,7 @@ urlpatterns += i18n_patterns(
     path("tableau-de-bord/", include("apps.dashboard.urls", namespace="dashboard")),
     path("evenements/", include("apps.events.urls", namespace="events")),
     path("communaute/", include("apps.community.urls", namespace="community")),
+    path("chatbot/", include("apps.chatbot.urls", namespace="chatbot")),
     prefix_default_language=False,
 )
 

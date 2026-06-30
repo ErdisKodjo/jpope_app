@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ test.nom }} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>{{ test.nom }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'orientation:test-list' %}">Tests</a></li>
+                    <li class="breadcrumb-item active">{{ test.nom|truncatechars:30 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- Carte de démarrage -->
+                <div class="test_card_start mb-5">
+                    <div class="test_icon">
+                        <i class="fas {% if test.type == 'RIASEC' %}fa-compass{% elif test.type == 'PERSONNALITE' %}fa-brain{% else %}fa-sliders-h{% endif %}"></i>
+                    </div>
+                    <h2 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-4);">{{ test.nom }}</h2>
+                    <div class="test_info_chips">
+                        <span class="test_chip"><i class="fas fa-clock"></i>{{ test.duree_estimee_minutes }} min</span>
+                        <span class="test_chip"><i class="fas fa-question-circle"></i>{{ test.nombre_questions }} questions</span>
+                        <span class="test_chip"><i class="fas fa-tag"></i>{{ test.get_type_display }}</span>
+                    </div>
+
+                    {% if dernier_resultat %}
+                    <div class="mb-4 p-4" style="background:var(--color-info-bg); border-radius:var(--radius-md); border-left:3px solid var(--color-info);">
+                        <p style="font-size:var(--text-sm); color:var(--color-info); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">
+                            <i class="fas fa-history mr-2"></i>Vous avez déjà passé ce test
+                        </p>
+                        <p style="font-size:var(--text-sm); color:var(--color-text); margin-bottom:var(--space-3);">
+                            Profil dominant : <strong>{{ dernier_resultat.dimension_dominante_nom }}</strong> ({{ dernier_resultat.date_calcul|date:"d/m/Y" }})
+                        </p>
+                        <a href="{% url 'orientation:resultat-detail' dernier_resultat.pk %}" class="comment_button btn_sm">
+                            <i class="fas fa-chart-bar mr-1"></i>Voir mes résultats
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    {% if test.peut_etre_passe %}
+                    <a href="{% url 'orientation:take-test' slug=test.slug %}" class="comment_button btn_lg w-100">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        {% if dernier_resultat %}Refaire le test{% else %}Commencer le test{% endif %}
+                    </a>
+                    {% else %}
+                    <div class="p-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-sm);">
+                        <p class="text-muted mb-0"><i class="fas fa-lock mr-2"></i>Ce test n'est pas encore disponible.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Description du test -->
+                {% if test.description %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">À propos de ce test</h2>
+                    <p class="detail_description">{{ test.description }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Dimensions évaluées -->
+                {% if test.dimensions_evaluees %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Dimensions évaluées</h2>
+                    <div class="row">
+                        {% for dim in test.dimensions_evaluees %}
+                        <div class="col-md-6 mb-3">
+                            <div class="d-flex align-items-center" style="gap:var(--space-3); padding:var(--space-3); background:var(--color-bg-subtle); border-radius:var(--radius-sm);">
+                                <div style="width:36px; height:36px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <i class="fas fa-check" style="color:var(--color-primary); font-size:var(--text-sm);"></i>
+                                </div>
+                                <span style="font-size:var(--text-sm); font-weight:var(--weight-semibold); color:var(--color-dark);">{{ dim }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Instructions -->
+                <div class="detail_container">
+                    <h2 class="detail_section_title">Comment bien répondre ?</h2>
+                    <div class="info_step">
+                        <div class="step_num">1</div>
+                        <div>
+                            <p style="margin:0; font-size:var(--text-sm); color:var(--color-text);">Installez-vous dans un endroit calme et prenez votre temps.</p>
+                        </div>
+                    </div>
+                    <div class="info_step">
+                        <div class="step_num">2</div>
+                        <div>
+                            <p style="margin:0; font-size:var(--text-sm); color:var(--color-text);">Répondez selon votre première impression, sans trop réfléchir.</p>
+                        </div>
+                    </div>
+                    <div class="info_step">
+                        <div class="step_num">3</div>
+                        <div>
+                            <p style="margin:0; font-size:var(--text-sm); color:var(--color-text);">Il n'y a pas de bonne ou mauvaise réponse — soyez honnête(e) avec vous-même.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Choisir un test — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Tests d'orientation</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'orientation:home' %}">Orientation</a></li>
+                    <li class="breadcrumb-item active">Choisir un test</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <div class="text-center mb-5">
+            <h2 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-3);">Choisissez votre test</h2>
+            <p style="font-size:var(--text-md); color:var(--color-text-muted);">
+                Sélectionnez le test le mieux adapté à votre profil et votre projet.
+            </p>
+        </div>
+
+        <div class="row justify-content-center">
+            {% for test in tests %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="test_card_start">
+                    <div class="test_icon">
+                        <i class="fas {% if test.type == 'RIASEC' %}fa-compass{% elif test.type == 'PERSONNALITE' %}fa-brain{% else %}fa-sliders-h{% endif %}"></i>
+                    </div>
+                    <h3 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin-bottom:var(--space-3);">{{ test.nom }}</h3>
+                    {% if test.description_courte %}
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-5); line-height:var(--leading-relaxed);">{{ test.description_courte }}</p>
+                    {% endif %}
+                    <div class="test_info_chips">
+                        <span class="test_chip"><i class="fas fa-clock"></i>{{ test.duree_estimee_minutes }} min</span>
+                        <span class="test_chip"><i class="fas fa-question-circle"></i>{{ test.nombre_questions }} questions</span>
+                        <span class="test_chip"><i class="fas fa-tag"></i>{{ test.get_type_display }}</span>
+                    </div>
+                    <a href="{% url 'orientation:test-detail' test.slug %}" class="comment_button w-100">
+                        <i class="fas fa-play-circle mr-2"></i>Commencer ce test
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty_state">
+                    <i class="fas fa-compass empty_state_icon"></i>
+                    <h4>Aucun test disponible</h4>
+                    <p>Les tests d'orientation seront bientôt disponibles.</p>
+                    <a href="{% url 'accounts:home' %}" class="comment_button">Retour à l'accueil</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if request.user.is_authenticated %}
+        <div class="text-center mt-4">
+            <a href="{% url 'orientation:resultats' %}" class="btn_ghost">
+                <i class="fas fa-history mr-2"></i>Voir mes résultats précédents
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

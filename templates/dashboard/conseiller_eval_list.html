@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes fiches d'évaluation — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section" style="padding-top:var(--space-7);">
+    <div class="container">
+
+        <!-- En-tête -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-5" style="gap:var(--space-4);">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-1);">
+                    <i class="fas fa-file-alt mr-2" style="color:var(--color-primary);"></i>Mes fiches d'évaluation
+                </h1>
+                <p class="text-muted mb-0" style="font-size:var(--text-base);">
+                    Rédigez et soumettez des fiches d'orientation pour vos étudiants.
+                </p>
+            </div>
+            <a href="{% url 'dashboard:conseiller-eval-create' %}" class="comment_button btn_sm">
+                <i class="fas fa-plus mr-1"></i>Nouvelle fiche
+            </a>
+        </div>
+
+        <!-- Compteurs statuts -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number">{{ nb_brouillons }}</div>
+                    <div class="stat_item_label">Brouillon{{ nb_brouillons|pluralize }}</div>
+                    <i class="fas fa-edit mt-2" style="font-size:var(--text-xl); color:var(--color-text-muted); opacity:0.35;"></i>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--info">{{ nb_soumises }}</div>
+                    <div class="stat_item_label">Soumise{{ nb_soumises|pluralize }}</div>
+                    <i class="fas fa-paper-plane mt-2" style="font-size:var(--text-xl); color:var(--color-info); opacity:0.35;"></i>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--danger">{{ nb_a_reviser }}</div>
+                    <div class="stat_item_label">À réviser</div>
+                    <i class="fas fa-redo mt-2" style="font-size:var(--text-xl); color:var(--color-danger); opacity:0.35;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste -->
+        {% if evaluations %}
+        <div class="row">
+            {% for eval in evaluations %}
+            <div class="col-12 mb-4">
+                <div class="sidebar_section" style="border-left:4px solid
+                    {% if eval.statut == 'VALIDEE' %}var(--color-success)
+                    {% elif eval.statut == 'SOUMISE' %}var(--color-info)
+                    {% elif eval.statut == 'REVISION' %}var(--color-danger)
+                    {% elif eval.statut == 'ARCHIVEE' %}var(--color-text-light)
+                    {% else %}var(--color-border-light){% endif %};">
+
+                    <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:var(--space-4);">
+                        <div>
+                            <div class="d-flex align-items-center flex-wrap mb-2" style="gap:var(--space-3);">
+                                <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin:0;">
+                                    {{ eval.etudiant.get_full_name }}
+                                </h3>
+                                <span class="tag_badge
+                                    {% if eval.statut == 'VALIDEE' %}tag_badge--success
+                                    {% elif eval.statut == 'SOUMISE' %}tag_badge--info
+                                    {% endif %}">
+                                    {{ eval.get_statut_display }}
+                                </span>
+                            </div>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0;">
+                                <i class="fas fa-envelope mr-1"></i>{{ eval.etudiant.email }}
+                                <span class="mx-2">·</span>
+                                <i class="fas fa-clock mr-1"></i>Modifiée le {{ eval.updated_at|date:"d/m/Y" }}
+                            </p>
+                            {% if eval.note_admin and eval.statut == 'REVISION' %}
+                            <p style="font-size:var(--text-sm); color:var(--color-danger); margin-top:var(--space-2); margin-bottom:0;">
+                                <i class="fas fa-exclamation-circle mr-1"></i>{{ eval.note_admin|truncatewords:15 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <a href="{% url 'dashboard:conseiller-eval-detail' pk=eval.pk %}" class="btn_ghost btn_sm flex-shrink-0">
+                            <i class="fas fa-eye mr-1"></i>Voir
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-2">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state">
+            <i class="fas fa-file-alt empty_state_icon"></i>
+            <h4>Aucune fiche pour l'instant</h4>
+            <p>Créez votre première fiche d'évaluation pour un étudiant que vous accompagnez.</p>
+            <a href="{% url 'dashboard:conseiller-eval-create' %}" class="comment_button btn_sm">
+                <i class="fas fa-plus mr-1"></i>Créer une fiche
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

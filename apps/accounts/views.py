@@ -4,11 +4,12 @@ Vues web pour l'app accounts.
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import FormView, TemplateView, UpdateView
+from django.utils.timezone import now
+from django.views.generic import FormView, TemplateView, UpdateView, ListView
 
 from .forms import (
     LoginForm,
@@ -16,10 +17,38 @@ from .forms import (
     UserProfileForm,
     StudentProfileForm,
     PasswordResetRequestForm,
+    RejectVerificationForm,
 )
+from .mixins import AdminRequiredMixin
+from .models.enums import StatutCompte, UserRole
+from .models.verification import DocumentVerification
 from .services.auth_service import AuthService
 
 User = get_user_model()
+
+# Rôles nécessitant vérification de document
+_ROLES_VERIFICATION = {UserRole.PARENT, UserRole.COUNSELOR, UserRole.SCHOOL_REP}
+
+
+class HomeView(TemplateView):
+    """Page d'accueil avec formations et événements dynamiques."""
+    template_name = "home.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from apps.catalog.models import Formation
+        from apps.events.models import Evenement
+
+        context["formations_populaires"] = (
+            Formation.objects.filter(is_active=True)
+            .select_related("etablissement", "domaine")
+            .order_by("-is_featured", "-score_qualite")[:3]
+        )
+        context["evenements_a_venir"] = (
+            Evenement.objects.filter(statut="PUBLIE", date_debut__gte=now())
+            .order_by("date_debut")[:2]
+        )
+        return context
 
 
 class LoginView(FormView):
@@ -62,7 +91,11 @@ class LogoutView(LoginRequiredMixin, View):
 
 
 class RegisterView(FormView):
-    """Vue d'inscription."""
+    """
+    Vue d'inscription.
+    - Étudiants : compte activé immédiatement.
+    - Autres rôles : compte EN_ATTENTE_VERIFICATION + document enregistré.
+    """
     template_name = "accounts/register.html"
     form_class = RegisterForm
     success_url = reverse_lazy("accounts:login")
@@ -72,19 +105,52 @@ class RegisterView(FormView):
             return redirect("accounts:home")
         return super().dispatch(request, *args, **kwargs)
 
-    def form_valid(self, form):
-        user = form.save()
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.request.method == "POST":
+            kwargs["files"] = self.request.FILES
+        return kwargs
 
-        # Envoyer email de vérification de manière asynchrone
+    def form_valid(self, form):
+        role = form.cleaned_data.get("role")
+        needs_verification = role in _ROLES_VERIFICATION
+
+        # Créer l'utilisateur sans sauvegarder encore
+        user = form.save(commit=False)
+        if needs_verification:
+            user.statut_compte = StatutCompte.EN_ATTENTE_VERIFICATION
+        user.save()
+
+        # Sauvegarder le document de vérification si applicable
+        if needs_verification:
+            document_file = form.cleaned_data.get("document")
+            type_doc = form.cleaned_data.get("type_document", "CNI")
+            if document_file:
+                DocumentVerification.objects.create(
+                    user=user,
+                    document=document_file,
+                    type_document=type_doc,
+                )
+
+        # Envoyer email de vérification
         try:
             AuthService.send_verification_email(user.id)
         except Exception:
-            pass  # Ne pas bloquer l'inscription si l'email échoue
+            pass
 
-        messages.success(
-            self.request,
-            _("Compte créé avec succès ! Vérifiez votre email pour activer votre compte."),
-        )
+        if needs_verification:
+            messages.success(
+                self.request,
+                _(
+                    "Compte créé ! Votre dossier est en cours de vérification par notre équipe. "
+                    "Vous serez notifié(e) par email dès que votre compte sera activé."
+                ),
+            )
+        else:
+            messages.success(
+                self.request,
+                _("Compte créé avec succès ! Vérifiez votre email pour activer votre compte."),
+            )
         return super().form_valid(form)
 
 
@@ -117,7 +183,7 @@ class PasswordResetRequestView(FormView):
         try:
             AuthService.send_password_reset_email(email)
         except Exception:
-            pass  # Ne pas révéler si l'email existe
+            pass
 
         messages.info(
             self.request,
@@ -218,3 +284,80 @@ class StudentProfileEditView(LoginRequiredMixin, FormView):
 
         messages.success(self.request, _("Profil étudiant mis à jour avec succès."))
         return super().form_valid(form)
+
+
+# ─────────────────────────────────────────────────────
+# Vérification de compte
+# ─────────────────────────────────────────────────────
+
+class VerificationPendingView(LoginRequiredMixin, TemplateView):
+    """
+    Page informative pour les comptes EN_ATTENTE_VERIFICATION.
+    Affiche le statut du document soumis.
+    """
+    template_name = "accounts/verification_pending.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["verification"] = getattr(self.request.user, "verification_document", None)
+        return context
+
+
+# ─────────────────────────────────────────────────────
+# Vues d'administration des vérifications
+# ─────────────────────────────────────────────────────
+
+class AdminVerifyListView(AdminRequiredMixin, ListView):
+    """Liste des comptes en attente de vérification (admin uniquement)."""
+    model = DocumentVerification
+    template_name = "accounts/admin_verify_list.html"
+    context_object_name = "verifications"
+    paginate_by = 20
+
+    def get_queryset(self):
+        from .models.verification import StatutVerification
+        statut = self.request.GET.get("statut", "SOUMIS")
+        qs = DocumentVerification.objects.select_related(
+            "user", "traite_par"
+        ).order_by("-date_soumission")
+        if statut in StatutVerification.values:
+            qs = qs.filter(statut=statut)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from .models.verification import StatutVerification
+        context["statut_filtre"] = self.request.GET.get("statut", "SOUMIS")
+        context["statut_choices"] = StatutVerification.choices
+        context["reject_form"] = RejectVerificationForm()
+        return context
+
+
+class AdminVerifyApproveView(AdminRequiredMixin, View):
+    """Approbation d'un document de vérification (POST uniquement)."""
+
+    def post(self, request, pk):
+        verification = get_object_or_404(DocumentVerification, pk=pk)
+        verification.approuver(request.user)
+        messages.success(
+            request,
+            _(f"Le compte de {verification.user.get_full_name()} a été activé."),
+        )
+        return redirect("accounts:admin_verify_list")
+
+
+class AdminVerifyRejectView(AdminRequiredMixin, View):
+    """Rejet d'un document de vérification avec motif (POST uniquement)."""
+
+    def post(self, request, pk):
+        verification = get_object_or_404(DocumentVerification, pk=pk)
+        form = RejectVerificationForm(request.POST)
+        if form.is_valid():
+            verification.rejeter(request.user, motif=form.cleaned_data["motif"])
+            messages.warning(
+                request,
+                _(f"Le compte de {verification.user.get_full_name()} a été rejeté."),
+            )
+        else:
+            messages.error(request, _("Veuillez saisir un motif de rejet valide."))
+        return redirect("accounts:admin_verify_list")

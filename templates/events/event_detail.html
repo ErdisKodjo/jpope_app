@@ -4,11 +4,155 @@
 {% block title %}{{ evenement.titre }} — AvenSU-Orienta{% endblock %}
 
 {% block content %}
-<div class="courses page_section">
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
     <div class="container">
-        <h1>{{ evenement.titre }}</h1>
-        <p>{{ evenement.description }}</p>
-        <p>Date : {{ evenement.date_debut }}</p>
+        <div class="page_header_content">
+            <h1>{{ evenement.titre }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'events:event-list' %}">Événements</a></li>
+                    <li class="breadcrumb-item active">{{ evenement.titre|truncatechars:40 }}</li>
+                </ol>
+            </nav>
+        </div>
     </div>
 </div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Contenu principal -->
+            <div class="col-lg-8">
+
+                <!-- Badge type + statut -->
+                <div class="mb-4" style="display:flex; gap:var(--space-2); flex-wrap:wrap; align-items:center;">
+                    <span class="tag_badge tag_badge--primary">{{ evenement.get_type_display }}</span>
+                    <span class="tag_badge">{{ evenement.get_format_display }}</span>
+                    {% if evenement.statut == 'ANNULE' %}
+                    <span class="tag_badge tag_badge--danger">Annulé</span>
+                    {% elif evenement.statut == 'REPORTE' %}
+                    <span class="tag_badge tag_badge--danger">Reporté</span>
+                    {% endif %}
+                </div>
+
+                <!-- Image principale -->
+                {% if evenement.image_principale %}
+                <div class="mb-4">
+                    <img src="{{ evenement.image_principale.url }}" alt="{{ evenement.titre }}"
+                         class="img-fluid" style="width:100%; border-radius:var(--radius-md); object-fit:cover; max-height:400px;">
+                </div>
+                {% endif %}
+
+                <!-- Description -->
+                <div class="detail_container mb-4">
+                    <h2 class="profile_section_title">
+                        <i class="fas fa-info-circle mr-2" style="color:var(--color-primary);"></i>À propos
+                    </h2>
+                    <div style="font-size:var(--text-base); line-height:var(--leading-relaxed); color:var(--color-text);">
+                        {{ evenement.description|linebreaksbr }}
+                    </div>
+                </div>
+
+                <!-- Programme si disponible (JSONField : liste de sessions) -->
+                {% if evenement.programme %}
+                <div class="detail_container mb-4">
+                    <h2 class="profile_section_title">
+                        <i class="fas fa-list-ul mr-2" style="color:var(--color-primary);"></i>Programme
+                    </h2>
+                    <ul style="padding-left:var(--space-5); color:var(--color-text);">
+                        {% for session in evenement.programme %}
+                        <li style="margin-bottom:var(--space-2);">{{ session }}</li>
+                        {% empty %}
+                        <li class="text-muted">Programme à venir.</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar infos pratiques -->
+            <div class="col-lg-4">
+
+                <!-- Carte infos -->
+                <div class="detail_container mb-4">
+                    <h3 class="profile_section_title">
+                        <i class="fas fa-calendar-alt mr-2" style="color:var(--color-primary);"></i>Infos pratiques
+                    </h3>
+
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        <li style="padding:var(--space-3) 0; border-bottom:var(--border-width) solid var(--color-border-light); display:flex; gap:var(--space-3); align-items:flex-start;">
+                            <i class="fas fa-calendar-day" style="color:var(--color-accent); margin-top:3px; width:16px; flex-shrink:0;"></i>
+                            <div>
+                                <div style="font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted); margin-bottom:2px;">Date</div>
+                                <strong>{{ evenement.date_debut|date:"l d F Y" }}</strong><br>
+                                <span class="text-muted" style="font-size:var(--text-sm);">{{ evenement.date_debut|date:"H:i" }}
+                                {% if evenement.date_fin %} → {{ evenement.date_fin|date:"H:i" }}{% endif %}</span>
+                            </div>
+                        </li>
+
+                        {% if evenement.lieu_nom or evenement.ville %}
+                        <li style="padding:var(--space-3) 0; border-bottom:var(--border-width) solid var(--color-border-light); display:flex; gap:var(--space-3); align-items:flex-start;">
+                            <i class="fas fa-map-marker-alt" style="color:var(--color-accent); margin-top:3px; width:16px; flex-shrink:0;"></i>
+                            <div>
+                                <div style="font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted); margin-bottom:2px;">Lieu</div>
+                                {% if evenement.lieu_nom %}<strong>{{ evenement.lieu_nom }}</strong><br>{% endif %}
+                                {% if evenement.adresse %}<span class="text-muted" style="font-size:var(--text-sm);">{{ evenement.adresse }}</span><br>{% endif %}
+                                {% if evenement.ville %}<span class="text-muted" style="font-size:var(--text-sm);">{{ evenement.ville }}, {{ evenement.pays }}</span>{% endif %}
+                            </div>
+                        </li>
+                        {% endif %}
+
+                        <li style="padding:var(--space-3) 0; display:flex; gap:var(--space-3); align-items:flex-start;">
+                            <i class="fas fa-users" style="color:var(--color-accent); margin-top:3px; width:16px; flex-shrink:0;"></i>
+                            <div>
+                                <div style="font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted); margin-bottom:2px;">Public cible</div>
+                                <strong>{{ evenement.get_cible_display }}</strong>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- CTA Inscription -->
+                {% if request.user.is_authenticated %}
+                    {% if evenement.statut == 'PUBLIE' %}
+                    <form method="post" action="{% url 'events:event-register' evenement.slug %}">
+                        {% csrf_token %}
+                        <button type="submit" class="comment_button w-100">
+                            <i class="fas fa-check-circle mr-2"></i>S'inscrire à cet événement
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="text-center py-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-md); padding:var(--space-4);">
+                        <i class="fas fa-ban text-muted d-block mb-2" style="font-size:1.5rem;"></i>
+                        <span class="text-muted" style="font-size:var(--text-sm);">Les inscriptions ne sont pas disponibles.</span>
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div style="background:var(--color-bg-warm); border-radius:var(--radius-md); padding:var(--space-4); text-align:center;">
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3);">
+                        Connectez-vous pour vous inscrire à cet événement.
+                    </p>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="comment_button btn_sm">
+                        <i class="fas fa-sign-in-alt mr-1"></i>Se connecter
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Retour liste -->
+                <div class="mt-4 text-center">
+                    <a href="{% url 'events:event-list' %}" class="btn_ghost btn_sm">
+                        <i class="fas fa-arrow-left mr-1"></i>Tous les événements
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

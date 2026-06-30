@@ -6,6 +6,7 @@ from .profiles import (
     ParentProfile,
 )
 from .enums import UserRole, SerieBac, Genre, StatutCompte
+from .verification import DocumentVerification, StatutVerification, TypeDocument
 
 __all__ = [
     "User",
@@ -17,4 +18,7 @@ __all__ = [
     "SerieBac",
     "Genre",
     "StatutCompte",
+    "DocumentVerification",
+    "StatutVerification",
+    "TypeDocument",
 ]

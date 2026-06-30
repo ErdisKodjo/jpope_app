@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fiches d'évaluation — Admin AvenSU{% endblock %}
+
+{% block content %}
+<div class="page_section" style="padding-top:var(--space-7);">
+    <div class="container">
+
+        <!-- En-tête -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-5" style="gap:var(--space-4);">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-1);">
+                    <i class="fas fa-file-alt mr-2" style="color:var(--color-primary);"></i>Fiches d'évaluation conseillers
+                </h1>
+                <p class="text-muted mb-0" style="font-size:var(--text-base);">
+                    {% if nb_soumises > 0 %}
+                    <span class="tag_badge" style="background:var(--color-info-bg); border-color:var(--color-info); color:var(--color-info);">
+                        {{ nb_soumises }} en attente de traitement
+                    </span>
+                    {% else %}
+                    Toutes les fiches soumises ont été traitées.
+                    {% endif %}
+                </p>
+            </div>
+            <a href="{% url 'dashboard:home' %}" class="btn_ghost btn_sm">
+                <i class="fas fa-arrow-left mr-1"></i>Tableau de bord
+            </a>
+        </div>
+
+        <!-- Filtres statut -->
+        <div class="mb-4" style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+            <a href="?" class="{% if not statut_filtre %}comment_button btn_sm{% else %}btn_ghost btn_sm{% endif %}">
+                Toutes
+            </a>
+            {% for val, label in statuts %}
+            <a href="?statut={{ val }}"
+               class="{% if statut_filtre == val %}comment_button btn_sm{% else %}btn_ghost btn_sm{% endif %}">
+                {{ label }}
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Liste -->
+        {% if evaluations %}
+        <div class="row">
+            {% for eval in evaluations %}
+            <div class="col-12 mb-4">
+                <div class="sidebar_section" style="border-left:4px solid
+                    {% if eval.statut == 'VALIDEE' %}var(--color-success)
+                    {% elif eval.statut == 'SOUMISE' %}var(--color-info)
+                    {% elif eval.statut == 'REVISION' %}var(--color-danger)
+                    {% elif eval.statut == 'ARCHIVEE' %}var(--color-text-light)
+                    {% else %}var(--color-border-light){% endif %};">
+
+                    <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:var(--space-4);">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center flex-wrap mb-2" style="gap:var(--space-3);">
+                                <strong style="font-size:var(--text-md);">{{ eval.etudiant.get_full_name }}</strong>
+                                <span class="tag_badge
+                                    {% if eval.statut == 'VALIDEE' %}tag_badge--success
+                                    {% elif eval.statut == 'SOUMISE' %}tag_badge--info
+                                    {% endif %}">{{ eval.get_statut_display }}</span>
+                            </div>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                                <i class="fas fa-user-tie mr-1"></i>Conseiller : {{ eval.conseiller.get_full_name }}
+                                <span class="mx-2">·</span>
+                                {% if eval.date_soumission %}
+                                <i class="fas fa-paper-plane mr-1"></i>Soumis le {{ eval.date_soumission|date:"d/m/Y" }}
+                                {% else %}
+                                <i class="fas fa-calendar mr-1"></i>Créé le {{ eval.created_at|date:"d/m/Y" }}
+                                {% endif %}
+                            </p>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0;">
+                                {{ eval.bilan_scolaire|truncatewords:20 }}
+                            </p>
+                        </div>
+
+                        <!-- Actions (seulement si SOUMISE) -->
+                        {% if eval.statut == 'SOUMISE' %}
+                        <div class="d-flex flex-column align-items-end" style="gap:var(--space-2); flex-shrink:0; min-width:160px;">
+                            <!-- Valider -->
+                            <form method="post" action="{% url 'dashboard:admin-eval-review' pk=eval.pk %}"
+                                  onsubmit="return confirm('Valider cette fiche ?')">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="valider">
+                                <input type="hidden" name="note_admin" value="">
+                                <button type="submit" class="comment_button btn_sm w-100">
+                                    <i class="fas fa-check mr-1"></i>Valider
+                                </button>
+                            </form>
+                            <!-- Révision / Archiver via modal -->
+                            <button type="button" class="btn_ghost btn_sm w-100"
+                                    data-toggle="modal" data-target="#reviewModal{{ eval.pk }}">
+                                <i class="fas fa-comment-alt mr-1"></i>Révision / Archiver
+                            </button>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="reviewModal{{ eval.pk }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content" style="border-radius:var(--radius-lg); border:none;">
+                                        <div class="modal-header" style="border-bottom:var(--border-width) solid var(--color-border-light); padding:var(--space-5);">
+                                            <h5 class="modal-title" style="font-weight:var(--weight-bold);">
+                                                <i class="fas fa-comment-alt mr-2" style="color:var(--color-primary);"></i>
+                                                Demander révision / Archiver
+                                            </h5>
+                                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                                        </div>
+                                        <form method="post" action="{% url 'dashboard:admin-eval-review' pk=eval.pk %}">
+                                            {% csrf_token %}
+                                            <div class="modal-body" style="padding:var(--space-5);">
+                                                <div class="form-group mb-3">
+                                                    <label class="form_label">Action</label>
+                                                    <select name="action" class="input_field" required>
+                                                        <option value="revision">Demander une révision</option>
+                                                        <option value="archiver">Archiver</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="form_label" for="note_{{ eval.pk }}">Commentaire (visible par le conseiller)</label>
+                                                    <textarea name="note_admin" id="note_{{ eval.pk }}" class="input_field" rows="3"
+                                                              placeholder="Expliquez votre décision…" style="min-height:90px;"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer" style="border-top:var(--border-width) solid var(--color-border-light); padding:var(--space-4) var(--space-5); gap:var(--space-3);">
+                                                <button type="button" class="btn_ghost btn_sm" data-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="comment_button btn_sm">Confirmer</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="flex-shrink-0">
+                            {% if eval.traite_par %}
+                            <small class="text-muted">
+                                <i class="fas fa-user-check mr-1"></i>{{ eval.traite_par.get_short_name }}
+                                le {{ eval.date_traitement|date:"d/m/Y" }}
+                            </small>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-2">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?statut={{ statut_filtre }}&page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?statut={{ statut_filtre }}&page={{ num }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?statut={{ statut_filtre }}&page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state">
+            <i class="fas fa-file-alt empty_state_icon"></i>
+            <h4>Aucune fiche{% if statut_filtre %} avec ce statut{% endif %}</h4>
+            <p>{% if not statut_filtre %}Les conseillers n'ont pas encore soumis de fiches.{% else %}Essayez un autre filtre.{% endif %}</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

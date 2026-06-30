@@ -3,91 +3,21 @@
 
 {% block title %}Page introuvable (404) — AvenSU-Orienta{% endblock %}
 
-{% block extra_css %}
-<style>
-    .error_section {
-        min-height: 70vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 80px 0;
-        text-align: center;
-        background: #f8f9fa;
-    }
-    .error_number {
-        font-size: 8rem;
-        font-weight: 900;
-        color: #f6a623;
-        line-height: 1;
-        margin-bottom: 20px;
-        text-shadow: 3px 3px 0 rgba(246, 166, 35, 0.2);
-    }
-    .error_title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1a1a2e;
-        margin-bottom: 15px;
-    }
-    .error_text {
-        font-size: 1rem;
-        color: #777;
-        max-width: 500px;
-        margin: 0 auto 35px;
-        line-height: 1.7;
-    }
-    .error_icon {
-        font-size: 5rem;
-        color: #e0e0e0;
-        margin-bottom: 25px;
-    }
-    .btn_home {
-        background: #f6a623;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        padding: 13px 35px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        text-decoration: none;
-        display: inline-block;
-        margin: 5px;
-        transition: background 0.2s;
-    }
-    .btn_home:hover {
-        background: #e59520;
-        color: #fff;
-        text-decoration: none;
-    }
-    .btn_back {
-        background: transparent;
-        color: #555;
-        border: 2px solid #ddd;
-        border-radius: 5px;
-        padding: 11px 35px;
-        font-weight: 600;
-        font-size: 0.95rem;
-        text-decoration: none;
-        display: inline-block;
-        margin: 5px;
-        transition: all 0.2s;
-    }
-    .btn_back:hover {
-        border-color: #f6a623;
-        color: #f6a623;
-        text-decoration: none;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
 
 <!-- En-tête de page -->
-<div class="home" style="height: 180px;">
-    <div class="home_background_container prlx_parent">
-        <div class="home_background prlx" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
-    </div>
-    <div class="home_content">
-        <h1>Page introuvable</h1>
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Page introuvable</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">404</li>
+                </ol>
+            </nav>
+        </div>
     </div>
 </div>
 
@@ -97,36 +27,26 @@
         <div class="row justify-content-center">
             <div class="col-lg-7">
 
-                <div class="error_icon">
+                <div class="error_icon_wrap">
                     <i class="fas fa-search"></i>
                 </div>
 
-                <div class="error_number">404</div>
+                <div class="error_number error_number--accent">404</div>
 
-                <h1 class="error_title">Oups ! Page introuvable</h1>
+                <h2 class="error_title">Oups ! Page introuvable</h2>
 
                 <p class="error_text">
                     La page que vous recherchez n'existe pas ou a été déplacée.
                     Vérifiez l'adresse saisie ou revenez à l'accueil pour continuer votre exploration.
                 </p>
 
-                <div>
-                    <a href="{% url 'home' %}" class="btn_home">
+                <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+                    <a href="{% url 'accounts:home' %}" class="comment_button">
                         <i class="fas fa-home mr-2"></i>Retour à l'accueil
                     </a>
-                    <a href="{% url 'catalog:list' %}" class="btn_back">
+                    <a href="{% url 'catalog:formation-list' %}" class="btn_ghost">
                         <i class="fas fa-search mr-2"></i>Chercher une formation
                     </a>
-                </div>
-
-                <div style="margin-top: 50px; padding-top: 40px; border-top: 1px solid #e8e8e8;">
-                    <p style="color: #999; font-size: 0.9rem; margin-bottom: 15px;">Liens utiles :</p>
-                    <div class="d-flex flex-wrap justify-content-center" style="gap: 15px;">
-                        <a href="{% url 'catalog:list' %}" style="color: #f6a623; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-graduation-cap mr-1"></i>Formations</a>
-                        <a href="{% url 'etablissements:list' %}" style="color: #f6a623; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-university mr-1"></i>Établissements</a>
-                        <a href="{% url 'events:list' %}" style="color: #f6a623; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-calendar-alt mr-1"></i>Événements</a>
-                        <a href="{% url 'contact' %}" style="color: #f6a623; text-decoration: none; font-size: 0.9rem;"><i class="fas fa-envelope mr-1"></i>Contact</a>
-                    </div>
                 </div>
 
             </div>

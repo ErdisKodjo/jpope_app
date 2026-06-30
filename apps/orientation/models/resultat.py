@@ -41,10 +41,10 @@ class ResultatTest(models.Model):
 
     # Profil RIASEC
     code_holland = models.CharField(
-        _("code Holland (3 lettres)"),
-        max_length=3,
+        _("code profil (Holland ou multi-domaine)"),
+        max_length=15,
         blank=True,
-        help_text=_("Ex: 'IRE' pour Investigateur-Réaliste-Entreprenant"),
+        help_text=_("Ex: 'IRE' (RIASEC) ou 'N-ENV-I' (multi-domaine)"),
     )
     profil_dominant = models.CharField(
         _("dimension dominante"),

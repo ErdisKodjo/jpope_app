@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Résultats — {{ resultat.reponse_utilisateur.test.nom }} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Mes résultats</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'orientation:resultats' %}">Résultats</a></li>
+                    <li class="breadcrumb-item active">Détail</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Contenu principal -->
+            <div class="col-lg-8">
+
+                <!-- Carte résumé -->
+                <div class="detail_container mb-5">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap mb-4" style="gap:var(--space-3);">
+                        <div>
+                            <h2 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-2);">{{ resultat.reponse_utilisateur.test.nom }}</h2>
+                            <p style="color:var(--color-text-muted); font-size:var(--text-sm); margin:0;">
+                                <i class="fas fa-calendar-alt mr-1"></i>{{ resultat.date_calcul|date:"d/m/Y à H:i" }}
+                            </p>
+                        </div>
+                        <div class="text-center">
+                            <div class="hexmark hexmark--2xl hexmark--{{ resultat.profil_dominant|upper }}" style="margin-bottom:var(--space-2);">
+                                {{ resultat.profil_dominant|upper }}
+                            </div>
+                            <small style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); font-weight:var(--weight-bold);">Profil dominant</small>
+                        </div>
+                    </div>
+
+                    {% if resultat.interpretation %}
+                    <p class="detail_description">{{ resultat.interpretation }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Scores par dimension -->
+                {% if resultat.scores_par_dimension %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title">Scores par dimension</h2>
+                    {% for dim, score in resultat.scores_par_dimension.items %}
+                    <div class="score_bar_wrap">
+                        <div class="score_bar_label">
+                            <span>{{ dim }}</span>
+                            <span>{{ score }}</span>
+                        </div>
+                        <div class="score_bar_track">
+                            <div class="score_bar_fill" style="width:{{ score }}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Forces -->
+                {% if resultat.forces %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title"><i class="fas fa-star mr-2" style="color:var(--color-primary);"></i>Vos points forts</h2>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        {% for force in resultat.forces %}
+                        <li style="display:flex; align-items:flex-start; gap:var(--space-3); padding:var(--space-3) 0; border-bottom:var(--border-width) solid var(--color-border-light);">
+                            <i class="fas fa-check-circle" style="color:var(--color-success); flex-shrink:0; margin-top:2px;"></i>
+                            <span style="font-size:var(--text-sm); color:var(--color-text);">{{ force }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Axes d'amélioration -->
+                {% if resultat.axes_amelioration %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title"><i class="fas fa-road mr-2" style="color:var(--color-info);"></i>Axes de développement</h2>
+                    <ul style="list-style:none; padding:0; margin:0;">
+                        {% for axe in resultat.axes_amelioration %}
+                        <li style="display:flex; align-items:flex-start; gap:var(--space-3); padding:var(--space-3) 0; border-bottom:var(--border-width) solid var(--color-border-light);">
+                            <i class="fas fa-arrow-right" style="color:var(--color-info); flex-shrink:0; margin-top:2px;"></i>
+                            <span style="font-size:var(--text-sm); color:var(--color-text);">{{ axe }}</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Recommandations -->
+                {% if recommandations %}
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title"><i class="fas fa-lightbulb mr-2" style="color:var(--color-warning);"></i>Recommandations personnalisées</h2>
+
+                    {% for reco in recommandations %}
+                    <div class="recommandation_card recommandation_card--{{ reco.plan|lower }}">
+                        <div class="recommandation_compat">
+                            {{ reco.taux_compatibilite|floatformat:0 }}%
+                            <small>Compat.</small>
+                        </div>
+                        <div class="flex-grow-1">
+                            <div style="display:flex; align-items:center; gap:var(--space-2); margin-bottom:var(--space-2);">
+                                <span class="tag_badge tag_badge--{% if reco.plan == 'PRINCIPAL' %}primary{% elif reco.plan == 'ALTERNATIF' %}info{% else %}success{% endif %}">
+                                    {{ reco.get_plan_display }}
+                                </span>
+                                <span class="tag_badge">
+                                    {% if reco.type_entite == 'FORMATION' %}<i class="fas fa-graduation-cap mr-1"></i>Formation
+                                    {% elif reco.type_entite == 'METIER' %}<i class="fas fa-briefcase mr-1"></i>Métier
+                                    {% else %}<i class="fas fa-university mr-1"></i>Établissement
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">{{ reco.entite_nom }}</h3>
+                            {% if reco.justification %}
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0;">{{ reco.justification|truncatewords:25 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">Actions</h3>
+                    <a href="{% url 'orientation:recommandations' %}" class="comment_button w-100 mb-3">
+                        <i class="fas fa-lightbulb mr-2"></i>Toutes mes recommandations
+                    </a>
+                    <a href="{% url 'orientation:test-list' %}" class="btn_ghost w-100">
+                        <i class="fas fa-redo mr-2"></i>Passer un autre test
+                    </a>
+                </div>
+
+                {% if resultat.top_3_dimensions %}
+                <div class="sidebar_section">
+                    <h3 class="sidebar_section_title">Top 3 profils</h3>
+                    {% for dim, score in resultat.top_3_dimensions %}
+                    <div class="score_bar_wrap">
+                        <div class="score_bar_label">
+                            <span style="font-weight:var(--weight-bold);">{{ dim }}</span>
+                            <span style="color:var(--color-primary); font-weight:var(--weight-bold);">{{ score }}</span>
+                        </div>
+                        <div class="score_bar_track">
+                            <div class="score_bar_fill" style="width:{{ score }}%;"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

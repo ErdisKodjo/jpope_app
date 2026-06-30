@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nouvelle fiche d'évaluation — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section" style="padding-top:var(--space-7);">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- En-tête -->
+                <div class="d-flex align-items-center mb-5" style="gap:var(--space-4);">
+                    <a href="{% url 'dashboard:conseiller-eval-list' %}" class="btn_ghost btn_sm">
+                        <i class="fas fa-arrow-left mr-1"></i>Retour
+                    </a>
+                    <div>
+                        <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                            Nouvelle fiche d'évaluation
+                        </h1>
+                        <p class="text-muted mb-0" style="font-size:var(--text-sm);">
+                            La fiche sera enregistrée en brouillon. Vous pourrez la soumettre à l'admin quand elle sera prête.
+                        </p>
+                    </div>
+                </div>
+
+                {% if form.errors %}
+                <div class="alert alert-warning mb-4" style="font-size:var(--text-sm);">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Corrigez les erreurs ci-dessous.
+                </div>
+                {% endif %}
+
+                <form method="post" action="{% url 'dashboard:conseiller-eval-create' %}" novalidate>
+                    {% csrf_token %}
+
+                    <div class="detail_container mb-4">
+                        <h2 class="profile_section_title">
+                            <i class="fas fa-user-graduate mr-2" style="color:var(--color-primary);"></i>Étudiant concerné
+                        </h2>
+                        <div class="form-group">
+                            <label class="form_label" for="id_etudiant_email">{{ form.etudiant_email.label }} *</label>
+                            {{ form.etudiant_email }}
+                            <small class="text-muted">{{ form.etudiant_email.help_text }}</small>
+                            {% if form.etudiant_email.errors %}
+                            <div class="form_error">{{ form.etudiant_email.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="detail_container mb-4">
+                        <h2 class="profile_section_title">
+                            <i class="fas fa-graduation-cap mr-2" style="color:var(--color-primary);"></i>Bilan scolaire
+                        </h2>
+                        <div class="form-group">
+                            <label class="form_label" for="id_bilan_scolaire">{{ form.bilan_scolaire.label }} *</label>
+                            {{ form.bilan_scolaire }}
+                            {% if form.bilan_scolaire.errors %}
+                            <div class="form_error">{{ form.bilan_scolaire.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="detail_container mb-4">
+                        <h2 class="profile_section_title">
+                            <i class="fas fa-star mr-2" style="color:var(--color-primary);"></i>Analyse
+                        </h2>
+                        <div class="form-group">
+                            <label class="form_label" for="id_points_forts_texte">{{ form.points_forts_texte.label }}</label>
+                            {{ form.points_forts_texte }}
+                            <small class="text-muted">{{ form.points_forts_texte.help_text }}</small>
+                        </div>
+                        <div class="form-group">
+                            <label class="form_label" for="id_points_attention_texte">{{ form.points_attention_texte.label }}</label>
+                            {{ form.points_attention_texte }}
+                            <small class="text-muted">{{ form.points_attention_texte.help_text }}</small>
+                        </div>
+                    </div>
+
+                    <div class="detail_container mb-5">
+                        <h2 class="profile_section_title">
+                            <i class="fas fa-compass mr-2" style="color:var(--color-primary);"></i>Recommandations
+                        </h2>
+                        <div class="form-group">
+                            <label class="form_label" for="id_formations_suggerees_texte">{{ form.formations_suggerees_texte.label }}</label>
+                            {{ form.formations_suggerees_texte }}
+                            <small class="text-muted">{{ form.formations_suggerees_texte.help_text }}</small>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'dashboard:conseiller-eval-list' %}" class="btn_ghost btn_sm">Annuler</a>
+                        <button type="submit" class="comment_button btn_sm">
+                            <i class="fas fa-save mr-1"></i>Enregistrer en brouillon
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

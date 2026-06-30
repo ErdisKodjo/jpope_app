@@ -203,22 +203,26 @@ class ScoringService:
         scores: Dict[str, float],
     ) -> Tuple[str, str, str]:
         """
-        Détermine le code Holland (3 lettres) à partir des scores.
+        Détermine le code profil à partir des scores.
+
+        Pour les tests RIASEC purs (toutes dims = 1 char) : "RIA"
+        Pour les tests multi-domaines (ex: N, ENV) : "N-ENV-I"
 
         Returns:
-            (code_holland, profil_dominant, profil_secondaire)
+            (code_profil, dim_dominante, dim_secondaire)
         """
         if not scores:
             return "", "", ""
 
-        # Trier par score décroissant
         sorted_dims = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-
-        # Prendre les 3 premières lettres
         top3 = [dim for dim, _ in sorted_dims[:3]]
-        code = "".join(top3)
 
-        return code, top3[0] if len(top3) > 0 else "", top3[1] if len(top3) > 1 else ""
+        if all(len(d) == 1 for d in top3):
+            code = "".join(top3)   # RIASEC classique : "RIA"
+        else:
+            code = "-".join(top3)  # multi-domaine : "N-ENV-I"
+
+        return code, top3[0] if top3 else "", top3[1] if len(top3) > 1 else ""
 
     @classmethod
     def _generer_interpretation(

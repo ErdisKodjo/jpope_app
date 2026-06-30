@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profil étudiant — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="detail_container">
+
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                            <i class="fas fa-graduation-cap mr-2" style="color:var(--color-primary);"></i>Profil étudiant
+                        </h1>
+                        <a href="{% url 'accounts:profile' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                    </div>
+
+                    <p style="font-size:var(--text-base); color:var(--color-text-muted); margin-bottom:var(--space-6);">
+                        Ces informations nous permettent de vous recommander les formations les plus adaptées à votre profil.
+                    </p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <h3 class="profile_section_title">Scolarité</h3>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label" for="{{ form.serie_bac.id_for_label }}">Série du BAC</label>
+                                {{ form.serie_bac }}
+                                {% if form.serie_bac.errors %}<div class="form_error">{{ form.serie_bac.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label" for="{{ form.annee_bac.id_for_label }}">Année du BAC</label>
+                                {{ form.annee_bac }}
+                                {% if form.annee_bac.errors %}<div class="form_error">{{ form.annee_bac.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form_label" for="{{ form.moyenne_generale.id_for_label }}">Moyenne générale (sur 20)</label>
+                            {{ form.moyenne_generale }}
+                            {% if form.moyenne_generale.errors %}<div class="form_error">{{ form.moyenne_generale.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form_label" for="{{ form.etablissement_scolaire.id_for_label }}">École / Lycée actuel(le)</label>
+                            {{ form.etablissement_scolaire }}
+                            {% if form.etablissement_scolaire.errors %}<div class="form_error">{{ form.etablissement_scolaire.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <h3 class="profile_section_title mt-5">Projet professionnel</h3>
+
+                        <div class="mb-4">
+                            <label class="form_label" for="{{ form.projet_professionnel.id_for_label }}">Décrivez votre projet professionnel</label>
+                            {{ form.projet_professionnel }}
+                            {% if form.projet_professionnel.errors %}<div class="form_error">{{ form.projet_professionnel.errors.0 }}</div>{% endif %}
+                            <small class="text-muted">Quelques phrases sur vos ambitions, le domaine qui vous attire, ou ce que vous souhaitez faire après vos études.</small>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                        <div class="form_error mb-4" style="padding:var(--space-3); background:var(--color-danger-bg); border-radius:var(--radius-sm); border-left:3px solid var(--color-danger);">
+                            {{ form.non_field_errors.0 }}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex align-items-center" style="gap:var(--space-3); margin-top:var(--space-6);">
+                            <button type="submit" class="comment_button">
+                                <i class="fas fa-save mr-2"></i>Enregistrer
+                            </button>
+                            <a href="{% url 'accounts:profile' %}" class="btn_ghost">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

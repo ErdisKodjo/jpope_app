@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mon profil — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Sidebar profil -->
+            <div class="col-lg-3 mb-4 mb-lg-0">
+                <div class="sidebar_section text-center mb-4">
+                    <div class="profile_avatar_wrap mx-auto mb-3">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}">
+                        {% else %}
+                        <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <h2 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-1);">{{ user.get_full_name }}</h2>
+                    <span class="status_badge">{{ user.get_role_display }}</span>
+                    <p class="text-muted mt-2 mb-0" style="font-size:var(--text-sm);">{{ user.email }}</p>
+
+                    {% if user.profile_complete %}
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1"><small style="font-weight:var(--weight-bold); font-size:var(--text-sm);">Profil</small><small style="color:var(--color-success); font-weight:var(--weight-bold);">Complet ✓</small></div>
+                        <div class="progress_bar_container"><div class="progress_bar_fill" style="width:100%; background:var(--color-success);"></div></div>
+                    </div>
+                    {% else %}
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1"><small style="font-weight:var(--weight-bold); font-size:var(--text-sm);">Profil complété</small><small style="color:var(--color-accent); font-weight:var(--weight-bold);">40%</small></div>
+                        <div class="progress_bar_container"><div class="progress_bar_fill" style="width:40%;"></div></div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Navigation -->
+                <div>
+                    <a href="{% url 'accounts:profile_edit' %}" class="admin_sidebar_item" style="border-left-color:var(--color-primary);">
+                        <i class="fas fa-user-edit"></i>Modifier le profil
+                    </a>
+                    {% if user.is_student %}
+                    <a href="{% url 'accounts:student_profile_edit' %}" class="admin_sidebar_item">
+                        <i class="fas fa-graduation-cap"></i>Profil étudiant
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'orientation:resultats' %}" class="admin_sidebar_item">
+                        <i class="fas fa-chart-bar"></i>Mes résultats
+                    </a>
+                    <a href="{% url 'orientation:recommandations' %}" class="admin_sidebar_item">
+                        <i class="fas fa-lightbulb"></i>Mes recommandations
+                    </a>
+                    <a href="#" class="admin_sidebar_item"
+                       style="border-left-color:var(--color-danger);"
+                       onclick="document.getElementById('logout-form').submit(); return false;">
+                        <i class="fas fa-sign-out-alt" style="color:var(--color-danger);"></i>
+                        <span style="color:var(--color-danger);">Déconnexion</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Contenu profil -->
+            <div class="col-lg-9">
+
+                <!-- Infos personnelles -->
+                <div class="detail_container mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h2 class="profile_section_title" style="margin-bottom:0; border:none; padding:0;">Informations personnelles</h2>
+                        <a href="{% url 'accounts:profile_edit' %}" class="comment_button btn_sm"><i class="fas fa-edit mr-1"></i>Modifier</a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Prénom</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ user.first_name|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Nom</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ user.last_name|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Email</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ user.email }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Téléphone</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ user.phone|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Rôle</label>
+                            <span class="tag_badge tag_badge--primary">{{ user.get_role_display }}</span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Membre depuis</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ user.date_joined|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profil étudiant (si applicable) -->
+                {% if user.is_student %}
+                {% with sp=user.student_profile %}
+                {% if sp %}
+                <div class="detail_container mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h2 class="profile_section_title" style="margin-bottom:0; border:none; padding:0;">Profil étudiant</h2>
+                        <a href="{% url 'accounts:student_profile_edit' %}" class="comment_button btn_sm"><i class="fas fa-edit mr-1"></i>Modifier</a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Série du BAC</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ sp.serie_bac|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Année du BAC</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ sp.annee_bac|default:"—" }}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Moyenne générale</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{% if sp.moyenne_generale %}{{ sp.moyenne_generale }}/20{% else %}—{% endif %}</p>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">École actuelle</label>
+                            <p style="font-size:var(--text-base); color:var(--color-dark); font-weight:var(--weight-semibold); margin:0;">{{ sp.etablissement_scolaire|default:"—" }}</p>
+                        </div>
+                        {% if sp.projet_professionnel %}
+                        <div class="col-12">
+                            <label style="font-size:var(--text-xs); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold); color:var(--color-text-muted); display:block; margin-bottom:var(--space-1);">Projet professionnel</label>
+                            <p style="font-size:var(--text-base); color:var(--color-text); margin:0; line-height:var(--leading-relaxed);">{{ sp.projet_professionnel }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="detail_container mb-4">
+                    <div class="empty_state" style="padding:var(--space-8) var(--space-4);">
+                        <i class="fas fa-graduation-cap empty_state_icon" style="font-size:36px;"></i>
+                        <h4>Profil étudiant incomplet</h4>
+                        <p>Renseignez votre profil pour recevoir des recommandations personnalisées.</p>
+                        <a href="{% url 'accounts:student_profile_edit' %}" class="comment_button"><i class="fas fa-edit mr-2"></i>Compléter mon profil étudiant</a>
+                    </div>
+                </div>
+                {% endif %}
+                {% endwith %}
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

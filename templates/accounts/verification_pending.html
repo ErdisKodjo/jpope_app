@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Compte en attente de vérification — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+
+                <!-- Statut principal -->
+                <div class="detail_container text-center mb-5">
+                    <div style="width:90px; height:90px; background:var(--color-bg-warm); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; margin:0 auto var(--space-5);">
+                        <i class="fas fa-clock" style="font-size:40px; color:var(--color-accent);"></i>
+                    </div>
+                    <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-3);">
+                        Votre compte est en cours de vérification
+                    </h1>
+                    <p style="font-size:var(--text-md); color:var(--color-text-muted); max-width:500px; margin:0 auto var(--space-6); line-height:var(--leading-relaxed);">
+                        Notre équipe examine votre document justificatif. Vous recevrez une notification par email dès que votre compte sera activé.
+                    </p>
+
+                    {% if verification %}
+                    <div style="background:var(--color-bg-subtle); border-radius:var(--radius-lg); padding:var(--space-6); text-align:left; margin-bottom:var(--space-6);">
+                        <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">Statut de votre dossier</h3>
+
+                        <div class="detail_meta_item">
+                            <div class="detail_meta_icon"><i class="fas fa-file-alt"></i></div>
+                            <div>
+                                <span class="detail_meta_label">Document soumis</span>
+                                <span class="detail_meta_value">{{ verification.get_type_document_display }}</span>
+                            </div>
+                        </div>
+                        <div class="detail_meta_item">
+                            <div class="detail_meta_icon"><i class="fas fa-calendar-alt"></i></div>
+                            <div>
+                                <span class="detail_meta_label">Soumis le</span>
+                                <span class="detail_meta_value">{{ verification.date_soumission|date:"d/m/Y à H:i" }}</span>
+                            </div>
+                        </div>
+                        <div class="detail_meta_item">
+                            <div class="detail_meta_icon"><i class="fas fa-info-circle"></i></div>
+                            <div>
+                                <span class="detail_meta_label">Statut</span>
+                                <span class="detail_meta_value">
+                                    {% if verification.statut == 'SOUMIS' %}
+                                    <span class="tag_badge" style="background:var(--color-bg-warm); border-color:var(--color-accent); color:var(--color-accent-text);">
+                                        <i class="fas fa-clock mr-1"></i>En attente de traitement
+                                    </span>
+                                    {% elif verification.statut == 'APPROUVE' %}
+                                    <span class="tag_badge tag_badge--success">
+                                        <i class="fas fa-check-circle mr-1"></i>Approuvé
+                                    </span>
+                                    {% else %}
+                                    <span class="tag_badge" style="background:var(--color-danger-bg); border-color:var(--color-danger); color:var(--color-danger);">
+                                        <i class="fas fa-times-circle mr-1"></i>Rejeté
+                                    </span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if verification.statut == 'REJETE' and verification.note_admin %}
+                        <div class="mt-4 p-3" style="background:var(--color-danger-bg); border-radius:var(--radius-sm); border-left:3px solid var(--color-danger);">
+                            <p style="font-size:var(--text-sm); font-weight:var(--weight-bold); color:var(--color-danger); margin-bottom:var(--space-2);">
+                                <i class="fas fa-exclamation-circle mr-1"></i>Motif du rejet
+                            </p>
+                            <p style="font-size:var(--text-sm); color:var(--color-text); margin:0;">{{ verification.note_admin }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Actions disponibles en attendant -->
+                    <div class="row justify-content-center text-left">
+                        <div class="col-md-10">
+                            <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-4); text-align:center;">
+                                En attendant, vous pouvez...
+                            </h3>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <a href="{% url 'catalog:etablissement-list' %}" class="quick_access_card">
+                                        <i class="fas fa-university" style="color:var(--color-primary);"></i>
+                                        <span>Parcourir les établissements</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{% url 'catalog:formation-list' %}" class="quick_access_card">
+                                        <i class="fas fa-graduation-cap" style="color:var(--color-success);"></i>
+                                        <span>Explorer les formations</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{% url 'events:event-list' %}" class="quick_access_card">
+                                        <i class="fas fa-calendar-alt" style="color:var(--color-info);"></i>
+                                        <span>Voir les événements</span>
+                                    </a>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <a href="{% url 'accounts:profile' %}" class="quick_access_card">
+                                        <i class="fas fa-user-cog" style="color:var(--color-text-muted);"></i>
+                                        <span>Compléter mon profil</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                            Une question ? Contactez-nous à
+                            <a href="mailto:support@avensu.tg" style="color:var(--color-primary);">support@avensu.tg</a>
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

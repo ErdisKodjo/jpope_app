@@ -74,10 +74,10 @@ class ReponseUtilisateur(models.Model):
         blank=True,
     )
     code_holland = models.CharField(
-        _("code Holland (3 lettres)"),
-        max_length=3,
+        _("code profil (Holland ou multi-domaine)"),
+        max_length=15,
         blank=True,
-        help_text=_("Ex: 'RIA', 'SEC'"),
+        help_text=_("Ex: 'RIA', 'SEC' ou 'N-ENV-I'"),
     )
     scores_par_dimension = models.JSONField(
         _("scores par dimension"),

@@ -4,55 +4,114 @@
 {% block title %}Communauté — AvenSU-Orienta{% endblock %}
 
 {% block content %}
-<!-- Page Hero -->
-<div class="page_title_container">
-    <div class="page_title_background" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
-    <div class="page_title_overlay"></div>
-    <div class="page_title_content d-flex flex-column align-items-center justify-content-center">
-        <h1 class="page_title">Communauté</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Communauté</li>
-            </ol>
-        </nav>
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Communauté</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Communauté</li>
+                </ol>
+            </nav>
+        </div>
     </div>
 </div>
 
-<div class="courses page_section">
+<div class="page_section">
     <div class="container">
         <div class="row">
-            <div class="col">
-                <div class="section_title text-center">
-                    <h1>Forums de discussion</h1>
-                    <p>Échangez avec d'autres étudiants, conseillers et représentants d'établissements</p>
-                </div>
-            </div>
-        </div>
 
-        <div class="row mt-4">
-            {% for forum in forums %}
-            <div class="col-lg-6 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <a href="{% url 'community:forum-detail' forum.pk %}">{{ forum.nom }}</a>
-                        </h5>
-                        <p class="card-text text-muted">{{ forum.description|truncatewords:20 }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">{{ forum.thread_set.count }} discussions</small>
-                            <a href="{% url 'community:forum-detail' forum.pk %}" class="btn btn-sm btn-outline-primary">Voir les discussions</a>
+            <!-- Liste des forums -->
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">Forums de discussion</h2>
+                    {% if request.user.is_authenticated %}
+                    <a href="#" class="comment_button btn_sm">
+                        <i class="fas fa-plus mr-2"></i>Nouveau sujet
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% for forum in forums %}
+                <div class="sidebar_section mb-3" style="border-left:4px solid var(--color-primary);">
+                    <div class="d-flex align-items-start">
+                        <div style="width:50px; height:50px; background:var(--color-primary-light); border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-right:var(--space-4);">
+                            <i class="fas fa-comments" style="font-size:var(--text-xl); color:var(--color-primary);"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">
+                                <a href="{% url 'community:forum-detail' forum.pk %}" style="color:var(--color-dark);">{{ forum.nom }}</a>
+                            </h3>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3);">
+                                {{ forum.description|truncatewords:25 }}
+                            </p>
+                            <div class="d-flex align-items-center" style="gap:var(--space-4);">
+                                <small class="text-muted">
+                                    <i class="fas fa-folder mr-1"></i>
+                                    {% with count=forum.thread_set.count %}{{ count }} discussion{{ count|pluralize }}{% endwith %}
+                                </small>
+                                <a href="{% url 'community:forum-detail' forum.pk %}" class="comment_button btn_sm">
+                                    Voir les discussions
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% empty %}
+                <div class="empty_state">
+                    <i class="fas fa-comments empty_state_icon"></i>
+                    <h4>Aucun forum disponible pour le moment</h4>
+                    <p>La communauté sera bientôt disponible.</p>
+                    {% if not request.user.is_authenticated %}
+                    <a href="{% url 'accounts:register' %}" class="comment_button">
+                        <i class="fas fa-user-plus mr-2"></i>Créer un compte pour participer
+                    </a>
+                    {% endif %}
+                </div>
+                {% endfor %}
             </div>
-            {% empty %}
-            <div class="col text-center py-5">
-                <i class="fas fa-comments fa-3x text-muted mb-3"></i>
-                <h4 class="text-muted">Aucun forum disponible pour le moment</h4>
-                <p>La communauté sera bientôt disponible.</p>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <!-- Recherche -->
+                <div class="sidebar_box mb-4">
+                    <h3 class="sidebar_section_title">Rechercher</h3>
+                    <form method="get">
+                        <input type="text" name="q" class="input_field mb-3" placeholder="Chercher un sujet..." value="{{ request.GET.q }}">
+                        <button type="submit" class="comment_button w-100 btn_sm">
+                            <i class="fas fa-search mr-2"></i>Rechercher
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Règles de la communauté -->
+                <div class="sidebar_box mb-4">
+                    <h3 class="sidebar_section_title">Règles de la communauté</h3>
+                    <div class="community_rule"><i class="fas fa-check-circle"></i>Soyez respectueux envers tous les membres</div>
+                    <div class="community_rule"><i class="fas fa-check-circle"></i>Partagez des informations vérifiées</div>
+                    <div class="community_rule"><i class="fas fa-check-circle"></i>Posez des questions claires et précises</div>
+                    <div class="community_rule"><i class="fas fa-check-circle"></i>Aidez les nouveaux membres</div>
+                    <div class="community_rule"><i class="fas fa-check-circle"></i>Pas de publicité ni de spam</div>
+                </div>
+
+                <!-- Rejoindre (non connecté) -->
+                {% if not request.user.is_authenticated %}
+                <div style="background:var(--color-accent); padding:var(--space-6); border-radius:var(--radius-lg); text-align:center;">
+                    <i class="fas fa-users fa-2x mb-3 d-block" style="color:var(--color-accent-text);"></i>
+                    <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); color:var(--color-accent-text); margin-bottom:var(--space-2);">Rejoignez-nous !</h3>
+                    <p style="font-size:var(--text-sm); color:rgba(0,0,0,0.6); margin-bottom:var(--space-5);">Créez un compte pour participer aux discussions.</p>
+                    <a href="{% url 'accounts:register' %}" class="btn_secondary w-100">
+                        S'inscrire gratuitement
+                    </a>
+                </div>
+                {% endif %}
+
             </div>
-            {% endfor %}
         </div>
     </div>
 </div>

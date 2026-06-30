@@ -4,57 +4,120 @@
 {% block title %}Orientation — AvenSU-Orienta{% endblock %}
 
 {% block content %}
-<div class="home">
-    <div class="home_background_container prlx_parent">
-        <div class="home_background prlx" style="background-image:url({% static 'images/search_background.jpg' %})"></div>
-    </div>
-    <div class="home_content">
-        <h1>Tests d'Orientation</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb justify-content-center">
-                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
-                <li class="breadcrumb-item active">Orientation</li>
-            </ol>
-        </nav>
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Tests d'Orientation</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Orientation</li>
+                </ol>
+            </nav>
+        </div>
     </div>
 </div>
 
 <div class="page_section">
     <div class="container">
-        <div class="row">
-            <div class="col text-center">
-                <div class="section_title">
-                    <h1>Découvrez votre voie</h1>
-                    <p>Passez nos tests d'orientation pour recevoir des recommandations personnalisées</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <!-- Intro -->
+                <div class="text-center mb-5">
+                    <h2 style="font-size:var(--text-3xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-3);">Découvrez votre profil d'orientation</h2>
+                    <p style="font-size:var(--text-md); color:var(--color-text-muted); line-height:var(--leading-relaxed);">
+                        Notre test analyse vos intérêts, aptitudes et personnalité pour vous aider à choisir la formation et le métier qui vous correspondent le mieux.
+                    </p>
                 </div>
+
+                <!-- Comment ça marche -->
+                <div class="detail_container mb-5">
+                    <h2 class="detail_section_title mb-4">Comment ça marche ?</h2>
+
+                    <div class="info_step">
+                        <div class="step_num">1</div>
+                        <div>
+                            <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-1);">Répondez aux questions</h3>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0;">Répondez à une série de questions sur vos centres d'intérêt et vos activités préférées. Soyez honnête, il n'y a pas de bonne ou mauvaise réponse.</p>
+                        </div>
+                    </div>
+
+                    <div class="info_step">
+                        <div class="step_num">2</div>
+                        <div>
+                            <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-1);">Obtenez votre profil RIASEC</h3>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0;">Découvrez votre type de personnalité parmi les 6 profils RIASEC : Réaliste, Investigateur, Artiste, Social, Entrepreneur, Conventionnel.</p>
+                        </div>
+                    </div>
+
+                    <div class="info_step">
+                        <div class="step_num">3</div>
+                        <div>
+                            <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-1);">Recevez vos recommandations</h3>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0;">Sur la base de votre profil, nous vous suggérons les formations et métiers qui correspondent le mieux à votre personnalité.</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        {% if request.user.is_authenticated %}
+                        <a href="{% url 'orientation:test-list' %}" class="comment_button btn_lg">
+                            <i class="fas fa-play-circle mr-2"></i>Commencer le test RIASEC
+                        </a>
+                        {% else %}
+                        <p style="font-size:var(--text-base); color:var(--color-text-muted); margin-bottom:var(--space-5);">Créez un compte gratuit pour accéder au test d'orientation.</p>
+                        <div style="display:flex; gap:var(--space-3); justify-content:center; flex-wrap:wrap;">
+                            <a href="{% url 'accounts:register' %}" class="comment_button">
+                                <i class="fas fa-user-plus mr-2"></i>Créer un compte
+                            </a>
+                            <a href="{% url 'accounts:login' %}" class="btn_ghost">
+                                Se connecter
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profils RIASEC -->
+                <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); text-align:center; margin-bottom:var(--space-6);">Les 6 profils RIASEC</h2>
+                <div class="riasec_grid mb-5">
+                    <div class="riasec_card riasec_card--R">
+                        <div class="lettre">R</div>
+                        <div class="nom">Réaliste</div>
+                        <div class="exemple">Ingénierie, Artisanat</div>
+                    </div>
+                    <div class="riasec_card riasec_card--I">
+                        <div class="lettre">I</div>
+                        <div class="nom">Investigateur</div>
+                        <div class="exemple">Recherche, Sciences</div>
+                    </div>
+                    <div class="riasec_card riasec_card--A">
+                        <div class="lettre">A</div>
+                        <div class="nom">Artiste</div>
+                        <div class="exemple">Arts, Communication</div>
+                    </div>
+                    <div class="riasec_card riasec_card--S">
+                        <div class="lettre">S</div>
+                        <div class="nom">Social</div>
+                        <div class="exemple">Éducation, Santé</div>
+                    </div>
+                    <div class="riasec_card riasec_card--E">
+                        <div class="lettre">E</div>
+                        <div class="nom">Entrepreneur</div>
+                        <div class="exemple">Commerce, Management</div>
+                    </div>
+                    <div class="riasec_card riasec_card--C">
+                        <div class="lettre">C</div>
+                        <div class="nom">Conventionnel</div>
+                        <div class="exemple">Comptabilité, Admin</div>
+                    </div>
+                </div>
+
             </div>
         </div>
-        <div class="row mt-4">
-            <div class="col-md-4 text-center mb-4">
-                <i class="fas fa-brain fa-3x text-primary mb-3"></i>
-                <h4>Test de personnalité</h4>
-                <p>Découvrez vos aptitudes et centres d'intérêt</p>
-            </div>
-            <div class="col-md-4 text-center mb-4">
-                <i class="fas fa-chart-bar fa-3x text-success mb-3"></i>
-                <h4>Analyse de profil</h4>
-                <p>Analysez vos résultats scolaires pour trouver les formations adaptées</p>
-            </div>
-            <div class="col-md-4 text-center mb-4">
-                <i class="fas fa-star fa-3x text-warning mb-3"></i>
-                <h4>Recommandations</h4>
-                <p>Recevez une liste de formations et établissements correspondant à votre profil</p>
-            </div>
-        </div>
-        {% if not request.user.is_authenticated %}
-        <div class="row mt-3">
-            <div class="col text-center">
-                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-user-plus mr-2"></i>S'inscrire pour commencer
-                </a>
-            </div>
-        </div>
-        {% endif %}
     </div>
 </div>
 {% endblock %}

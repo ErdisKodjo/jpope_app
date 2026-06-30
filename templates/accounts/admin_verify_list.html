@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Vérifications en attente — Admin AvenSU{% endblock %}
+
+{% block content %}
+<div class="page_section" style="padding-top:var(--space-7);">
+    <div class="container">
+
+        <!-- En-tête -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-5" style="gap:var(--space-4);">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-1);">
+                    <i class="fas fa-user-check mr-2" style="color:var(--color-primary);"></i>Vérifications de comptes
+                </h1>
+                <p class="text-muted" style="margin:0; font-size:var(--text-base);">Administration — Gestion des demandes de vérification</p>
+            </div>
+            <a href="{% url 'dashboard:home' %}" class="btn_ghost btn_sm">
+                <i class="fas fa-arrow-left mr-1"></i>Tableau de bord
+            </a>
+        </div>
+
+        <!-- Filtres statut -->
+        <div class="mb-4" style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+            <a href="?statut=SOUMIS"
+               class="{% if statut_filtre == 'SOUMIS' %}comment_button btn_sm{% else %}btn_ghost btn_sm{% endif %}">
+                <i class="fas fa-clock mr-1"></i>En attente
+            </a>
+            <a href="?statut=APPROUVE"
+               class="{% if statut_filtre == 'APPROUVE' %}comment_button btn_sm{% else %}btn_ghost btn_sm{% endif %}">
+                <i class="fas fa-check-circle mr-1"></i>Approuvés
+            </a>
+            <a href="?statut=REJETE"
+               class="{% if statut_filtre == 'REJETE' %}comment_button btn_sm{% else %}btn_ghost btn_sm{% endif %}">
+                <i class="fas fa-times-circle mr-1"></i>Rejetés
+            </a>
+        </div>
+
+        <!-- Liste des vérifications -->
+        {% if verifications %}
+        <div class="row">
+            {% for verif in verifications %}
+            <div class="col-12 mb-4">
+                <div class="sidebar_section" style="border-left:4px solid {% if verif.statut == 'SOUMIS' %}var(--color-accent){% elif verif.statut == 'APPROUVE' %}var(--color-success){% else %}var(--color-danger){% endif %};">
+                    <div class="d-flex align-items-start justify-content-between flex-wrap" style="gap:var(--space-4);">
+
+                        <!-- Infos utilisateur -->
+                        <div class="d-flex align-items-start" style="gap:var(--space-4); flex:1; min-width:0;">
+                            <div style="width:48px; height:48px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="fas fa-user" style="color:var(--color-primary); font-size:var(--text-xl);"></i>
+                            </div>
+                            <div>
+                                <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-1);">
+                                    {{ verif.user.get_full_name }}
+                                </h3>
+                                <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                                    <i class="fas fa-envelope mr-1"></i>{{ verif.user.email }}
+                                    <span class="mx-2">·</span>
+                                    <span class="tag_badge">{{ verif.user.get_role_display }}</span>
+                                </p>
+                                <div style="display:flex; gap:var(--space-3); flex-wrap:wrap;">
+                                    <small class="text-muted">
+                                        <i class="fas fa-file-alt mr-1"></i>{{ verif.get_type_document_display }}
+                                    </small>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar-alt mr-1"></i>{{ verif.date_soumission|date:"d/m/Y à H:i" }}
+                                    </small>
+                                    {% if verif.traite_par %}
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-check mr-1"></i>Traité par {{ verif.traite_par.get_short_name }} le {{ verif.date_traitement|date:"d/m/Y" }}
+                                    </small>
+                                    {% endif %}
+                                </div>
+                                {% if verif.note_admin %}
+                                <p style="font-size:var(--text-sm); color:var(--color-danger); margin-top:var(--space-2); margin-bottom:0;">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>{{ verif.note_admin|truncatewords:20 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="d-flex flex-column align-items-end" style="gap:var(--space-2); flex-shrink:0;">
+                            <!-- Voir le document -->
+                            <a href="{{ verif.document.url }}" target="_blank" rel="noopener noreferrer" class="btn_ghost btn_sm w-100">
+                                <i class="fas fa-eye mr-1"></i>Voir le document
+                            </a>
+
+                            {% if verif.statut == 'SOUMIS' %}
+                            <!-- Approuver -->
+                            <form method="post" action="{% url 'accounts:admin_verify_approve' verif.pk %}"
+                                  onsubmit="return confirm('Approuver le compte de {{ verif.user.get_full_name }} ?');">
+                                {% csrf_token %}
+                                <button type="submit" class="comment_button btn_sm w-100" style="min-width:140px;">
+                                    <i class="fas fa-check mr-1"></i>Approuver
+                                </button>
+                            </form>
+
+                            <!-- Rejeter -->
+                            <button type="button" class="btn_danger btn_sm w-100"
+                                    data-toggle="modal" data-target="#rejectModal{{ verif.pk }}"
+                                    style="min-width:140px;">
+                                <i class="fas fa-times mr-1"></i>Rejeter
+                            </button>
+
+                            <!-- Modal rejet -->
+                            <div class="modal fade" id="rejectModal{{ verif.pk }}" tabindex="-1" role="dialog" aria-labelledby="rejectLabel{{ verif.pk }}" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content" style="border-radius:var(--radius-lg); border:none;">
+                                        <div class="modal-header" style="border-bottom:var(--border-width) solid var(--color-border-light); padding:var(--space-5);">
+                                            <h5 class="modal-title" id="rejectLabel{{ verif.pk }}" style="font-weight:var(--weight-bold);">
+                                                <i class="fas fa-times-circle mr-2" style="color:var(--color-danger);"></i>
+                                                Rejeter — {{ verif.user.get_full_name }}
+                                            </h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Fermer">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <form method="post" action="{% url 'accounts:admin_verify_reject' verif.pk %}">
+                                            {% csrf_token %}
+                                            <div class="modal-body" style="padding:var(--space-5);">
+                                                <label class="form_label" for="motif_{{ verif.pk }}">Motif du rejet *</label>
+                                                <textarea name="motif" id="motif_{{ verif.pk }}" class="input_field" rows="3"
+                                                          placeholder="Expliquez clairement pourquoi le document est refusé…" required style="min-height:100px;"></textarea>
+                                                <small class="text-muted">Ce message sera visible par l'utilisateur.</small>
+                                            </div>
+                                            <div class="modal-footer" style="border-top:var(--border-width) solid var(--color-border-light); padding:var(--space-4) var(--space-5); gap:var(--space-3);">
+                                                <button type="button" class="btn_ghost btn_sm" data-dismiss="modal">Annuler</button>
+                                                <button type="submit" class="btn_danger btn_sm">
+                                                    <i class="fas fa-times mr-1"></i>Confirmer le rejet
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% elif verif.statut == 'APPROUVE' %}
+                            <span class="tag_badge tag_badge--success">
+                                <i class="fas fa-check-circle mr-1"></i>Compte activé
+                            </span>
+                            {% else %}
+                            <span class="tag_badge" style="background:var(--color-danger-bg); border-color:var(--color-danger); color:var(--color-danger);">
+                                <i class="fas fa-times-circle mr-1"></i>Rejeté
+                            </span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?statut={{ statut_filtre }}&page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?statut={{ statut_filtre }}&page={{ num }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?statut={{ statut_filtre }}&page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state">
+            <i class="fas fa-user-check empty_state_icon"></i>
+            <h4>
+                {% if statut_filtre == 'SOUMIS' %}Aucune demande en attente{% elif statut_filtre == 'APPROUVE' %}Aucun compte approuvé{% else %}Aucun compte rejeté{% endif %}
+            </h4>
+            <p>
+                {% if statut_filtre == 'SOUMIS' %}Toutes les demandes ont été traitées.{% else %}Aucun dossier dans cette catégorie.{% endif %}
+            </p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

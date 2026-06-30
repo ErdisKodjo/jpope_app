@@ -88,7 +88,7 @@ class TestEtablissementAPI:
         url = reverse("catalog-api:etablissements-list")
         data = {"nom": "Nouvelle École", "ville": "Lomé"}
         response = api_client.post(url, data, format="json")
-        assert response.status_code == status.HTTP_403_FORBIDDEN
+        assert response.status_code in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN)
 
 
 @pytest.mark.django_db

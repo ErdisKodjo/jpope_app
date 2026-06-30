@@ -3,110 +3,169 @@
 
 {% block title %}Formations — AvenSU-Orienta{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" type="text/css" href="{% static 'css/courses_styles.css' %}">
-<link rel="stylesheet" type="text/css" href="{% static 'css/courses_responsive.css' %}">
-{% endblock %}
 
 {% block content %}
+
 <!-- En-tête de page -->
-<div class="home">
-    <div class="home_background_container prlx_parent">
-        <div class="home_background prlx" style="background-image:url({% static 'images/courses_background.jpg' %})"></div>
-    </div>
-    <div class="home_content">
-        <h1>Formations</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb justify-content-center">
-                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
-                <li class="breadcrumb-item active">Formations</li>
-            </ol>
-        </nav>
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Formations</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Formations</li>
+                </ol>
+            </nav>
+        </div>
     </div>
 </div>
 
-<div class="courses page_section">
-    <div class="container">
-        <div class="row">
-
-            <!-- Sidebar filtres -->
-            <div class="col-lg-3">
-                <div class="courses_sidebar">
-                    <div class="courses_sidebar_section">
-                        <div class="courses_sidebar_section_title">Recherche</div>
-                        <form method="get">
-                            <input type="text" name="q" class="form-control mb-2" placeholder="Nom de la formation..." value="{{ request.GET.q }}">
-                            <select name="niveau" class="form-control mb-2">
-                                <option value="">Tous les niveaux</option>
-                                <option value="BTS">BTS</option>
-                                <option value="LICENCE">Licence</option>
-                                <option value="MASTER">Master</option>
-                                <option value="INGENIEUR">Ingénieur</option>
-                            </select>
-                            <button type="submit" class="btn btn-primary btn-block">Filtrer</button>
-                        </form>
-                    </div>
-                </div>
+<!-- Barre de filtres -->
+<div class="container" style="position:relative; z-index:20;">
+    <div class="filter_form_container">
+        <form method="get" class="row align-items-end">
+            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Rechercher une formation</label>
+                <input type="text" name="q" class="input_field" placeholder="Ex : informatique, gestion..." value="{{ request.GET.q }}">
             </div>
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Domaine</label>
+                <select name="domaine" class="input_field" style="appearance:auto;">
+                    <option value="">Tous les domaines</option>
+                    <option value="informatique" {% if request.GET.domaine == 'informatique' %}selected{% endif %}>Informatique &amp; Numérique</option>
+                    <option value="gestion" {% if request.GET.domaine == 'gestion' %}selected{% endif %}>Gestion &amp; Commerce</option>
+                    <option value="sante" {% if request.GET.domaine == 'sante' %}selected{% endif %}>Santé &amp; Sciences</option>
+                    <option value="droit" {% if request.GET.domaine == 'droit' %}selected{% endif %}>Droit &amp; Sciences Sociales</option>
+                    <option value="arts" {% if request.GET.domaine == 'arts' %}selected{% endif %}>Arts &amp; Communication</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Niveau</label>
+                <select name="niveau" class="input_field" style="appearance:auto;">
+                    <option value="">Tous les niveaux</option>
+                    <option value="BTS" {% if request.GET.niveau == 'BTS' %}selected{% endif %}>BTS (2 ans)</option>
+                    <option value="LICENCE" {% if request.GET.niveau == 'LICENCE' %}selected{% endif %}>Licence (3 ans)</option>
+                    <option value="MASTER" {% if request.GET.niveau == 'MASTER' %}selected{% endif %}>Master (5 ans)</option>
+                    <option value="INGENIEUR" {% if request.GET.niveau == 'INGENIEUR' %}selected{% endif %}>Ingénieur (5 ans)</option>
+                    <option value="DOCTORAT" {% if request.GET.niveau == 'DOCTORAT' %}selected{% endif %}>Doctorat</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <button type="submit" class="comment_button w-100">
+                    <i class="fas fa-search mr-2"></i>Rechercher
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
-            <!-- Liste des formations -->
-            <div class="col-lg-9">
-                <div class="row course_boxes">
-                    {% for formation in formations %}
-                    <div class="col-lg-6 course_box mb-4">
-                        <div class="card h-100">
-                            <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="{{ formation.nom }}">
-                            <div class="card-body text-center">
-                                <div class="card-title">
-                                    <a href="{% url 'catalog:formation-detail' formation.slug %}">{{ formation.nom }}</a>
-                                </div>
-                                <div class="card-text text-muted">{{ formation.etablissement.nom }}</div>
-                                <div class="badge badge-info">{{ formation.get_niveau_display }}</div>
-                            </div>
-                            <div class="price_box d-flex flex-row align-items-center">
-                                <div class="course_author_name ml-3">
-                                    <i class="fas fa-map-marker-alt mr-1"></i>{{ formation.etablissement.ville }}
-                                </div>
-                                <div class="course_price d-flex flex-column align-items-center justify-content-center ml-auto mr-3">
-                                    <span>{{ formation.cout_annuel|floatformat:0 }} FCFA</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% empty %}
-                    <div class="col text-center py-5">
-                        <i class="fas fa-graduation-cap fa-3x text-muted mb-3 d-block"></i>
-                        <h4 class="text-muted">Aucune formation disponible</h4>
-                        <p>Les formations seront bientôt ajoutées.</p>
-                    </div>
-                    {% endfor %}
-                </div>
+<!-- Liste des formations -->
+<div class="page_section" style="padding:60px 0;">
+    <div class="container">
 
-                <!-- Pagination -->
-                {% if is_paginated %}
-                <div class="d-flex justify-content-center mt-4">
-                    <nav aria-label="Pagination">
-                        <ul class="pagination">
-                            {% if page_obj.has_previous %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
-                            </li>
-                            {% endif %}
-                            <li class="page-item active">
-                                <span class="page-link">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
-                            </li>
-                            {% if page_obj.has_next %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
-                            </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                </div>
+        <!-- Résultats header -->
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h2 style="font-size:20px; font-weight:700; margin-bottom:4px;">
+                    {% if formations %}{{ formations|length }}{% else %}0{% endif %} formation{% if formations and formations|length > 1 %}s{% endif %} trouvée{% if formations and formations|length > 1 %}s{% endif %}
+                </h2>
+                {% if request.GET.q or request.GET.domaine or request.GET.niveau %}
+                <small class="text-muted">
+                    Filtres actifs :
+                    {% if request.GET.q %}<span class="tag_badge mr-1">{{ request.GET.q }}</span>{% endif %}
+                    {% if request.GET.domaine %}<span class="tag_badge mr-1">{{ request.GET.domaine }}</span>{% endif %}
+                    {% if request.GET.niveau %}<span class="tag_badge mr-1">{{ request.GET.niveau }}</span>{% endif %}
+                    <a href="{% url 'catalog:formation-list' %}" class="ml-2" style="color:var(--color-danger); font-size:12px;">
+                        <i class="fas fa-times mr-1"></i>Effacer
+                    </a>
+                </small>
                 {% endif %}
             </div>
-
+            <div>
+                <select class="input_field" style="width:auto; height:40px; appearance:auto;" onchange="window.location.href='?tri='+this.value+'&q={{ request.GET.q }}&domaine={{ request.GET.domaine }}&niveau={{ request.GET.niveau }}'">
+                    <option value="">Trier par</option>
+                    <option value="nom">Nom A-Z</option>
+                    <option value="cout_asc">Coût croissant</option>
+                    <option value="cout_desc">Coût décroissant</option>
+                </select>
+            </div>
         </div>
+
+        <div class="row">
+            {% for formation in formations %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card unified_card h-100">
+                    <div class="position-relative">
+                        <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="{{ formation.nom }}" style="height:180px; object-fit:cover;">
+                        <span class="unified_card_domain_badge">{{ formation.domaine.nom|default:"Général" }}</span>
+                    </div>
+                    <div class="unified_card_body">
+                        <h3 class="unified_card_title">
+                            <a href="{% url 'catalog:formation-detail' formation.slug %}">{{ formation.nom }}</a>
+                        </h3>
+                        <p class="unified_card_text">{{ formation.description|truncatewords:15 }}</p>
+                        <div class="mt-2" style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <span class="tag_badge">{{ formation.get_niveau_display }}</span>
+                            <span class="tag_badge"><i class="fas fa-clock mr-1"></i>{{ formation.duree_annees }} an{{ formation.duree_annees|pluralize }}</span>
+                            {% if formation.has_inscription_ouverte %}
+                            <span class="tag_badge tag_badge--success">Inscriptions ouvertes</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="unified_card_footer">
+                        <div class="unified_price_box">
+                            <div style="display:flex; align-items:center; overflow:hidden;">
+                                <i class="fas fa-university mr-2 text-muted" style="font-size:11px; flex-shrink:0;"></i>
+                                <small class="text-muted" style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ formation.etablissement.nom }}</small>
+                            </div>
+                            <span style="font-size:13px; font-weight:700; color:var(--color-accent); white-space:nowrap; margin-left:8px;">
+                                {{ formation.cout_annuel|floatformat:0 }} FCFA
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <i class="fas fa-graduation-cap fa-3x text-muted mb-3 d-block"></i>
+                <h4 class="text-muted">Aucune formation trouvée</h4>
+                <p class="text-muted">Essayez d'élargir vos critères de recherche.</p>
+                <a href="{% url 'catalog:formation-list' %}" class="comment_button mt-2">Voir toutes les formations</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav>
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}&domaine={{ request.GET.domaine }}&niveau={{ request.GET.niveau }}">
+                            <i class="fas fa-angle-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}&q={{ request.GET.q }}&domaine={{ request.GET.domaine }}&niveau={{ request.GET.niveau }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}&domaine={{ request.GET.domaine }}&niveau={{ request.GET.niveau }}">
+                            <i class="fas fa-angle-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+
     </div>
 </div>
 {% endblock %}

@@ -4,112 +4,318 @@
 {% block title %}Tableau de bord — AvenSU-Orienta{% endblock %}
 
 {% block content %}
-<div class="page_section" style="padding-top: 40px;">
+<div class="page_section" style="padding-top:var(--space-7);">
     <div class="container">
 
-        <!-- En-tête -->
+        <!-- En-tête dashboard -->
         <div class="row mb-4">
-            <div class="col">
-                <h2>Bonjour, {{ request.user.first_name }} 👋</h2>
-                <p class="text-muted">Voici un aperçu de votre espace personnel.</p>
+            <div class="col-lg-8">
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-1);">
+                    Bonjour, <span style="color:var(--color-primary);">{{ request.user.first_name }}</span> 👋
+                </h1>
+                <p class="text-muted" style="font-size:var(--text-base); margin:0;">
+                    Bienvenue sur votre espace personnel — {{ request.user.get_role_display|default:request.user.role }}
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-right d-flex align-items-center justify-content-lg-end mt-3 mt-lg-0" style="gap:var(--space-3);">
+                <a href="{% url 'accounts:profile' %}" class="btn_ghost btn_sm">
+                    <i class="fas fa-user-cog mr-1"></i>Mon profil
+                </a>
+                <a href="{% url 'orientation:home' %}" class="comment_button btn_sm">
+                    <i class="fas fa-compass mr-1"></i>Orientation
+                </a>
             </div>
         </div>
 
         <!-- Statistiques rapides -->
         <div class="row mb-4">
-            <div class="col-md-3">
-                <div class="card text-center shadow-sm border-primary">
-                    <div class="card-body">
-                        <i class="fas fa-heart fa-2x text-danger mb-2"></i>
-                        <h4 class="mb-0" id="favoris-count">—</h4>
-                        <small class="text-muted">Favoris</small>
-                    </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--primary" id="favoris-count">—</div>
+                    <div class="stat_item_label">Favoris</div>
+                    <i class="fas fa-heart mt-2" style="font-size:var(--text-xl); color:var(--color-primary); opacity:0.25;"></i>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center shadow-sm border-success">
-                    <div class="card-body">
-                        <i class="fas fa-star fa-2x text-warning mb-2"></i>
-                        <h4 class="mb-0" id="voeux-count">—</h4>
-                        <small class="text-muted">Vœux</small>
-                    </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--success" id="voeux-count">—</div>
+                    <div class="stat_item_label">Vœux</div>
+                    <i class="fas fa-star mt-2" style="font-size:var(--text-xl); color:var(--color-success); opacity:0.25;"></i>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center shadow-sm border-info">
-                    <div class="card-body">
-                        <i class="fas fa-tasks fa-2x text-info mb-2"></i>
-                        <h4 class="mb-0" id="demarches-count">—</h4>
-                        <small class="text-muted">Démarches</small>
-                    </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--info" id="demarches-count">—</div>
+                    <div class="stat_item_label">Démarches</div>
+                    <i class="fas fa-tasks mt-2" style="font-size:var(--text-xl); color:var(--color-info); opacity:0.25;"></i>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="card text-center shadow-sm border-warning">
-                    <div class="card-body">
-                        <i class="fas fa-bell fa-2x text-primary mb-2"></i>
-                        <h4 class="mb-0">0</h4>
-                        <small class="text-muted">Notifications</small>
-                    </div>
+            <div class="col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--danger">0</div>
+                    <div class="stat_item_label">Notifications</div>
+                    <i class="fas fa-bell mt-2" style="font-size:var(--text-xl); color:var(--color-danger); opacity:0.25;"></i>
                 </div>
             </div>
         </div>
 
-        <!-- Liens rapides -->
-        <div class="row mb-4">
-            <div class="col">
-                <h5>Accès rapide</h5>
-            </div>
-        </div>
         <div class="row">
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'catalog:formation-list' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
-                    <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
-                    <p class="mb-0">Chercher une formation</p>
-                </a>
-            </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'orientation:home' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
-                    <i class="fas fa-compass fa-2x text-success mb-2"></i>
-                    <p class="mb-0">Test d'orientation</p>
-                </a>
-            </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'events:event-list' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
-                    <i class="fas fa-calendar-alt fa-2x text-warning mb-2"></i>
-                    <p class="mb-0">Voir les événements</p>
-                </a>
-            </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'community:forum-list' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
-                    <i class="fas fa-comments fa-2x text-info mb-2"></i>
-                    <p class="mb-0">Forum communauté</p>
-                </a>
-            </div>
-            <div class="col-md-4 mb-3">
-                <a href="{% url 'accounts:profile' %}" class="card text-center p-4 d-block text-decoration-none text-dark shadow-sm h-100">
-                    <i class="fas fa-user-cog fa-2x text-secondary mb-2"></i>
-                    <p class="mb-0">Mon profil</p>
-                </a>
-            </div>
-        </div>
 
+            <!-- Colonne principale -->
+            <div class="col-lg-8">
+
+                <!-- Accès rapide -->
+                <div class="dashboard_card mb-4">
+                    <h2 class="profile_section_title">
+                        <i class="fas fa-th-large mr-2" style="color:var(--color-primary);"></i>Accès rapide
+                    </h2>
+                    <div class="row">
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'catalog:formation-list' %}" class="quick_access_card">
+                                <i class="fas fa-graduation-cap" style="color:var(--color-primary);"></i>
+                                <span>Formations</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'orientation:home' %}" class="quick_access_card">
+                                <i class="fas fa-compass" style="color:var(--color-success);"></i>
+                                <span>Test orientation</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'events:event-list' %}" class="quick_access_card">
+                                <i class="fas fa-calendar-alt" style="color:var(--color-info);"></i>
+                                <span>Événements</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'community:forum-list' %}" class="quick_access_card">
+                                <i class="fas fa-comments" style="color:var(--color-primary);"></i>
+                                <span>Communauté</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'catalog:etablissement-list' %}" class="quick_access_card">
+                                <i class="fas fa-university" style="color:var(--color-warning);"></i>
+                                <span>Établissements</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'accounts:profile' %}" class="quick_access_card">
+                                <i class="fas fa-user-cog" style="color:var(--color-text-muted);"></i>
+                                <span>Mon profil</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Bloc conseiller : fiches ── -->
+                {% if request.user.is_counselor %}
+                <div class="dashboard_card mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h2 class="profile_section_title mb-0">
+                            <i class="fas fa-file-alt mr-2" style="color:var(--color-primary);"></i>Mes fiches d'évaluation
+                        </h2>
+                        <a href="{% url 'dashboard:conseiller-eval-list' %}" class="btn_ghost btn_sm">Gérer</a>
+                    </div>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="stat_item_value">{{ nb_brouillons|default:"0" }}</div>
+                            <div class="stat_item_label">Brouillon{{ nb_brouillons|default:0|pluralize }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat_item_value stat_item_value--info">{{ nb_soumises|default:"0" }}</div>
+                            <div class="stat_item_label">Soumise{{ nb_soumises|default:0|pluralize }}</div>
+                        </div>
+                        <div class="col-4">
+                            <div class="stat_item_value stat_item_value--danger">{{ nb_a_reviser|default:"0" }}</div>
+                            <div class="stat_item_label">À réviser</div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-3" style="border-top:var(--border-width) solid var(--color-border-light);">
+                        <a href="{% url 'dashboard:conseiller-eval-create' %}" class="comment_button btn_sm">
+                            <i class="fas fa-plus mr-1"></i>Nouvelle fiche
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- ── Bloc étudiant : fiche validée ── -->
+                {% if request.user.is_student and evaluation_validee %}
+                <div class="dashboard_card mb-4" style="border-left:4px solid var(--color-success);">
+                    <h2 class="profile_section_title">
+                        <i class="fas fa-clipboard-check mr-2" style="color:var(--color-success);"></i>Avis de votre conseiller
+                    </h2>
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3);">
+                        <i class="fas fa-user-tie mr-1"></i>{{ evaluation_validee.conseiller.get_full_name }}
+                        — validé le {{ evaluation_validee.date_traitement|date:"d/m/Y" }}
+                    </p>
+                    <p style="font-size:var(--text-base);">{{ evaluation_validee.bilan_scolaire|truncatewords:30 }}</p>
+                    {% if evaluation_validee.formations_suggerees %}
+                    <div style="display:flex; flex-wrap:wrap; gap:var(--space-2);">
+                        {% for f in evaluation_validee.formations_suggerees %}
+                        <span class="tag_badge tag_badge--primary">{{ f }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- ── Bloc admin : fiches en attente ── -->
+                {% if request.user.is_admin_role and nb_evaluations_en_attente %}
+                <div class="dashboard_card mb-4" style="border-left:4px solid var(--color-info);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="profile_section_title mb-1">
+                                <i class="fas fa-file-alt mr-2" style="color:var(--color-info);"></i>Fiches à traiter
+                            </h2>
+                            <p class="text-muted mb-0" style="font-size:var(--text-sm);">
+                                <strong style="color:var(--color-info);">{{ nb_evaluations_en_attente }}</strong>
+                                fiche{{ nb_evaluations_en_attente|pluralize }} soumise{{ nb_evaluations_en_attente|pluralize }} en attente.
+                            </p>
+                        </div>
+                        <a href="{% url 'dashboard:admin-eval-list' %}?statut=SOUMISE" class="comment_button btn_sm flex-shrink-0">
+                            <i class="fas fa-eye mr-1"></i>Traiter
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Démarches Kanban -->
+                <div class="dashboard_card">
+                    <h2 class="profile_section_title">
+                        <i class="fas fa-tasks mr-2" style="color:var(--color-primary);"></i>Suivi de mes démarches
+                    </h2>
+                    <div class="row">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="kanban_header" style="background:var(--color-bg-subtle);">
+                                <h5>À candidater</h5>
+                            </div>
+                            <div class="kanban_column">
+                                <div class="empty_state" style="padding:var(--space-5) var(--space-3);">
+                                    <i class="fas fa-inbox" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
+                                    <small class="text-muted">Aucune démarche en attente</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <div class="kanban_header" style="background:var(--color-bg-warm);">
+                                <h5>Dossier envoyé</h5>
+                            </div>
+                            <div class="kanban_column">
+                                <div class="empty_state" style="padding:var(--space-5) var(--space-3);">
+                                    <i class="fas fa-paper-plane" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
+                                    <small class="text-muted">Aucun dossier envoyé</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="kanban_header" style="background:var(--lagune-50);">
+                                <h5>Réponses</h5>
+                            </div>
+                            <div class="kanban_column">
+                                <div class="empty_state" style="padding:var(--space-5) var(--space-3);">
+                                    <i class="fas fa-envelope-open" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
+                                    <small class="text-muted">Aucune réponse reçue</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Sidebar profil -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="sidebar_section">
+                    <div class="text-center mb-4">
+                        <div class="profile_avatar_wrap">
+                            {% if request.user.avatar %}
+                                <img src="{{ request.user.avatar.url }}" alt="{{ request.user.get_full_name }}">
+                            {% else %}
+                                <i class="fas fa-user"></i>
+                            {% endif %}
+                        </div>
+                        <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-1);">{{ request.user.get_full_name }}</h3>
+                        <span class="status_badge">{{ request.user.get_role_display|default:request.user.role }}</span>
+                        <p class="text-muted mt-2 mb-0" style="font-size:var(--text-sm);">{{ request.user.email }}</p>
+                    </div>
+
+                    <!-- Complétion profil -->
+                    <div class="pt-3" style="border-top:var(--border-width) solid var(--color-border-light);">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small style="font-weight:var(--weight-bold); font-size:var(--text-sm);">Profil complété</small>
+                            <small style="font-weight:var(--weight-bold); color:var(--color-primary);">{% if request.user.profile_complete %}100%{% else %}40%{% endif %}</small>
+                        </div>
+                        <div class="progress_bar_container">
+                            <div class="progress_bar_fill" style="width:{% if request.user.profile_complete %}100%{% else %}40%{% endif %};"></div>
+                        </div>
+                        {% if not request.user.profile_complete %}
+                        <a href="{% url 'accounts:profile' %}" class="hero_box_link mt-2 d-block" style="font-size:var(--text-sm);">
+                            <i class="fas fa-arrow-right mr-1"></i>Compléter mon profil
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Navigation rapide -->
+                <div class="mt-3">
+                    <a href="{% url 'accounts:profile' %}" class="admin_sidebar_item">
+                        <i class="fas fa-user"></i>Mon profil
+                    </a>
+                    {% if request.user.role == 'STUDENT' %}
+                    <a href="{% url 'accounts:student_profile_edit' %}" class="admin_sidebar_item">
+                        <i class="fas fa-graduation-cap"></i>Profil étudiant
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'orientation:home' %}" class="admin_sidebar_item">
+                        <i class="fas fa-compass"></i>Mes tests d'orientation
+                    </a>
+                    <a href="{% url 'catalog:formation-list' %}" class="admin_sidebar_item">
+                        <i class="fas fa-heart"></i>Mes favoris
+                    </a>
+                    {% if request.user.is_counselor %}
+                    <a href="{% url 'dashboard:conseiller-eval-list' %}" class="admin_sidebar_item">
+                        <i class="fas fa-file-alt"></i>Fiches d'évaluation
+                    </a>
+                    {% endif %}
+                    {% if request.user.is_admin_role %}
+                    <a href="{% url 'dashboard:admin-eval-list' %}" class="admin_sidebar_item">
+                        <i class="fas fa-file-alt"></i>Évaluations conseillers
+                    </a>
+                    {% endif %}
+                    <a href="#" class="admin_sidebar_item"
+                       style="border-left-color:var(--color-danger);"
+                       onclick="document.getElementById('logout-form').submit(); return false;">
+                        <i class="fas fa-sign-out-alt" style="color:var(--color-danger);"></i>
+                        <span style="color:var(--color-danger);">Déconnexion</span>
+                    </a>
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Charge les stats du dashboard via l'API
 fetch('/api/v1/dashboard/', {
     headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Accept': 'application/json' }
 })
 .then(r => r.json())
-.then(data => {
-    document.getElementById('favoris-count').textContent = data.favoris_count ?? 0;
-    document.getElementById('voeux-count').textContent = data.voeux_count ?? 0;
-    document.getElementById('demarches-count').textContent = data.demarches_count ?? 0;
+.then(function(data) {
+    ['favoris-count','voeux-count','demarches-count'].forEach(function(id) {
+        var key = id.replace('-count', '_count');
+        var el = document.getElementById(id);
+        if (el) el.textContent = data[key] !== undefined ? data[key] : 0;
+    });
 })
-.catch(() => {});
+.catch(function() {
+    ['favoris-count','voeux-count','demarches-count'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = '0';
+    });
+});
 </script>
 {% endblock %}

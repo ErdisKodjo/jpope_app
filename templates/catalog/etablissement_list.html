@@ -3,54 +3,114 @@
 
 {% block title %}Établissements — AvenSU-Orienta{% endblock %}
 
+
 {% block content %}
-<div class="home">
-    <div class="home_background_container prlx_parent">
-        <div class="home_background prlx" style="background-image:url({% static 'images/teachers_background.jpg' %})"></div>
-    </div>
-    <div class="home_content">
-        <h1>Établissements</h1>
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb justify-content-center">
-                <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
-                <li class="breadcrumb-item active">Établissements</li>
-            </ol>
-        </nav>
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Établissements</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Établissements</li>
+                </ol>
+            </nav>
+        </div>
     </div>
 </div>
 
-<div class="teachers page_section">
+<!-- Filtres -->
+<div class="container" style="position:relative; z-index:20;">
+    <div class="filter_form_container">
+        <form method="get" class="row align-items-end">
+            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Nom de l'établissement</label>
+                <input type="text" name="q" class="input_field" placeholder="Ex : Université de Lomé..." value="{{ request.GET.q }}">
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Ville</label>
+                <select name="ville" class="input_field" style="appearance:auto;">
+                    <option value="">Toutes les villes</option>
+                    <option value="Lome" {% if request.GET.ville == 'Lome' %}selected{% endif %}>Lomé</option>
+                    <option value="Kara" {% if request.GET.ville == 'Kara' %}selected{% endif %}>Kara</option>
+                    <option value="Dakar" {% if request.GET.ville == 'Dakar' %}selected{% endif %}>Dakar</option>
+                    <option value="Abidjan" {% if request.GET.ville == 'Abidjan' %}selected{% endif %}>Abidjan</option>
+                    <option value="Accra" {% if request.GET.ville == 'Accra' %}selected{% endif %}>Accra</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Type</label>
+                <select name="type" class="input_field" style="appearance:auto;">
+                    <option value="">Tous les types</option>
+                    <option value="PUBLIC" {% if request.GET.type == 'PUBLIC' %}selected{% endif %}>Public</option>
+                    <option value="PRIVE" {% if request.GET.type == 'PRIVE' %}selected{% endif %}>Privé</option>
+                    <option value="GRANDE_ECOLE" {% if request.GET.type == 'GRANDE_ECOLE' %}selected{% endif %}>Grande école</option>
+                </select>
+            </div>
+            <div class="col-lg-2 col-md-6">
+                <button type="submit" class="comment_button w-100"><i class="fas fa-search mr-2"></i>Rechercher</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste -->
+<div class="page_section" style="padding:60px 0;">
     <div class="container">
         <div class="row">
-            <div class="col">
-                <div class="section_title text-center">
-                    <h1>Établissements d'enseignement supérieur</h1>
-                    <p>Découvrez les meilleures institutions d'Afrique de l'Ouest</p>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-4">
             {% for etablissement in etablissements %}
             <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body text-center">
-                        <i class="fas fa-university fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">
+                <div class="card unified_card h-100">
+                    <div class="position-relative">
+                        <img class="card-img-top" src="{% static 'images/teachers_background.jpg' %}" alt="{{ etablissement.nom }}" style="height:160px; object-fit:cover;">
+                        <div style="position:absolute; top:12px; right:12px;">
+                            <span class="tag_badge {% if etablissement.type == 'PUBLIC' %}tag_badge--primary{% elif etablissement.type == 'PRIVE' %}tag_badge--info{% endif %}">
+                                {{ etablissement.get_type_display }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="unified_card_body text-center">
+                        <div style="width:70px; height:70px; background:var(--color-bg-warm); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:-35px auto 12px; border:3px solid white; box-shadow:0 2px 10px rgba(0,0,0,0.1);">
+                            <i class="fas fa-university" style="font-size:28px; color:var(--color-accent);"></i>
+                        </div>
+                        <h3 class="unified_card_title text-center" style="font-size:16px;">
                             <a href="{% url 'catalog:etablissement-detail' etablissement.slug %}">{{ etablissement.nom }}</a>
-                        </h5>
-                        <p class="card-text text-muted">{{ etablissement.ville }}, {{ etablissement.pays }}</p>
-                        <span class="badge badge-secondary">{{ etablissement.get_type_display }}</span>
+                        </h3>
+                        <p class="text-muted" style="font-size:13px;">
+                            <i class="fas fa-map-marker-alt mr-1"></i>{{ etablissement.ville }}, {{ etablissement.pays }}
+                        </p>
+                        {% if etablissement.nombre_formations %}
+                        <span class="tag_badge">{{ etablissement.nombre_formations }} formations</span>
+                        {% endif %}
+                    </div>
+                    <div class="unified_card_footer text-center">
+                        <a href="{% url 'catalog:etablissement-detail' etablissement.slug %}" class="comment_button btn_sm">
+                            Voir les formations
+                        </a>
                     </div>
                 </div>
             </div>
             {% empty %}
-            <div class="col text-center py-5">
+            <div class="col-12 text-center py-5">
                 <i class="fas fa-university fa-3x text-muted mb-3 d-block"></i>
-                <h4 class="text-muted">Aucun établissement disponible</h4>
-                <p>Les établissements seront bientôt ajoutés.</p>
+                <h4 class="text-muted">Aucun établissement trouvé</h4>
+                <p class="text-muted">Les établissements seront bientôt ajoutés.</p>
             </div>
             {% endfor %}
         </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

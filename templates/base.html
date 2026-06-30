@@ -8,6 +8,11 @@
 <meta name="description" content="{% block meta_description %}AvenSU-Orienta — Plateforme d'orientation post-bac pour les étudiants d'Afrique de l'Ouest{% endblock %}">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<!-- Google Fonts — Bricolage Grotesque (titres) + Nunito Sans (corps) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;1,6..12,400&display=swap" rel="stylesheet">
+
 <!-- Bootstrap 4 -->
 <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap4/bootstrap.min.css' %}">
 <!-- FontAwesome -->
@@ -16,28 +21,30 @@
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/OwlCarousel2-2.2.1/owl.carousel.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/OwlCarousel2-2.2.1/owl.theme.default.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'plugins/OwlCarousel2-2.2.1/animate.css' %}">
-<!-- Main Styles -->
+<!-- Design Tokens (doit être chargé EN PREMIER — définit toutes les variables CSS) -->
+<link rel="stylesheet" type="text/css" href="{% static 'css/design_tokens.css' %}">
+<!-- Main Styles (template de base, NE PAS MODIFIER) -->
 <link rel="stylesheet" type="text/css" href="{% static 'css/main_styles.css' %}">
 <link rel="stylesheet" type="text/css" href="{% static 'css/responsive.css' %}">
+<!-- Composants AvenSU (utilise les variables de design_tokens.css) -->
+<link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}">
 
 {% block extra_css %}{% endblock %}
 </head>
 <body>
+
+<a href="#main-content" class="skip-nav">Aller au contenu principal</a>
 
 <div class="super_container">
 
     <!-- Header -->
     {% include 'partials/navbar.html' %}
 
-    <!-- Mobile Menu -->
+    <!-- Menu Mobile -->
     <div class="menu_container menu_mm">
-
-        <!-- Menu Close Button -->
         <div class="menu_close_container">
             <div class="menu_close"></div>
         </div>
-
-        <!-- Menu Items -->
         <div class="menu_inner menu_mm">
             <div class="menu menu_mm">
                 <ul class="menu_list menu_mm">
@@ -46,47 +53,188 @@
                     <li class="menu_item menu_mm"><a href="{% url 'catalog:formation-list' %}">Formations</a></li>
                     <li class="menu_item menu_mm"><a href="{% url 'events:event-list' %}">Événements</a></li>
                     <li class="menu_item menu_mm"><a href="{% url 'community:forum-list' %}">Communauté</a></li>
-                    <li class="menu_item menu_mm"><a href="#">Contact</a></li>
+                    <li class="menu_item menu_mm"><a href="{% url 'orientation:home' %}">Orientation</a></li>
+                    {% if request.user.is_authenticated %}
+                    <li class="menu_item menu_mm"><a href="{% url 'dashboard:home' %}">Mon espace</a></li>
+                    <li class="menu_item menu_mm">
+                        <a href="#" onclick="document.getElementById('logout-form').submit(); return false;">Déconnexion</a>
+                    </li>
+                    {% else %}
+                    <li class="menu_item menu_mm"><a href="{% url 'accounts:login' %}">Connexion</a></li>
+                    <li class="menu_item menu_mm"><a href="{% url 'accounts:register' %}">Inscription</a></li>
+                    {% endif %}
                 </ul>
-
-                <!-- Menu Social -->
                 <div class="menu_social_container menu_mm">
                     <ul class="menu_social menu_mm">
                         <li class="menu_social_item menu_mm"><a href="#"><i class="fab fa-facebook-f"></i></a></li>
                         <li class="menu_social_item menu_mm"><a href="#"><i class="fab fa-twitter"></i></a></li>
                         <li class="menu_social_item menu_mm"><a href="#"><i class="fab fa-instagram"></i></a></li>
                         <li class="menu_social_item menu_mm"><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                        <li class="menu_social_item menu_mm"><a href="#"><i class="fab fa-youtube"></i></a></li>
                     </ul>
                 </div>
-
                 <div class="menu_copyright menu_mm">&copy; 2026 AvenSU-Orienta. Tous droits réservés.</div>
             </div>
         </div>
-
     </div>
 
-    <!-- Messages Django -->
-    {% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-        <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Fermer">
-                <span aria-hidden="true">&times;</span>
-            </button>
+    <!-- Bannière compte en attente de vérification -->
+    {% if request.user.is_authenticated and request.user.statut_compte == 'EN_ATTENTE' %}
+    <div class="verification_banner" role="alert">
+        <div class="container d-flex align-items-center justify-content-between flex-wrap" style="gap:var(--space-3);">
+            <span>
+                <i class="fas fa-clock mr-2"></i>
+                <strong>Compte en cours de vérification</strong> — Certaines fonctionnalités sont temporairement indisponibles.
+            </span>
+            <a href="{% url 'accounts:verification_pending' %}" class="verification_banner_link">
+                Voir le statut de mon dossier <i class="fas fa-arrow-right ml-1"></i>
+            </a>
         </div>
-        {% endfor %}
     </div>
     {% endif %}
 
-    <!-- Page Content -->
+    <!-- Messages Django -->
+    {% if messages %}
+    <div class="messages_container">
+        <div class="container">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Contenu principal -->
+    <main id="main-content">
     {% block content %}{% endblock %}
+    </main>
 
     <!-- Footer -->
     {% include 'partials/footer.html' %}
 
 </div>
+
+<!-- Formulaire logout (déclenché par JS) -->
+{% if request.user.is_authenticated %}
+<form id="logout-form" method="post" action="{% url 'accounts:logout' %}" style="display:none;">
+    {% csrf_token %}
+</form>
+{% endif %}
+
+<!-- Widget AvenBot (utilisateurs connectés uniquement) -->
+{% if request.user.is_authenticated and request.user.statut_compte == 'VERIFIE' %}
+<div id="avenbot_widget">
+    <!-- Bouton flottant -->
+    <button id="avenbot_toggle" class="avenbot_fab" title="AvenBot — Assistant d'orientation" aria-label="Ouvrir AvenBot">
+        <i class="fas fa-robot avenbot_fab_icon"></i>
+        <i class="fas fa-times avenbot_close_icon" style="display:none;"></i>
+    </button>
+
+    <!-- Mini-panel -->
+    <div id="avenbot_panel" class="avenbot_panel" style="display:none;" role="dialog" aria-label="AvenBot assistant">
+        <div class="avenbot_panel_header">
+            <div style="display:flex; align-items:center; gap:var(--space-3);">
+                <div class="chat_avatar" style="width:32px; height:32px; font-size:var(--text-sm);"><i class="fas fa-robot"></i></div>
+                <div>
+                    <strong style="font-size:var(--text-sm);">AvenBot</strong>
+                    <div style="font-size:var(--text-xs); color:var(--color-success);"><i class="fas fa-circle" style="font-size:6px;"></i> En ligne</div>
+                </div>
+            </div>
+            <a href="{% url 'chatbot:home' %}" class="btn_ghost btn_sm" style="font-size:var(--text-xs);" title="Ouvrir en plein écran">
+                <i class="fas fa-expand-alt"></i>
+            </a>
+        </div>
+        <div class="avenbot_messages" id="widget_messages">
+            <div class="chat_bubble chat_bubble--assistant" style="font-size:var(--text-sm);">
+                Bonjour ! Je suis AvenBot. Posez-moi une question sur les formations ou votre orientation. 😊
+            </div>
+            <div class="chat_typing" id="widget_typing" style="display:none;">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="avenbot_input_row">
+            <input type="text" id="widget_input" class="avenbot_input" placeholder="Posez une question…" autocomplete="off">
+            <button class="chat_send_btn" id="widget_send" style="width:32px; height:32px; font-size:var(--text-sm);">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var CSRF = '{{ csrf_token }}';
+    var convId = null;
+    var sending = false;
+    var toggle = document.getElementById('avenbot_toggle');
+    var panel  = document.getElementById('avenbot_panel');
+    var input  = document.getElementById('widget_input');
+    var sendBtn = document.getElementById('widget_send');
+    var messages = document.getElementById('widget_messages');
+    var typing = document.getElementById('widget_typing');
+
+    toggle.addEventListener('click', function () {
+        var open = panel.style.display !== 'none';
+        panel.style.display = open ? 'none' : 'flex';
+        toggle.querySelector('.avenbot_fab_icon').style.display = open ? '' : 'none';
+        toggle.querySelector('.avenbot_close_icon').style.display = open ? 'none' : '';
+        if (!open) input.focus();
+    });
+
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); envoyer(); }
+    });
+    sendBtn.addEventListener('click', envoyer);
+
+    function envoyer() {
+        var texte = input.value.trim();
+        if (!texte || sending) return;
+        sending = true;
+        sendBtn.disabled = true;
+        ajouterBulle('user', texte);
+        input.value = '';
+        typing.style.display = 'flex';
+        scrollBas();
+
+        var body = { content: texte };
+        if (convId) body.conversation_id = convId;
+
+        fetch('/api/v1/message/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+            body: JSON.stringify(body)
+        }).then(function (r) { return r.json(); }).then(function (data) {
+            convId = data.conversation_id;
+            typing.style.display = 'none';
+            ajouterBulle('assistant', data.assistant_message.contenu);
+        }).catch(function () {
+            typing.style.display = 'none';
+            ajouterBulle('assistant', 'Désolé, une erreur est survenue. Essayez la version complète.');
+        }).finally(function () {
+            sending = false;
+            sendBtn.disabled = false;
+            scrollBas();
+        });
+    }
+
+    function ajouterBulle(role, contenu) {
+        var div = document.createElement('div');
+        div.className = 'chat_bubble chat_bubble--' + role;
+        div.style.fontSize = 'var(--text-sm)';
+        // Raccourcir si trop long dans le widget
+        div.textContent = contenu.length > 300 ? contenu.substring(0, 297) + '…' : contenu;
+        messages.insertBefore(div, typing);
+        scrollBas();
+    }
+
+    function scrollBas() { messages.scrollTop = messages.scrollHeight; }
+})();
+</script>
+{% endif %}
 
 <!-- Scripts -->
 <script src="{% static 'js/jquery-3.2.1.min.js' %}"></script>

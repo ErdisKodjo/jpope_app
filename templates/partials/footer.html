@@ -1,117 +1,109 @@
 {% load static %}
-<!-- Footer -->
-<footer class="footer">
+<footer class="footer" style="background:var(--color-deep); color:rgba(255,255,255,0.6); padding-top:60px; padding-bottom:0;">
     <div class="container">
 
         <!-- Newsletter -->
-        <div class="newsletter">
-            <div class="row">
-                <div class="col">
-                    <div class="section_title text-center">
-                        <h1>Abonnez-vous à notre newsletter</h1>
-                    </div>
-                </div>
+        <div class="row mb-5 pb-4" style="border-bottom: 1px solid rgba(255,255,255,0.12);">
+            <div class="col-lg-6">
+                <h4 style="color:white; font-weight:700; margin-bottom:6px;">Abonnez-vous à notre newsletter</h4>
+                <p style="color:rgba(255,255,255,0.6); font-size:14px; margin-bottom:0;">Recevez les dernières actualités et offres de formations.</p>
             </div>
-
-            <div class="row">
-                <div class="col text-center">
-                    <div class="newsletter_form_container mx-auto">
-                        <div class="newsletter_form d-flex flex-md-row flex-column flex-xs-column align-items-center justify-content-center">
-                            <input id="newsletter_email" class="newsletter_email" type="email" name="email" placeholder="Votre adresse e-mail">
-                            <button id="newsletter_submit" type="button" class="newsletter_submit_btn trans_300">S'abonner</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-lg-6 d-flex align-items-center justify-content-lg-end mt-3 mt-lg-0">
+                <form method="post" action="{% url 'accounts:home' %}" class="d-flex" style="max-width:400px; width:100%;">
+                    {% csrf_token %}
+                    <input type="hidden" name="newsletter" value="1">
+                    <input type="email" name="email_newsletter" placeholder="Votre adresse e-mail"
+                           style="flex:1; height:46px; border:none; border-radius:4px 0 0 4px; padding:0 15px; font-size:14px;">
+                    <button type="submit"
+                            style="height:46px; padding:0 20px; background:var(--color-accent); color:var(--color-accent-text); font-weight:700; font-size:13px; border:none; border-radius:0 4px 4px 0; cursor:pointer; text-transform:uppercase; white-space:nowrap;">
+                        S'abonner
+                    </button>
+                </form>
             </div>
         </div>
 
-        <!-- Footer Content -->
-        <div class="footer_content">
-            <div class="row">
+        <!-- Footer colonnes -->
+        <div class="row pb-5">
 
-                <!-- À propos -->
-                <div class="col-lg-3 footer_col">
-                    <div class="logo_container">
-                        <div class="logo">
-                            <img src="{% static 'images/logo.png' %}" alt="AvenSU-Orienta">
-                            <span>AvenSU</span>
+            <!-- À propos -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <a href="{% url 'accounts:home' %}" class="logo_container mb-3" style="text-decoration:none;">
+                    <img src="{% static 'images/logo.png' %}" alt="AvenSU" style="height:36px; margin-right:8px;">
+                    <div>
+                        <div style="font-size:20px; font-weight:900; letter-spacing:-0.5px;">
+                            <span style="color:var(--lagune-300);">Aven</span><span style="color:var(--color-accent);">SU</span>
                         </div>
+                        <div style="font-size:9px; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:1px;">Orienta</div>
                     </div>
-                    <p class="footer_about_text">AvenSU-Orienta est la plateforme de référence pour l'orientation post-bac des étudiants d'Afrique de l'Ouest. Nous vous aidons à trouver la formation et l'établissement qui correspondent à votre projet.</p>
+                </a>
+                <p style="font-size:13px; color:rgba(255,255,255,0.6); line-height:1.7;">
+                    La plateforme de référence pour l'orientation post-bac des étudiants d'Afrique de l'Ouest.
+                </p>
+                <div class="d-flex mt-3" style="gap:10px;">
+                    <a href="#" style="color:rgba(255,255,255,0.5); font-size:16px; transition:color 200ms;"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" style="color:rgba(255,255,255,0.5); font-size:16px; transition:color 200ms;"><i class="fab fa-twitter"></i></a>
+                    <a href="#" style="color:rgba(255,255,255,0.5); font-size:16px; transition:color 200ms;"><i class="fab fa-instagram"></i></a>
+                    <a href="#" style="color:rgba(255,255,255,0.5); font-size:16px; transition:color 200ms;"><i class="fab fa-linkedin-in"></i></a>
                 </div>
-
-                <!-- Liens rapides -->
-                <div class="col-lg-3 footer_col">
-                    <div class="footer_column_title">Liens rapides</div>
-                    <div class="footer_column_content">
-                        <ul>
-                            <li class="footer_list_item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
-                            <li class="footer_list_item"><a href="{% url 'catalog:etablissement-list' %}">Établissements</a></li>
-                            <li class="footer_list_item"><a href="{% url 'events:event-list' %}">Événements</a></li>
-                            <li class="footer_list_item"><a href="{% url 'community:forum-list' %}">Communauté</a></li>
-                            <li class="footer_list_item"><a href="#">Contact</a></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Formations -->
-                <div class="col-lg-3 footer_col">
-                    <div class="footer_column_title">Formations</div>
-                    <div class="footer_column_content">
-                        <ul>
-                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}">Toutes les formations</a></li>
-                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=informatique">Informatique &amp; Numérique</a></li>
-                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=gestion">Gestion &amp; Commerce</a></li>
-                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=sante">Santé &amp; Sciences</a></li>
-                            <li class="footer_list_item"><a href="{% url 'catalog:formation-list' %}?domaine=droit">Droit &amp; Lettres</a></li>
-                        </ul>
-                    </div>
-                </div>
-
-                <!-- Contact -->
-                <div class="col-lg-3 footer_col">
-                    <div class="footer_column_title">Contact</div>
-                    <div class="footer_column_content">
-                        <ul>
-                            <li class="footer_contact_item">
-                                <div class="footer_contact_icon">
-                                    <img src="{% static 'images/placeholder.svg' %}" alt="Adresse">
-                                </div>
-                                Lomé, Togo — Afrique de l'Ouest
-                            </li>
-                            <li class="footer_contact_item">
-                                <div class="footer_contact_icon">
-                                    <img src="{% static 'images/smartphone.svg' %}" alt="Téléphone">
-                                </div>
-                                +228 90 00 00 00
-                            </li>
-                            <li class="footer_contact_item">
-                                <div class="footer_contact_icon">
-                                    <img src="{% static 'images/envelope.svg' %}" alt="Email">
-                                </div>
-                                contact@avensu-orienta.com
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-
             </div>
-        </div>
 
-        <!-- Footer Copyright -->
-        <div class="footer_bar d-flex flex-column flex-sm-row align-items-center">
-            <div class="footer_copyright">
-                <span>&copy; 2026 AvenSU-Orienta. Tous droits réservés.</span>
-            </div>
-            <div class="footer_social ml-sm-auto">
-                <ul class="menu_social">
-                    <li class="menu_social_item"><a href="#"><i class="fab fa-facebook-f"></i></a></li>
-                    <li class="menu_social_item"><a href="#"><i class="fab fa-twitter"></i></a></li>
-                    <li class="menu_social_item"><a href="#"><i class="fab fa-instagram"></i></a></li>
-                    <li class="menu_social_item"><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
-                    <li class="menu_social_item"><a href="#"><i class="fab fa-youtube"></i></a></li>
+            <!-- Liens rapides -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div style="font-size:13px; font-weight:700; text-transform:uppercase; color:white; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--color-accent); display:inline-block;">
+                    Liens rapides
+                </div>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <li style="margin-bottom:8px;"><a href="{% url 'accounts:home' %}" style="color:rgba(255,255,255,0.6); font-size:13px; transition:color 200ms;">→ Accueil</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:etablissement-list' %}" style="color:rgba(255,255,255,0.6); font-size:13px; transition:color 200ms;">→ Établissements</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:formation-list' %}" style="color:rgba(255,255,255,0.6); font-size:13px; transition:color 200ms;">→ Formations</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'events:event-list' %}" style="color:rgba(255,255,255,0.6); font-size:13px; transition:color 200ms;">→ Événements</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'community:forum-list' %}" style="color:rgba(255,255,255,0.6); font-size:13px; transition:color 200ms;">→ Communauté</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'orientation:home' %}" style="color:rgba(255,255,255,0.6); font-size:13px; transition:color 200ms;">→ Orientation</a></li>
                 </ul>
             </div>
+
+            <!-- Formations par domaine -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div style="font-size:13px; font-weight:700; text-transform:uppercase; color:white; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--color-accent); display:inline-block;">
+                    Formations
+                </div>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:formation-list' %}" style="color:rgba(255,255,255,0.6); font-size:13px;">→ Toutes les formations</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:formation-list' %}?domaine=informatique" style="color:rgba(255,255,255,0.6); font-size:13px;">→ Informatique &amp; Numérique</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:formation-list' %}?domaine=gestion" style="color:rgba(255,255,255,0.6); font-size:13px;">→ Gestion &amp; Commerce</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:formation-list' %}?domaine=sante" style="color:rgba(255,255,255,0.6); font-size:13px;">→ Santé &amp; Sciences</a></li>
+                    <li style="margin-bottom:8px;"><a href="{% url 'catalog:formation-list' %}?domaine=droit" style="color:rgba(255,255,255,0.6); font-size:13px;">→ Droit &amp; Sciences Sociales</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div style="font-size:13px; font-weight:700; text-transform:uppercase; color:white; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--color-accent); display:inline-block;">
+                    Contact
+                </div>
+                <ul style="list-style:none; padding:0; margin:0;">
+                    <li style="display:flex; align-items:flex-start; margin-bottom:14px;">
+                        <i class="fas fa-map-marker-alt" style="color:var(--color-accent); margin-right:10px; margin-top:3px; width:14px;"></i>
+                        <span style="font-size:13px; color:rgba(255,255,255,0.6);">Lomé, Togo — Afrique de l'Ouest</span>
+                    </li>
+                    <li style="display:flex; align-items:center; margin-bottom:14px;">
+                        <i class="fas fa-phone" style="color:var(--color-accent); margin-right:10px; width:14px;"></i>
+                        <span style="font-size:13px; color:rgba(255,255,255,0.6);">+228 90 00 00 00</span>
+                    </li>
+                    <li style="display:flex; align-items:center; margin-bottom:14px;">
+                        <i class="fas fa-envelope" style="color:var(--color-accent); margin-right:10px; width:14px;"></i>
+                        <span style="font-size:13px; color:rgba(255,255,255,0.6);">contact@avensu-orienta.com</span>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Footer bar copyright -->
+        <div style="border-top:1px solid rgba(255,255,255,0.12); padding:20px 0; display:flex; align-items:center; justify-content:center;">
+            <span style="font-size:13px; color:rgba(255,255,255,0.4);">
+                &copy; 2026 <strong style="color:var(--color-accent);">AvenSU-Orienta</strong>. Tous droits réservés.
+            </span>
         </div>
 
     </div>

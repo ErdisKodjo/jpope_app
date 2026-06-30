@@ -1,325 +1,231 @@
-﻿{% extends 'base.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Inscription — AvenSU-Orienta{% endblock %}
 
 {% block extra_css %}
-<style>
-    .auth_section {
-        min-height: 80vh;
-        background: #f8f9fa;
-        display: flex;
-        align-items: center;
-        padding: 60px 0;
-    }
-    .auth_card {
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 5px 30px rgba(0,0,0,0.10);
-        overflow: hidden;
-    }
-    .auth_card_left {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #f6a623 100%);
-        padding: 60px 40px;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        color: #fff;
-        min-height: 600px;
-    }
-    .auth_card_left .brand_logo {
-        font-size: 2.5rem;
-        font-weight: 900;
-        color: #f6a623;
-        margin-bottom: 10px;
-        letter-spacing: -1px;
-    }
-    .auth_card_left .brand_logo span { color: #fff; }
-    .auth_card_left h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 15px; }
-    .auth_card_left p { font-size: 0.9rem; opacity: 0.85; line-height: 1.7; }
-    .auth_card_right { padding: 50px 50px; }
-    .auth_title { font-size: 1.8rem; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
-    .auth_subtitle { color: #888; font-size: 0.9rem; margin-bottom: 30px; }
-    .form-group label { font-weight: 600; font-size: 0.85rem; color: #444; margin-bottom: 6px; }
-    .form-control {
-        border: 1px solid #e0e0e0;
-        border-radius: 5px;
-        padding: 11px 15px;
-        font-size: 0.9rem;
-        color: #333;
-        transition: border-color 0.2s;
-    }
-    .form-control:focus { border-color: #f6a623; box-shadow: 0 0 0 3px rgba(246, 166, 35, 0.15); }
-    .btn_auth {
-        background: #f6a623;
-        color: #fff;
-        border: none;
-        border-radius: 5px;
-        padding: 13px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        width: 100%;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-    .btn_auth:hover { background: #e59520; color: #fff; }
-    .role_option {
-        border: 2px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 15px;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: center;
-        flex: 1;
-    }
-    .role_option:hover, .role_option.active { border-color: #f6a623; background: #fff8ee; }
-    .role_option i { font-size: 1.6rem; color: #f6a623; margin-bottom: 8px; display: block; }
-    .role_option span { font-size: 0.82rem; font-weight: 600; color: #444; }
-    .auth_link { color: #f6a623; font-weight: 600; text-decoration: none; }
-    .auth_link:hover { color: #e59520; text-decoration: underline; }
-    .alert_errors {
-        background: #fff3cd;
-        border: 1px solid #ffc107;
-        border-radius: 5px;
-        padding: 12px 15px;
-        margin-bottom: 20px;
-        font-size: 0.9rem;
-        color: #856404;
-    }
-    .step_indicator {
-        display: flex;
-        align-items: center;
-        margin-bottom: 30px;
-    }
-    .step {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        background: #f6a623;
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 700;
-        font-size: 0.85rem;
-        flex-shrink: 0;
-    }
-    .step_label {
-        margin-left: 10px;
-        font-size: 0.82rem;
-        color: #666;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}">
 {% endblock %}
 
 {% block content %}
+<div class="auth_page_container">
+    <div class="auth_card" style="max-width:900px;">
 
-<!-- En-tête de page -->
-<div class="home" style="height: 200px;">
-    <div class="home_background_container prlx_parent">
-        <div class="home_background prlx" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
-    </div>
-    <div class="home_content">
-        <h1>Inscription</h1>
-    </div>
-</div>
+        <!-- Côté formulaire -->
+        <div class="auth_form_side">
+            <div class="mb-3">
+                <a href="{% url 'accounts:home' %}" class="logo_container">
+                    <div class="logo_name">
+                        <span class="logo_text_aven">Aven</span><span class="logo_text_su">SU</span>
+                    </div>
+                </a>
+            </div>
 
-<!-- Section Inscription -->
-<div class="auth_section">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-11">
-                <div class="auth_card">
-                    <div class="row no-gutters">
+            <h1 class="auth_title">Créer un compte</h1>
+            <p class="auth_subtitle">Rejoignez des milliers d'étudiants sur AvenSU-Orienta.</p>
 
-                        <!-- Côté gauche — Branding -->
-                        <div class="col-lg-4 auth_card_left">
-                            <div>
-                                <div class="brand_logo">Aven<span>SU</span></div>
-                                <p style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 30px;">Orienta</p>
-                                <h2>Rejoignez la communauté AvenSU</h2>
-                                <p>Des milliers d'étudiants et de familles font confiance à AvenSU-Orienta pour prendre les meilleures décisions d'orientation.</p>
-                                <div style="margin-top: 30px;">
-                                    <div style="display: flex; align-items: flex-start; margin-bottom: 14px;">
-                                        <i class="fas fa-star" style="color: #f6a623; margin-right: 10px; margin-top: 3px; flex-shrink: 0;"></i>
-                                        <span style="font-size: 0.85rem; text-align: left;">Inscription 100% gratuite</span>
-                                    </div>
-                                    <div style="display: flex; align-items: flex-start; margin-bottom: 14px;">
-                                        <i class="fas fa-star" style="color: #f6a623; margin-right: 10px; margin-top: 3px; flex-shrink: 0;"></i>
-                                        <span style="font-size: 0.85rem; text-align: left;">Comparaison illimitée d'établissements</span>
-                                    </div>
-                                    <div style="display: flex; align-items: flex-start; margin-bottom: 14px;">
-                                        <i class="fas fa-star" style="color: #f6a623; margin-right: 10px; margin-top: 3px; flex-shrink: 0;"></i>
-                                        <span style="font-size: 0.85rem; text-align: left;">Accès aux conseils d'experts</span>
-                                    </div>
-                                    <div style="display: flex; align-items: flex-start;">
-                                        <i class="fas fa-star" style="color: #f6a623; margin-right: 10px; margin-top: 3px; flex-shrink: 0;"></i>
-                                        <span style="font-size: 0.85rem; text-align: left;">Notifications sur les événements</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            {% if form.errors %}
+            <div class="alert alert-warning mb-3" style="font-size:var(--text-sm);">
+                <i class="fas fa-exclamation-triangle mr-2"></i>Veuillez corriger les erreurs ci-dessous.
+            </div>
+            {% endif %}
 
-                        <!-- Côté droit — Formulaire -->
-                        <div class="col-lg-8 auth_card_right">
+            <form method="post" action="{% url 'accounts:register' %}" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
 
-                            <h2 class="auth_title">Créer un compte</h2>
-                            <p class="auth_subtitle">Remplissez le formulaire ci-dessous pour rejoindre AvenSU-Orienta.</p>
-
-                            {% if form.errors %}
-                                <div class="alert_errors">
-                                    <i class="fas fa-exclamation-triangle mr-2"></i>
-                                    Veuillez corriger les erreurs ci-dessous.
-                                </div>
-                            {% endif %}
-
-                            <form method="post" action="{% url 'accounts:register' %}">
-                                {% csrf_token %}
-
-                                <!-- Rôle -->
-                                <div class="form-group mb-4">
-                                    <label style="display: block; margin-bottom: 12px;">Je suis...</label>
-                                    <div class="d-flex" style="gap: 12px;">
-                                        <label class="role_option" for="role_etudiant">
-                                            <input type="radio" name="role" id="role_etudiant" value="etudiant" style="display: none;" {% if form.role.value == 'etudiant' or not form.role.value %}checked{% endif %}>
-                                            <i class="fas fa-graduation-cap"></i>
-                                            <span>Étudiant(e)</span>
-                                        </label>
-                                        <label class="role_option" for="role_parent">
-                                            <input type="radio" name="role" id="role_parent" value="parent" style="display: none;" {% if form.role.value == 'parent' %}checked{% endif %}>
-                                            <i class="fas fa-users"></i>
-                                            <span>Parent</span>
-                                        </label>
-                                        <label class="role_option" for="role_conseiller">
-                                            <input type="radio" name="role" id="role_conseiller" value="conseiller" style="display: none;" {% if form.role.value == 'conseiller' %}checked{% endif %}>
-                                            <i class="fas fa-user-tie"></i>
-                                            <span>Conseiller</span>
-                                        </label>
-                                    </div>
-                                    {% if form.role.errors %}
-                                        <div class="text-danger" style="font-size: 0.85rem; margin-top: 5px;">{{ form.role.errors|join:", " }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Prénom / Nom -->
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="id_first_name">Prénom</label>
-                                        <input type="text" name="first_name" id="id_first_name" class="form-control{% if form.first_name.errors %} is-invalid{% endif %}" placeholder="Votre prénom" value="{{ form.first_name.value|default:'' }}" required>
-                                        {% if form.first_name.errors %}
-                                            <div class="invalid-feedback">{{ form.first_name.errors|join:", " }}</div>
-                                        {% endif %}
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="id_last_name">Nom de famille</label>
-                                        <input type="text" name="last_name" id="id_last_name" class="form-control{% if form.last_name.errors %} is-invalid{% endif %}" placeholder="Votre nom" value="{{ form.last_name.value|default:'' }}" required>
-                                        {% if form.last_name.errors %}
-                                            <div class="invalid-feedback">{{ form.last_name.errors|join:", " }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Email -->
-                                <div class="form-group">
-                                    <label for="id_email">Adresse e-mail</label>
-                                    <input type="email" name="email" id="id_email" class="form-control{% if form.email.errors %} is-invalid{% endif %}" placeholder="exemple@email.com" value="{{ form.email.value|default:'' }}" required>
-                                    {% if form.email.errors %}
-                                        <div class="invalid-feedback">{{ form.email.errors|join:", " }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Pays -->
-                                <div class="form-group">
-                                    <label for="id_pays">Pays de résidence</label>
-                                    <select name="pays" id="id_pays" class="form-control{% if form.pays.errors %} is-invalid{% endif %}">
-                                        <option value="">Sélectionnez votre pays</option>
-                                        <option value="TG" {% if form.pays.value == 'TG' %}selected{% endif %}>Togo</option>
-                                        <option value="SN" {% if form.pays.value == 'SN' %}selected{% endif %}>Sénégal</option>
-                                        <option value="CI" {% if form.pays.value == 'CI' %}selected{% endif %}>Côte d'Ivoire</option>
-                                        <option value="GH" {% if form.pays.value == 'GH' %}selected{% endif %}>Ghana</option>
-                                        <option value="BJ" {% if form.pays.value == 'BJ' %}selected{% endif %}>Bénin</option>
-                                        <option value="ML" {% if form.pays.value == 'ML' %}selected{% endif %}>Mali</option>
-                                        <option value="BF" {% if form.pays.value == 'BF' %}selected{% endif %}>Burkina Faso</option>
-                                        <option value="GN" {% if form.pays.value == 'GN' %}selected{% endif %}>Guinée</option>
-                                        <option value="NE" {% if form.pays.value == 'NE' %}selected{% endif %}>Niger</option>
-                                        <option value="NG" {% if form.pays.value == 'NG' %}selected{% endif %}>Nigeria</option>
-                                        <option value="MR" {% if form.pays.value == 'MR' %}selected{% endif %}>Mauritanie</option>
-                                        <option value="GW" {% if form.pays.value == 'GW' %}selected{% endif %}>Guinée-Bissau</option>
-                                        <option value="CV" {% if form.pays.value == 'CV' %}selected{% endif %}>Cap-Vert</option>
-                                        <option value="LR" {% if form.pays.value == 'LR' %}selected{% endif %}>Liberia</option>
-                                        <option value="SL" {% if form.pays.value == 'SL' %}selected{% endif %}>Sierra Leone</option>
-                                        <option value="GM" {% if form.pays.value == 'GM' %}selected{% endif %}>Gambie</option>
-                                        <option value="autre" {% if form.pays.value == 'autre' %}selected{% endif %}>Autre pays</option>
-                                    </select>
-                                    {% if form.pays.errors %}
-                                        <div class="invalid-feedback">{{ form.pays.errors|join:", " }}</div>
-                                    {% endif %}
-                                </div>
-
-                                <!-- Mot de passe -->
-                                <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label for="id_password1">Mot de passe</label>
-                                        <input type="password" name="password1" id="id_password1" class="form-control{% if form.password1.errors %} is-invalid{% endif %}" placeholder="Choisissez un mot de passe" required>
-                                        {% if form.password1.errors %}
-                                            <div class="invalid-feedback">{{ form.password1.errors|join:", " }}</div>
-                                        {% endif %}
-                                        <small class="form-text text-muted">8 caractères minimum, avec majuscule et chiffre.</small>
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label for="id_password2">Confirmer le mot de passe</label>
-                                        <input type="password" name="password2" id="id_password2" class="form-control{% if form.password2.errors %} is-invalid{% endif %}" placeholder="Répétez le mot de passe" required>
-                                        {% if form.password2.errors %}
-                                            <div class="invalid-feedback">{{ form.password2.errors|join:", " }}</div>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- CGU -->
-                                <div class="form-group form-check mb-4">
-                                    <input type="checkbox" class="form-check-input" id="cgu" name="cgu" required>
-                                    <label class="form-check-label" for="cgu" style="font-size: 0.85rem; color: #666;">
-                                        J'accepte les <a href="#" class="auth_link">Conditions Générales d'Utilisation</a> et la <a href="#" class="auth_link">Politique de confidentialité</a> d'AvenSU-Orienta.
-                                    </label>
-                                </div>
-
-                                <button type="submit" class="btn_auth">
-                                    <i class="fas fa-user-plus mr-2"></i>Créer mon compte
-                                </button>
-
-                                <div class="text-center mt-4">
-                                    <span style="font-size: 0.9rem; color: #666;">Déjà un compte ?</span>
-                                    <a href="{% url 'accounts:login' %}" class="auth_link ml-1">Se connecter</a>
-                                </div>
-
-                            </form>
-
-                        </div>
+                <!-- Choix du rôle -->
+                <div class="mb-4">
+                    <label class="form_label">Je suis...</label>
+                    <div class="d-flex flex-wrap" style="gap:8px;">
+                        <label class="role_card {% if form.role.value == 'STUDENT' or not form.role.value %}active{% endif %}" for="role_student">
+                            <input type="radio" name="role" id="role_student" value="STUDENT"
+                                   {% if form.role.value == 'STUDENT' or not form.role.value %}checked{% endif %}>
+                            <i class="fas fa-graduation-cap"></i>
+                            <span>Étudiant(e)</span>
+                        </label>
+                        <label class="role_card {% if form.role.value == 'PARENT' %}active{% endif %}" for="role_parent">
+                            <input type="radio" name="role" id="role_parent" value="PARENT"
+                                   {% if form.role.value == 'PARENT' %}checked{% endif %}>
+                            <i class="fas fa-users"></i>
+                            <span>Parent</span>
+                        </label>
+                        <label class="role_card {% if form.role.value == 'COUNSELOR' %}active{% endif %}" for="role_counselor">
+                            <input type="radio" name="role" id="role_counselor" value="COUNSELOR"
+                                   {% if form.role.value == 'COUNSELOR' %}checked{% endif %}>
+                            <i class="fas fa-user-tie"></i>
+                            <span>Conseiller</span>
+                        </label>
+                        <label class="role_card {% if form.role.value == 'SCHOOL_REP' %}active{% endif %}" for="role_school_rep">
+                            <input type="radio" name="role" id="role_school_rep" value="SCHOOL_REP"
+                                   {% if form.role.value == 'SCHOOL_REP' %}checked{% endif %}>
+                            <i class="fas fa-university"></i>
+                            <span>Établissement</span>
+                        </label>
                     </div>
                 </div>
+
+                <!-- Prénom / Nom -->
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="form_label" for="id_first_name">Prénom *</label>
+                        <input type="text" name="first_name" id="id_first_name"
+                               class="input_field {% if form.first_name.errors %}is-invalid{% endif %}"
+                               placeholder="Votre prénom" value="{{ form.first_name.value|default:'' }}" required>
+                        {% if form.first_name.errors %}<div class="form_error">{{ form.first_name.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="form_label" for="id_last_name">Nom de famille *</label>
+                        <input type="text" name="last_name" id="id_last_name"
+                               class="input_field {% if form.last_name.errors %}is-invalid{% endif %}"
+                               placeholder="Votre nom" value="{{ form.last_name.value|default:'' }}" required>
+                        {% if form.last_name.errors %}<div class="form_error">{{ form.last_name.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group mb-3">
+                    <label class="form_label" for="id_email">Adresse e-mail *</label>
+                    <input type="email" name="email" id="id_email"
+                           class="input_field {% if form.email.errors %}is-invalid{% endif %}"
+                           placeholder="exemple@email.com" value="{{ form.email.value|default:'' }}" required>
+                    {% if form.email.errors %}<div class="form_error">{{ form.email.errors.0 }}</div>{% endif %}
+                </div>
+
+                <!-- Mot de passe -->
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label class="form_label" for="id_password1">Mot de passe *</label>
+                        <input type="password" name="password1" id="id_password1"
+                               class="input_field {% if form.password1.errors %}is-invalid{% endif %}"
+                               placeholder="10 caractères minimum" required autocomplete="new-password">
+                        {% if form.password1.errors %}<div class="form_error">{{ form.password1.errors.0 }}</div>{% endif %}
+                    </div>
+                    <div class="form-group col-md-6">
+                        <label class="form_label" for="id_password2">Confirmer *</label>
+                        <input type="password" name="password2" id="id_password2"
+                               class="input_field {% if form.password2.errors %}is-invalid{% endif %}"
+                               placeholder="Répétez le mot de passe" required autocomplete="new-password">
+                        {% if form.password2.errors %}<div class="form_error">{{ form.password2.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+
+                <!-- ═══ BLOC VÉRIFICATION (non-étudiants) ═══ -->
+                <div id="verification_block" style="display:none;">
+                    <div class="mt-4 p-4" style="background:var(--color-info-bg); border-radius:var(--radius-md); border-left:4px solid var(--color-info); margin-bottom:var(--space-4);">
+                        <p style="font-size:var(--text-sm); color:var(--color-info); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">
+                            <i class="fas fa-info-circle mr-2"></i>Document justificatif requis
+                        </p>
+                        <p style="font-size:var(--text-sm); color:var(--color-text); margin:0; line-height:var(--leading-relaxed);">
+                            Pour les comptes Parent, Conseiller et Représentant d'établissement, un document d'identité est nécessaire.
+                            Votre compte sera activé après vérification par notre équipe.
+                        </p>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form_label" for="id_type_document">Type de document *</label>
+                        <select name="type_document" id="id_type_document"
+                                class="input_field {% if form.type_document.errors %}is-invalid{% endif %}">
+                            <option value="">-- Choisir le type --</option>
+                            {% for value, label in form.type_document.field.choices %}
+                            {% if value %}
+                            <option value="{{ value }}" {% if form.type_document.value == value %}selected{% endif %}>{{ label }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                        {% if form.type_document.errors %}<div class="form_error">{{ form.type_document.errors.0 }}</div>{% endif %}
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label class="form_label" for="id_document">Document justificatif *</label>
+                        <input type="file" name="document" id="id_document"
+                               class="input_field {% if form.document.errors %}is-invalid{% endif %}"
+                               accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted" style="font-size:var(--text-xs);">
+                            <i class="fas fa-paperclip mr-1"></i>PDF, JPG ou PNG — 5 Mo maximum
+                        </small>
+                        {% if form.document.errors %}<div class="form_error">{{ form.document.errors.0 }}</div>{% endif %}
+                    </div>
+                </div>
+                <!-- ═══ FIN BLOC VÉRIFICATION ═══ -->
+
+                <!-- CGU -->
+                <div class="form-check mb-4">
+                    <input type="checkbox" class="form-check-input" id="cgu" name="cgu" required>
+                    <label class="form-check-label" for="cgu" style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                        J'accepte les <a href="#" class="auth_link">Conditions d'Utilisation</a> et la <a href="#" class="auth_link">Politique de confidentialité</a>.
+                    </label>
+                </div>
+
+                <button type="submit" class="auth_btn">
+                    <i class="fas fa-user-plus mr-2"></i>Créer mon compte
+                </button>
+
+                <div class="text-center mt-3">
+                    <span style="font-size:var(--text-sm); color:var(--color-text-muted);">Déjà un compte ?</span>
+                    <a href="{% url 'accounts:login' %}" class="auth_link ml-1">Se connecter</a>
+                </div>
+
+            </form>
+        </div>
+
+        <!-- Côté info (gold) -->
+        <div class="auth_info_side">
+            <h3 class="auth_info_title">Rejoignez la communauté</h3>
+            <p class="auth_info_text">
+                Des milliers d'étudiants et de familles font confiance à AvenSU-Orienta pour leurs décisions d'orientation.
+            </p>
+            <div>
+                <div class="auth_info_feature"><i class="fas fa-star"></i>Inscription 100% gratuite</div>
+                <div class="auth_info_feature"><i class="fas fa-star"></i>Test RIASEC gratuit</div>
+                <div class="auth_info_feature"><i class="fas fa-star"></i>Recommandations personnalisées</div>
+                <div class="auth_info_feature"><i class="fas fa-star"></i>Conseils d'experts</div>
+                <div class="auth_info_feature"><i class="fas fa-star"></i>Suivi des candidatures</div>
+            </div>
+
+            <!-- Indicateur de sécurité -->
+            <div class="mt-4 pt-4" style="border-top:1px solid rgba(0,0,0,0.12);">
+                <p style="font-size:var(--text-xs); color:rgba(0,0,0,0.55); line-height:var(--leading-relaxed);">
+                    <i class="fas fa-shield-alt mr-1"></i>
+                    Vos données sont protégées. Les documents de vérification sont chiffrés et traités uniquement par notre équipe.
+                </p>
             </div>
         </div>
+
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Gestion visuelle des boutons de rôle
-document.querySelectorAll('.role_option').forEach(function(label) {
-    label.addEventListener('click', function() {
-        document.querySelectorAll('.role_option').forEach(function(l) { l.classList.remove('active'); });
-        this.classList.add('active');
-    });
-    // Marquer l'actif au chargement
-    var radio = label.querySelector('input[type=radio]');
-    if (radio && radio.checked) {
-        label.classList.add('active');
+(function() {
+    var NON_STUDENT_ROLES = ['PARENT', 'COUNSELOR', 'SCHOOL_REP'];
+    var block = document.getElementById('verification_block');
+    var docInput = document.getElementById('id_document');
+    var typeInput = document.getElementById('id_type_document');
+
+    function updateVerificationBlock() {
+        var selected = document.querySelector('input[name="role"]:checked');
+        var role = selected ? selected.value : 'STUDENT';
+        var show = NON_STUDENT_ROLES.indexOf(role) !== -1;
+
+        block.style.display = show ? 'block' : 'none';
+        if (docInput) docInput.required = show;
+        if (typeInput) typeInput.required = show;
     }
-});
+
+    document.querySelectorAll('.role_card').forEach(function(label) {
+        label.addEventListener('click', function() {
+            document.querySelectorAll('.role_card').forEach(function(l) {
+                l.classList.remove('active');
+            });
+            this.classList.add('active');
+            // Attendre que le radio soit coché avant de re-tester
+            setTimeout(updateVerificationBlock, 10);
+        });
+    });
+
+    // Initialisation au chargement
+    updateVerificationBlock();
+})();
 </script>
 {% endblock %}
-

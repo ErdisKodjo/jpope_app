@@ -290,7 +290,9 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@avensu-orient
 # CHATBOT / IA
 # ──────────────────────────────────────────────
 CHATBOT = {
-    "PROVIDER": os.environ.get("CHATBOT_PROVIDER", "openai"),  # openai | ollama
+    "PROVIDER": os.environ.get("CHATBOT_PROVIDER", "anthropic"),  # anthropic | openai | ollama
+    "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", ""),
+    "ANTHROPIC_MODEL": os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001"),
     "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
     "OPENAI_MODEL": os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
     "OLLAMA_BASE_URL": os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434"),

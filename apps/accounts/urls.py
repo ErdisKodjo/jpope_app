@@ -2,8 +2,6 @@
 URLs web pour l'app accounts.
 """
 from django.urls import path
-from django.contrib.auth import views as auth_views
-from django.views.generic import TemplateView
 
 from . import views
 
@@ -11,7 +9,7 @@ app_name = "accounts"
 
 urlpatterns = [
     # Page d'accueil
-    path("", TemplateView.as_view(template_name="home.html"), name="home"),
+    path("", views.HomeView.as_view(), name="home"),
 
     # Authentification
     path("login/", views.LoginView.as_view(), name="login"),
@@ -37,4 +35,12 @@ urlpatterns = [
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("profile/edit/", views.ProfileEditView.as_view(), name="profile_edit"),
     path("profile/student/", views.StudentProfileEditView.as_view(), name="student_profile_edit"),
+
+    # Vérification de compte (comptes non-étudiants en attente)
+    path("verification-pending/", views.VerificationPendingView.as_view(), name="verification_pending"),
+
+    # Administration des vérifications (ADMIN uniquement)
+    path("admin/verify/", views.AdminVerifyListView.as_view(), name="admin_verify_list"),
+    path("admin/verify/<int:pk>/approve/", views.AdminVerifyApproveView.as_view(), name="admin_verify_approve"),
+    path("admin/verify/<int:pk>/reject/", views.AdminVerifyRejectView.as_view(), name="admin_verify_reject"),
 ]

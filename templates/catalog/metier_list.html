@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Métiers — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<!-- En-tête de page -->
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Métiers &amp; Débouchés</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Métiers</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="container" style="position:relative; z-index:20;">
+    <div class="filter_form_container">
+        <form method="get" class="row align-items-end">
+            <div class="col-lg-5 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Domaine</label>
+                <select name="domaine" class="input_field" style="appearance:auto;">
+                    <option value="">Tous les domaines</option>
+                    {% for domaine in domaines %}
+                    <option value="{{ domaine.slug }}" {% if request.GET.domaine == domaine.slug %}selected{% endif %}>{{ domaine.nom }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                <label class="filter_label">Demande du marché</label>
+                <select name="demande" class="input_field" style="appearance:auto;">
+                    <option value="">Toutes</option>
+                    <option value="FORT" {% if request.GET.demande == 'FORT' %}selected{% endif %}>Forte demande</option>
+                    <option value="MOYEN" {% if request.GET.demande == 'MOYEN' %}selected{% endif %}>Demande moyenne</option>
+                    <option value="FAIBLE" {% if request.GET.demande == 'FAIBLE' %}selected{% endif %}>Faible demande</option>
+                </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <button type="submit" class="comment_button w-100"><i class="fas fa-search mr-2"></i>Filtrer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste -->
+<div class="page_section" style="padding-top:var(--space-8);">
+    <div class="container">
+        <div class="row">
+            {% for metier in metiers %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card unified_card h-100">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-center mb-3" style="gap:var(--space-3);">
+                            <div style="width:44px; height:44px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="fas fa-briefcase" style="color:var(--color-primary); font-size:var(--text-md);"></i>
+                            </div>
+                            <div>
+                                <span class="tag_badge tag_badge--{% if metier.demande_marche == 'FORT' %}success{% elif metier.demande_marche == 'MOYEN' %}info{% else %}primary{% endif %}">
+                                    {{ metier.get_demande_marche_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <h3 class="unified_card_title" style="font-size:var(--text-base);">{{ metier.nom }}</h3>
+                        {% if metier.description_courte %}
+                        <p class="unified_card_text">{{ metier.description_courte|truncatewords:20 }}</p>
+                        {% endif %}
+                        {% if metier.domaine %}
+                        <span class="tag_badge"><i class="fas fa-folder mr-1" style="color:var(--color-primary);"></i>{{ metier.domaine.nom }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="unified_card_footer">
+                        <div class="unified_price_box">
+                            <small class="text-muted">Salaire moyen</small>
+                            <span class="unified_price">{{ metier.revenu_moyen_formate }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="empty_state">
+                    <i class="fas fa-briefcase empty_state_icon"></i>
+                    <h4>Aucun métier trouvé</h4>
+                    <p>Essayez d'élargir vos critères de recherche.</p>
+                    <a href="{% url 'catalog:metier-list' %}" class="comment_button">Voir tous les métiers</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.domaine %}&domaine={{ request.GET.domaine }}{% endif %}{% if request.GET.demande %}&demande={{ request.GET.demande }}{% endif %}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.domaine %}&domaine={{ request.GET.domaine }}{% endif %}{% if request.GET.demande %}&demande={{ request.GET.demande }}{% endif %}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
