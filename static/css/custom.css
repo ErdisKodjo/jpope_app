@@ -102,6 +102,84 @@ body, p {
   color: var(--color-primary);
 }
 
+/* ── NAVBAR DROPDOWNS ── */
+.main_nav_item--dropdown {
+  position: relative;
+}
+.main_nav_item--dropdown > .main_nav_dropdown_toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.main_nav_dropdown {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 220px;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 14px 0 var(--space-2) 0;
+  z-index: var(--z-dropdown);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-base),
+    transform var(--transition-base),
+    visibility var(--transition-base);
+  pointer-events: none;
+}
+/* Flèche — positionnée dans le padding-top du panel */
+.main_nav_dropdown::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top: none;
+  border-bottom-color: var(--color-border-light);
+}
+.main_nav_dropdown::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top: none;
+  border-bottom-color: var(--color-bg-card);
+}
+.main_nav_item--dropdown:hover .main_nav_dropdown,
+.main_nav_item--dropdown:focus-within .main_nav_dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+.main_nav_dropdown_item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-5);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text);
+  transition: background var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+}
+.main_nav_dropdown_item:hover {
+  background: var(--color-bg-subtle);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+.main_nav_dropdown_divider {
+  height: 1px;
+  background: var(--color-border-light);
+  margin: var(--space-2) 0;
+}
+
 /* courses_styles.css: carré prix des cartes formations (catalog_list.html) */
 .course_price {
   background: var(--color-accent);
@@ -152,15 +230,19 @@ p {
 }
 .section_title h1,
 .section_title h2 {
-  font-size: var(--text-3xl);
+  font-size: var(--text-4xl);
   font-weight: var(--weight-extrabold);
   color: var(--color-dark);
   margin-bottom: var(--space-2);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
 }
 .section_title p {
   font-size: var(--text-md);
   color: var(--color-text-muted);
-  margin-bottom: 0;
+  margin: 0 auto;
+  line-height: var(--leading-relaxed);
+  max-width: 560px;
 }
 /* Ligne accent sous tous les titres de section */
 .section_title h1::after,
@@ -910,12 +992,13 @@ p {
   font-weight: var(--weight-bold);
   color: var(--color-dark);
   margin-bottom: var(--space-2);
+  letter-spacing: -0.01em;
 }
 .hero_box_text {
   font-size: var(--text-base);
   color: var(--color-text-muted);
   margin-bottom: var(--space-3);
-  line-height: var(--leading-normal);
+  line-height: var(--leading-relaxed);
 }
 .hero_box_link {
   font-size: var(--text-base);
@@ -1415,23 +1498,27 @@ p {
   color: var(--color-accent);
   font-weight: var(--weight-bold);
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 0.14em;
   margin-bottom: var(--space-4);
   font-size: var(--text-sm);
 }
 .hero_slide_content h1 {
   color: white;
-  font-size: var(--text-hero);  /* responsive : clamp(26px,5vw,48px) */
-  font-weight: var(--weight-extrabold);
-  line-height: var(--leading-tight);
+  font-size: var(--text-hero);
+  font-weight: var(--weight-black);
+  line-height: 1.10;
   margin-bottom: var(--space-5);
   font-family: var(--font-heading);
+  letter-spacing: -0.03em;
 }
 .hero_slide_content p {
-  color: rgba(255,255,255,0.88);
+  color: rgba(255,255,255,0.82);
   font-size: var(--text-md);
   margin-bottom: var(--space-7);
   line-height: var(--leading-relaxed);
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ──────────────────────────────────────
@@ -1644,16 +1731,17 @@ p {
   color: white;
 }
 .service_card h3 {
-  font-size: var(--text-md);
+  font-size: var(--text-lg);
   font-weight: var(--weight-bold);
   color: var(--color-dark);
   margin-bottom: var(--space-2);
+  letter-spacing: -0.01em;
 }
 .service_card p {
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   margin: 0;
-  line-height: var(--leading-normal);
+  line-height: var(--leading-relaxed);
 }
 
 

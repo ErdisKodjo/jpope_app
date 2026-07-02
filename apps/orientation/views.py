@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views import View
 from django.views.generic import ListView, DetailView, TemplateView
 
-from apps.accounts.mixins import VerifiedAccountMixin
+from apps.accounts.mixins import VerifiedAccountMixin, CounselorOrAdminMixin
 from .models import (
     TestOrientation, ResultatTest, Recommandation, StatutTest,
     ReponseUtilisateur, DetailReponse, Question, Choice,
@@ -125,6 +125,43 @@ class RecommandationListView(VerifiedAccountMixin, ListView):
             qs = qs.filter(plan=plan)
 
         return qs.order_by("plan", "ordre", "-taux_compatibilite")
+
+
+class ResultatsConseillerView(CounselorOrAdminMixin, ListView):
+    """Vue réservée aux conseillers et admins : tous les résultats étudiants."""
+    model = ResultatTest
+    template_name = "orientation/resultats_conseiller.html"
+    context_object_name = "resultats"
+    paginate_by = 25
+
+    def get_queryset(self):
+        qs = ResultatTest.objects.select_related(
+            "reponse_utilisateur__etudiant",
+            "reponse_utilisateur__test",
+        ).order_by("-date_calcul")
+
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            from django.db.models import Q
+            qs = qs.filter(
+                Q(reponse_utilisateur__etudiant__email__icontains=q)
+                | Q(reponse_utilisateur__etudiant__first_name__icontains=q)
+                | Q(reponse_utilisateur__etudiant__last_name__icontains=q)
+            )
+
+        test_id = self.request.GET.get("test", "").strip()
+        if test_id:
+            qs = qs.filter(reponse_utilisateur__test__id=test_id)
+
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tests"] = TestOrientation.objects.filter(is_active=True).order_by("nom")
+        context["total_passations"] = ResultatTest.objects.count()
+        context["q"] = self.request.GET.get("q", "")
+        context["test_selectionne"] = self.request.GET.get("test", "")
+        return context
 
 
 class TakeTestView(VerifiedAccountMixin, DetailView):

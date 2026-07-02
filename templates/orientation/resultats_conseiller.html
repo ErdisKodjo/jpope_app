@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tableau des résultats — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Tableau des résultats</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'orientation:home' %}">Orientation</a></li>
+                    <li class="breadcrumb-item active">Tableau des résultats</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- Stats rapides -->
+        <div class="row mb-5">
+            <div class="col-md-4 mb-3">
+                <div class="sidebar_section text-center">
+                    <div style="font-size:var(--text-4xl); font-weight:var(--weight-black); color:var(--color-primary);">
+                        {{ total_passations }}
+                    </div>
+                    <p class="text-muted mb-0" style="font-size:var(--text-sm);">Tests complétés</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="sidebar_section text-center">
+                    <div style="font-size:var(--text-4xl); font-weight:var(--weight-black); color:var(--color-accent);">
+                        {{ tests.count }}
+                    </div>
+                    <p class="text-muted mb-0" style="font-size:var(--text-sm);">Tests actifs</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="sidebar_section text-center">
+                    <div style="font-size:var(--text-4xl); font-weight:var(--weight-black); color:var(--color-success);">
+                        {{ page_obj.paginator.count }}
+                    </div>
+                    <p class="text-muted mb-0" style="font-size:var(--text-sm);">Résultats affichés</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filter_form_container mb-5">
+            <form method="get" class="row align-items-end">
+                <div class="col-lg-5 col-md-6 mb-3 mb-lg-0">
+                    <label class="filter_label">Rechercher un étudiant</label>
+                    <input type="text" name="q" value="{{ q }}" class="input_field"
+                           placeholder="Nom, prénom ou email…">
+                </div>
+                <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+                    <label class="filter_label">Filtrer par test</label>
+                    <select name="test" class="input_field" style="appearance:auto;">
+                        <option value="">Tous les tests</option>
+                        {% for test in tests %}
+                        <option value="{{ test.id }}" {% if test_selectionne == test.id|stringformat:'s' %}selected{% endif %}>
+                            {{ test.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <button type="submit" class="comment_button w-100">
+                        <i class="fas fa-search mr-2"></i>Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Tableau des résultats -->
+        {% if resultats %}
+        <div class="table-responsive">
+            <table class="table" style="background:white; border-radius:var(--radius-lg); overflow:hidden; box-shadow:var(--shadow-sm);">
+                <thead style="background:var(--color-deep); color:white;">
+                    <tr>
+                        <th style="padding:var(--space-4) var(--space-5); font-size:var(--text-sm); font-weight:var(--weight-bold); letter-spacing:0.05em; border:none;">Étudiant</th>
+                        <th style="padding:var(--space-4) var(--space-5); font-size:var(--text-sm); font-weight:var(--weight-bold); letter-spacing:0.05em; border:none;">Test</th>
+                        <th style="padding:var(--space-4) var(--space-5); font-size:var(--text-sm); font-weight:var(--weight-bold); letter-spacing:0.05em; border:none;">Profil</th>
+                        <th style="padding:var(--space-4) var(--space-5); font-size:var(--text-sm); font-weight:var(--weight-bold); letter-spacing:0.05em; border:none; text-align:center;">Score</th>
+                        <th style="padding:var(--space-4) var(--space-5); font-size:var(--text-sm); font-weight:var(--weight-bold); letter-spacing:0.05em; border:none;">Date</th>
+                        <th style="padding:var(--space-4) var(--space-5); font-size:var(--text-sm); font-weight:var(--weight-bold); letter-spacing:0.05em; border:none;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resultat in resultats %}
+                    <tr style="border-bottom:1px solid var(--color-border-light);">
+                        <td style="padding:var(--space-4) var(--space-5); vertical-align:middle; border:none;">
+                            <div style="display:flex; align-items:center; gap:var(--space-3);">
+                                <div style="width:36px; height:36px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <i class="fas fa-user" style="color:var(--color-primary); font-size:var(--text-sm);"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:var(--weight-bold); font-size:var(--text-sm); color:var(--color-dark);">
+                                        {{ resultat.reponse_utilisateur.etudiant.get_full_name|default:resultat.reponse_utilisateur.etudiant.email }}
+                                    </div>
+                                    <div style="font-size:var(--text-xs); color:var(--color-text-muted);">
+                                        {{ resultat.reponse_utilisateur.etudiant.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding:var(--space-4) var(--space-5); vertical-align:middle; border:none;">
+                            <span style="font-size:var(--text-sm); color:var(--color-text);">
+                                {{ resultat.reponse_utilisateur.test.nom }}
+                            </span>
+                        </td>
+                        <td style="padding:var(--space-4) var(--space-5); vertical-align:middle; border:none;">
+                            {% if resultat.code_holland %}
+                            <span class="tag_badge tag_badge--primary">{{ resultat.code_holland }}</span>
+                            {% endif %}
+                            {% if resultat.profil_dominant %}
+                            <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-1);">
+                                {{ resultat.dimension_dominante_nom }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding:var(--space-4) var(--space-5); vertical-align:middle; border:none; text-align:center;">
+                            {% if resultat.score_global %}
+                            <div style="display:inline-flex; align-items:center; justify-content:center; width:48px; height:48px; border-radius:var(--radius-full); background:{% if resultat.score_global >= 70 %}var(--color-success-bg){% elif resultat.score_global >= 40 %}var(--safran-50){% else %}var(--color-danger-bg){% endif %};">
+                                <span style="font-weight:var(--weight-black); font-size:var(--text-sm); color:{% if resultat.score_global >= 70 %}var(--color-success){% elif resultat.score_global >= 40 %}var(--safran-600){% else %}var(--color-danger){% endif %};">
+                                    {{ resultat.score_global|floatformat:0 }}
+                                </span>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:var(--space-4) var(--space-5); vertical-align:middle; border:none;">
+                            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                                {{ resultat.date_calcul|date:"d/m/Y" }}
+                            </span>
+                        </td>
+                        <td style="padding:var(--space-4) var(--space-5); vertical-align:middle; border:none;">
+                            <a href="{% url 'orientation:resultat-detail' resultat.pk %}"
+                               class="btn_ghost btn_sm" style="white-space:nowrap;">
+                                <i class="fas fa-eye mr-1"></i>Voir
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if test_selectionne %}&test={{ test_selectionne }}{% endif %}">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if test_selectionne %}&test={{ test_selectionne }}{% endif %}">
+                        {{ num }}
+                    </a>
+                </li>
+                {% endfor %}
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if test_selectionne %}&test={{ test_selectionne }}{% endif %}">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state">
+            <i class="fas fa-chart-bar empty_state_icon"></i>
+            <h4>Aucun résultat trouvé</h4>
+            <p>{% if q %}Aucun résultat pour la recherche "{{ q }}".{% else %}Aucun étudiant n'a encore passé de test.{% endif %}</p>
+            {% if q %}
+            <a href="{% url 'orientation:resultats-conseiller' %}" class="comment_button">Voir tous les résultats</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

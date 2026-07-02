@@ -23,7 +23,7 @@
 </div>
 
 <!-- Barre de filtres -->
-<div class="container" style="position:relative; z-index:20;">
+<div class="container">
     <div class="filter_form_container">
         <form method="get" class="row align-items-end">
             <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
@@ -95,8 +95,8 @@
 
         <div class="row">
             {% for formation in formations %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card unified_card h-100">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
                     <div class="position-relative">
                         <img class="card-img-top" src="{% static 'images/course_1.jpg' %}" alt="{{ formation.nom }}" style="height:180px; object-fit:cover;">
                         <span class="unified_card_domain_badge">{{ formation.domaine.nom|default:"Général" }}</span>

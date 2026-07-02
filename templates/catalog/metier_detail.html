@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ metier.nom }} — Métiers — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>{{ metier.nom }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'catalog:metier-list' %}">Métiers</a></li>
+                    <li class="breadcrumb-item active">{{ metier.nom }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Contenu principal -->
+            <div class="col-lg-8">
+
+                <!-- Badges & domaine -->
+                <div class="d-flex align-items-center flex-wrap mb-4" style="gap:var(--space-2);">
+                    <span class="tag_badge">
+                        <i class="fas fa-folder mr-1" style="color:var(--color-primary);"></i>{{ metier.domaine.nom }}
+                    </span>
+                    <span class="tag_badge tag_badge--{% if metier.demande_marche == 'TRES_FORTE' or metier.demande_marche == 'FORTE' %}success{% elif metier.demande_marche == 'MOYENNE' %}info{% else %}primary{% endif %}">
+                        <i class="fas fa-chart-line mr-1"></i>{{ metier.get_demande_marche_display }}
+                    </span>
+                    <span class="tag_badge">
+                        <i class="fas fa-graduation-cap mr-1"></i>{{ metier.get_niveau_etude_requis_display }}
+                    </span>
+                </div>
+
+                {% if metier.description %}
+                <div class="sidebar_section mb-4">
+                    <h2 class="detail_section_title">Description du métier</h2>
+                    <div style="font-size:var(--text-md); line-height:var(--leading-relaxed); color:var(--color-text);">
+                        {{ metier.description|linebreaksbr }}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Compétences clés -->
+                {% if metier.competences_cles %}
+                <div class="sidebar_section mb-4">
+                    <h2 class="detail_section_title">Compétences clés</h2>
+                    <div class="d-flex flex-wrap" style="gap:var(--space-2);">
+                        {% for competence in metier.competences_cles %}
+                        <span class="tag_badge tag_badge--primary">
+                            <i class="fas fa-check mr-1"></i>{{ competence }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Tâches principales -->
+                {% if metier.taches_principales %}
+                <div class="sidebar_section mb-4">
+                    <h2 class="detail_section_title">Tâches principales</h2>
+                    <ul style="padding-left:var(--space-5); margin:0;">
+                        {% for tache in metier.taches_principales %}
+                        <li style="font-size:var(--text-md); color:var(--color-text); margin-bottom:var(--space-2); line-height:var(--leading-normal);">
+                            {{ tache }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Perspectives d'évolution -->
+                {% if metier.perspectives_evolution %}
+                <div class="sidebar_section mb-4">
+                    <h2 class="detail_section_title">Perspectives d'évolution</h2>
+                    <p style="font-size:var(--text-md); line-height:var(--leading-relaxed); color:var(--color-text); margin:0;">
+                        {{ metier.perspectives_evolution|linebreaksbr }}
+                    </p>
+                </div>
+                {% endif %}
+
+                <!-- Formations d'accès -->
+                {% if formations_acces %}
+                <div class="sidebar_section mb-4">
+                    <h2 class="detail_section_title">Formations pour accéder à ce métier</h2>
+                    <div class="row">
+                        {% for formation in formations_acces %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card unified_card w-100">
+                                <div class="unified_card_body">
+                                    <h3 class="unified_card_title">
+                                        <a href="{% url 'catalog:formation-detail' formation.slug %}">{{ formation.nom }}</a>
+                                    </h3>
+                                    <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                                        <i class="fas fa-university mr-1"></i>{{ formation.etablissement.nom }}
+                                    </p>
+                                    <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                                        <span class="tag_badge">{{ formation.get_niveau_display }}</span>
+                                        <span class="tag_badge">{{ formation.duree_annees }} an{{ formation.duree_annees|pluralize }}</span>
+                                    </div>
+                                </div>
+                                <div class="unified_card_footer">
+                                    <div class="unified_price_box">
+                                        <small class="text-muted">Coût annuel</small>
+                                        <span class="unified_price">{{ formation.cout_annuel|floatformat:0 }} FCFA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <!-- Salaires -->
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">Approximation salariale</h3>
+                    <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-4);">
+                        En FCFA/mois, brut. Source : {{ metier.source_donnees|default:"Données AvenSU" }}
+                        {% if metier.date_mise_a_jour %}— mis à jour le {{ metier.date_mise_a_jour|date:"m/Y" }}{% endif %}
+                    </p>
+
+                    <div style="background:var(--color-bg-subtle); border-radius:var(--radius-md); padding:var(--space-5); margin-bottom:var(--space-4);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">Salaire moyen</span>
+                            <span style="font-size:var(--text-xl); font-weight:var(--weight-black); color:var(--color-primary);">
+                                {{ metier.revenu_moyen_formate }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between" style="gap:var(--space-4);">
+                            <div class="text-center flex-1">
+                                <div style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-1);">Débutant</div>
+                                <div style="font-size:var(--text-md); font-weight:var(--weight-bold); color:var(--color-text);">{{ metier.revenu_min|floatformat:0 }} FCFA</div>
+                            </div>
+                            <div style="border-left:1px solid var(--color-border); margin:0 var(--space-2);"></div>
+                            <div class="text-center flex-1">
+                                <div style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-1);">Expérimenté</div>
+                                <div style="font-size:var(--text-md); font-weight:var(--weight-bold); color:var(--color-text);">{{ metier.revenu_max|floatformat:0 }} FCFA</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Barre de progression attractivité -->
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">Score d'attractivité</span>
+                            <span style="font-size:var(--text-sm); font-weight:var(--weight-bold); color:var(--color-primary);">{{ metier.score_attractivite|floatformat:0 }}/100</span>
+                        </div>
+                        <div style="height:6px; background:var(--color-border-light); border-radius:var(--radius-full); overflow:hidden;">
+                            <div style="height:100%; width:{{ metier.score_attractivite|floatformat:0 }}%; background:linear-gradient(90deg, var(--color-primary) 0%, var(--safran-400) 100%); border-radius:var(--radius-full); transition:width 1s ease;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Marché du travail -->
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">Marché du travail</h3>
+                    <div class="d-flex flex-column" style="gap:var(--space-3);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                                <i class="fas fa-briefcase mr-2" style="color:var(--color-primary);"></i>Taux d'emploi
+                            </span>
+                            <span style="font-size:var(--text-sm); font-weight:var(--weight-bold);">{{ metier.taux_emploi|floatformat:0 }}%</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                                <i class="fas fa-chart-line mr-2" style="color:var(--color-primary);"></i>Demande
+                            </span>
+                            <span class="tag_badge tag_badge--{% if metier.demande_marche == 'TRES_FORTE' or metier.demande_marche == 'FORTE' %}success{% elif metier.demande_marche == 'MOYENNE' %}info{% else %}primary{% endif %}">
+                                {{ metier.get_demande_marche_display }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                                <i class="fas fa-graduation-cap mr-2" style="color:var(--color-primary);"></i>Formation requise
+                            </span>
+                            <span style="font-size:var(--text-sm); font-weight:var(--weight-bold);">{{ metier.duree_formation_typique_annees }} an{{ metier.duree_formation_typique_annees|pluralize }}</span>
+                        </div>
+                        {% if metier.villes_principales %}
+                        <div>
+                            <div style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                                <i class="fas fa-map-marker-alt mr-2" style="color:var(--color-primary);"></i>Villes principales
+                            </div>
+                            <div class="d-flex flex-wrap" style="gap:var(--space-1);">
+                                {% for ville in metier.villes_principales %}
+                                <span class="tag_badge">{{ ville }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <div class="sidebar_section">
+                    <h3 class="sidebar_section_title">Explorer ce domaine</h3>
+                    <a href="{% url 'catalog:formation-list' %}?domaine={{ metier.domaine.slug }}" class="comment_button w-100 mb-3">
+                        <i class="fas fa-search mr-2"></i>Formations dans ce domaine
+                    </a>
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'orientation:test-list' %}" class="btn_ghost w-100">
+                        <i class="fas fa-compass mr-2"></i>Test d'orientation
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:register' %}" class="btn_ghost w-100">
+                        <i class="fas fa-user-plus mr-2"></i>Créer un compte gratuit
+                    </a>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

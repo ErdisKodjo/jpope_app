@@ -16,4 +16,5 @@ urlpatterns = [
     path("resultats/", views.ResultatListView.as_view(), name="resultats"),
     path("resultats/<uuid:pk>/", views.ResultatDetailView.as_view(), name="resultat-detail"),
     path("recommandations/", views.RecommandationListView.as_view(), name="recommandations"),
+    path("conseiller/resultats/", views.ResultatsConseillerView.as_view(), name="resultats-conseiller"),
 ]

@@ -189,7 +189,7 @@
   --text-3xl:   32px;
   --text-4xl:   40px;
   /* Hero titre : responsive natif via clamp */
-  --text-hero:  clamp(26px, 5vw, 48px);
+  --text-hero:  clamp(34px, 6vw, 62px);
 
   /* Interligne */
   --leading-tight:  1.25;

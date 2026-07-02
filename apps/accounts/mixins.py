@@ -37,6 +37,20 @@ class CounselorRequiredMixin(VerifiedAccountMixin):
         return result
 
 
+class CounselorOrAdminMixin(VerifiedAccountMixin):
+    """
+    Réserve l'accès aux utilisateurs COUNSELOR et ADMIN.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        result = super().dispatch(request, *args, **kwargs)
+        if not request.user.is_authenticated:
+            return result
+        if request.user.role not in (UserRole.COUNSELOR, UserRole.ADMIN):
+            raise PermissionDenied
+        return result
+
+
 class AdminRequiredMixin(LoginRequiredMixin):
     """
     Réserve l'accès aux utilisateurs ayant le rôle ADMIN ou superuser.

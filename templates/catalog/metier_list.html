@@ -22,7 +22,7 @@
 </div>
 
 <!-- Filtres -->
-<div class="container" style="position:relative; z-index:20;">
+<div class="container">
     <div class="filter_form_container">
         <form method="get" class="row align-items-end">
             <div class="col-lg-5 col-md-6 mb-3 mb-lg-0">
@@ -38,9 +38,11 @@
                 <label class="filter_label">Demande du marché</label>
                 <select name="demande" class="input_field" style="appearance:auto;">
                     <option value="">Toutes</option>
-                    <option value="FORT" {% if request.GET.demande == 'FORT' %}selected{% endif %}>Forte demande</option>
-                    <option value="MOYEN" {% if request.GET.demande == 'MOYEN' %}selected{% endif %}>Demande moyenne</option>
-                    <option value="FAIBLE" {% if request.GET.demande == 'FAIBLE' %}selected{% endif %}>Faible demande</option>
+                    <option value="TRES_FORTE" {% if request.GET.demande == 'TRES_FORTE' %}selected{% endif %}>Très forte</option>
+                    <option value="FORTE" {% if request.GET.demande == 'FORTE' %}selected{% endif %}>Forte</option>
+                    <option value="MOYENNE" {% if request.GET.demande == 'MOYENNE' %}selected{% endif %}>Moyenne</option>
+                    <option value="FAIBLE" {% if request.GET.demande == 'FAIBLE' %}selected{% endif %}>Faible</option>
+                    <option value="EN_DECLIN" {% if request.GET.demande == 'EN_DECLIN' %}selected{% endif %}>En déclin</option>
                 </select>
             </div>
             <div class="col-lg-3 col-md-6">
@@ -55,8 +57,8 @@
     <div class="container">
         <div class="row">
             {% for metier in metiers %}
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="card unified_card h-100">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
                     <div class="unified_card_body">
                         <div class="d-flex align-items-center mb-3" style="gap:var(--space-3);">
                             <div style="width:44px; height:44px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
