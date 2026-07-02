@@ -13,6 +13,12 @@
             </div>
         </a>
 
+        <!-- Barre de recherche -->
+        <form method="get" action="{% url 'catalog:recherche' %}" class="d-none d-lg-flex align-items-center mr-3" style="flex:1; max-width:300px; position:relative;">
+            <i class="fas fa-search" style="position:absolute; left:12px; color:var(--color-text-muted); font-size:12px; pointer-events:none;"></i>
+            <input type="text" name="q" class="input_field" style="padding-left:34px; height:36px; font-size:var(--text-sm); border-radius:var(--radius-full);" placeholder="Rechercher..." value="{{ request.GET.q }}">
+        </form>
+
         <!-- Navigation principale -->
         <nav class="main_nav_container d-none d-lg-block">
             <div class="main_nav">
@@ -54,6 +60,10 @@
                                 <i class="fas fa-compass mr-2" style="color:var(--color-primary); width:16px;"></i>
                                 Présentation
                             </a>
+                            <a href="{% url 'orientation:conseillers' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-user-tie mr-2" style="color:var(--color-primary); width:16px;"></i>
+                                Conseillers
+                            </a>
                             <a href="{% url 'orientation:test-list' %}" class="main_nav_dropdown_item">
                                 <i class="fas fa-play-circle mr-2" style="color:var(--color-primary); width:16px;"></i>
                                 Passer un test
@@ -67,25 +77,94 @@
                                 <i class="fas fa-lightbulb mr-2" style="color:var(--color-accent); width:16px;"></i>
                                 Mes recommandations
                             </a>
+                            <a href="{% url 'orientation:mes-demandes' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-hands-helping mr-2" style="color:var(--color-accent); width:16px;"></i>
+                                Mes accompagnements
+                            </a>
+                            <a href="{% url 'orientation:mes-rdv' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-calendar-check mr-2" style="color:var(--color-success); width:16px;"></i>
+                                Mes rendez-vous
+                            </a>
                             {% if request.user.role == 'COUNSELOR' or request.user.role == 'ADMIN' %}
                             <div class="main_nav_dropdown_divider"></div>
                             <a href="{% url 'orientation:resultats-conseiller' %}" class="main_nav_dropdown_item">
                                 <i class="fas fa-users mr-2" style="color:var(--safran-500); width:16px;"></i>
                                 Tableau des résultats
                             </a>
+                            <a href="{% url 'orientation:conseiller-demandes' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-hands-helping mr-2" style="color:var(--safran-500); width:16px;"></i>
+                                Mes sessions
+                            </a>
+                            {% endif %}
+                            {% if request.user.role == 'ADMIN' %}
+                            <div class="main_nav_dropdown_divider"></div>
+                            <a href="{% url 'orientation:admin-questions-proposees' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-clipboard-check mr-2" style="color:var(--color-danger); width:16px;"></i>
+                                Questions proposées
+                            </a>
+                            <a href="{% url 'orientation:admin-ristournes' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-coins mr-2" style="color:var(--color-danger); width:16px;"></i>
+                                Ristournes
+                            </a>
                             {% endif %}
                             {% endif %}
                         </div>
                     </li>
 
-                    <!-- Événements -->
-                    <li class="main_nav_item {% if request.resolver_match.namespace == 'events' %}active{% endif %}">
-                        <a href="{% url 'events:event-list' %}">Événements</a>
+                    <!-- Classements -->
+                    <li class="main_nav_item main_nav_item--dropdown {% if request.resolver_match.namespace == 'ranking' %}active{% endif %}">
+                        <a href="{% url 'ranking:classement-list' %}" class="main_nav_dropdown_toggle">
+                            Classements <i class="fas fa-angle-down ml-1" style="font-size:10px;"></i>
+                        </a>
+                        <div class="main_nav_dropdown">
+                            <a href="{% url 'ranking:classement-list' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-list-ol mr-2" style="color:var(--color-primary); width:16px;"></i>
+                                Tous les classements
+                            </a>
+                            <a href="{% url 'ranking:top-national' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-trophy mr-2" style="color:#FFD700; width:16px;"></i>
+                                Top 20 national
+                            </a>
+                        </div>
                     </li>
 
-                    <!-- Communauté -->
-                    <li class="main_nav_item {% if request.resolver_match.namespace == 'community' %}active{% endif %}">
-                        <a href="{% url 'community:forum-list' %}">Communauté</a>
+                    <!-- Événements (dropdown) -->
+                    <li class="main_nav_item main_nav_item--dropdown {% if request.resolver_match.namespace == 'events' %}active{% endif %}">
+                        <a href="{% url 'events:event-list' %}" class="main_nav_dropdown_toggle">
+                            Événements <i class="fas fa-angle-down ml-1" style="font-size:10px;"></i>
+                        </a>
+                        <div class="main_nav_dropdown">
+                            <a href="{% url 'events:event-list' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-calendar-alt mr-2" style="color:var(--color-primary); width:16px;"></i>
+                                Tous les événements
+                            </a>
+                            {% if request.user.is_authenticated %}
+                            <a href="{% url 'events:mes-evenements' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-calendar-check mr-2" style="color:var(--color-accent); width:16px;"></i>
+                                Mes inscriptions
+                            </a>
+                            {% endif %}
+                        </div>
+                    </li>
+
+                    <!-- Communauté (dropdown) -->
+                    <li class="main_nav_item main_nav_item--dropdown {% if request.resolver_match.namespace == 'community' %}active{% endif %}">
+                        <a href="{% url 'community:forum-list' %}" class="main_nav_dropdown_toggle">
+                            Communauté <i class="fas fa-angle-down ml-1" style="font-size:10px;"></i>
+                        </a>
+                        <div class="main_nav_dropdown">
+                            <a href="{% url 'community:forum-list' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-comments mr-2" style="color:var(--color-primary); width:16px;"></i>
+                                Forums de discussion
+                            </a>
+                            {% if request.user.is_authenticated %}
+                            <div class="main_nav_dropdown_divider"></div>
+                            <a href="{% url 'community:forum-list' %}" class="main_nav_dropdown_item">
+                                <i class="fas fa-pen mr-2" style="color:var(--color-accent); width:16px;"></i>
+                                Nouvelle discussion
+                            </a>
+                            {% endif %}
+                        </div>
                     </li>
 
                 </ul>
@@ -99,10 +178,12 @@
         {% if request.user.is_authenticated %}
             <!-- Cloche notifications -->
             <div class="position-relative mr-3">
-                <button class="notif_bell_btn" aria-label="Notifications">
+                <a href="{% url 'notifications:list' %}" class="notif_bell_btn" aria-label="Notifications" style="text-decoration:none;">
                     <i class="fas fa-bell" style="font-size:14px;"></i>
-                    <span class="notif_badge">0</span>
-                </button>
+                    {% if unread_notifications_count > 0 %}
+                    <span class="notif_badge">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
             </div>
 
             <!-- Dropdown utilisateur -->
@@ -132,9 +213,31 @@
                     <a class="dropdown-item" href="{% url 'orientation:home' %}">
                         <i class="fas fa-compass mr-2 text-muted"></i>Mon orientation
                     </a>
+                    <a class="dropdown-item" href="{% url 'events:mes-evenements' %}">
+                        <i class="fas fa-calendar-check mr-2 text-muted"></i>Mes événements
+                    </a>
+                    <a class="dropdown-item" href="{% url 'chatbot:home' %}">
+                        <i class="fas fa-robot mr-2" style="color:var(--color-primary);"></i>AvenBot
+                    </a>
+                    {% if request.user.role == 'STUDENT' %}
+                    <a class="dropdown-item" href="{% url 'orientation:mes-demandes' %}">
+                        <i class="fas fa-hands-helping mr-2 text-muted"></i>Mes accompagnements
+                    </a>
+                    {% endif %}
                     {% if request.user.role == 'COUNSELOR' or request.user.role == 'ADMIN' %}
                     <a class="dropdown-item" href="{% url 'orientation:resultats-conseiller' %}">
                         <i class="fas fa-users mr-2" style="color:var(--safran-500);"></i>Résultats étudiants
+                    </a>
+                    <a class="dropdown-item" href="{% url 'orientation:conseiller-demandes' %}">
+                        <i class="fas fa-hands-helping mr-2" style="color:var(--safran-500);"></i>Mes sessions
+                    </a>
+                    {% endif %}
+                    {% if request.user.role == 'ADMIN' %}
+                    <a class="dropdown-item" href="{% url 'orientation:admin-questions-proposees' %}">
+                        <i class="fas fa-clipboard-check mr-2" style="color:var(--color-danger);"></i>Questions proposées
+                    </a>
+                    <a class="dropdown-item" href="{% url 'orientation:admin-ristournes' %}">
+                        <i class="fas fa-coins mr-2" style="color:var(--color-danger);"></i>Ristournes
                     </a>
                     {% endif %}
                     <div class="dropdown-divider"></div>

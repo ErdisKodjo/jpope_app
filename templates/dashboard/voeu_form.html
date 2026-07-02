@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if mode == 'edit' %}Modifier le vœu{% else %}Ajouter un vœu{% endif %} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="detail_container">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h1 style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); margin:0;">
+                            <i class="fas fa-star mr-2" style="color:var(--color-accent);"></i>
+                            {% if mode == 'edit' %}Modifier le vœu{% else %}Ajouter un vœu{% endif %}
+                        </h1>
+                        <a href="{% url 'dashboard:mes-voeux' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                    </div>
+
+                    {% if formation %}
+                    <div class="mb-4 p-4" style="background:var(--color-primary-light); border-radius:var(--radius-md);">
+                        <div style="font-weight:var(--weight-bold); font-size:var(--text-base);">{{ formation.nom }}</div>
+                        <div style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                            <i class="fas fa-university mr-1"></i>{{ formation.etablissement.nom }} — {{ formation.etablissement.ville }}
+                            &nbsp;|&nbsp; {{ formation.cout_annuel|floatformat:0 }} FCFA/an
+                        </div>
+                    </div>
+                    {% elif not mode == 'edit' %}
+                    <div class="mb-4">
+                        <label class="form_label">Choisir une formation <span style="color:var(--color-danger);">*</span></label>
+                        <select name="formation_id" class="input_field">
+                            <option value="">— Sélectionner —</option>
+                            {% for f in formations %}
+                            <option value="{{ f.pk }}">{{ f.nom }} — {{ f.etablissement.nom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if formation %}<input type="hidden" name="formation_id" value="{{ formation.pk }}">{% endif %}
+
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <label class="form_label">Ordre de priorité</label>
+                                {{ form.priorite }}
+                                {% if form.priorite.errors %}<div class="form_error">{{ form.priorite.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-8 mb-4">
+                                <label class="form_label">Niveau de priorité</label>
+                                {{ form.niveau_priorite }}
+                                {% if form.niveau_priorite.errors %}<div class="form_error">{{ form.niveau_priorite.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form_label">Lettre de motivation</label>
+                            {{ form.lettre_motivation }}
+                            {% if form.lettre_motivation.errors %}<div class="form_error">{{ form.lettre_motivation.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form_label">Notes personnelles</label>
+                            {{ form.notes_etudiant }}
+                        </div>
+
+                        <div class="d-flex" style="gap:var(--space-3);">
+                            <button type="submit" class="comment_button">
+                                <i class="fas fa-save mr-2"></i>{% if mode == 'edit' %}Mettre à jour{% else %}Ajouter à mes vœux{% endif %}
+                            </button>
+                            <a href="{% url 'dashboard:mes-voeux' %}" class="btn_ghost">Annuler</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

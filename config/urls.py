@@ -51,6 +51,8 @@ urlpatterns += i18n_patterns(
     path("evenements/", include("apps.events.urls", namespace="events")),
     path("communaute/", include("apps.community.urls", namespace="community")),
     path("chatbot/", include("apps.chatbot.urls", namespace="chatbot")),
+    path("classements/", include("apps.ranking.urls", namespace="ranking")),
+    path("notifications/", include("apps.notifications.urls", namespace="notifications")),
     prefix_default_language=False,
 )
 

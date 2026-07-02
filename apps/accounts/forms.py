@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .models.enums import UserRole, Genre, SerieBac
 from .models.verification import TypeDocument
+from .models.notes import NotesEtudiant
 
 User = get_user_model()
 
@@ -238,3 +239,31 @@ class RejectVerificationForm(forms.Form):
             "placeholder": _("Expliquez clairement pourquoi le document est refusé…"),
         }),
     )
+
+
+class NotesEtudiantForm(forms.ModelForm):
+    """Formulaire de saisie des notes académiques d'un étudiant."""
+
+    class Meta:
+        model = NotesEtudiant
+        fields = [
+            "annee_scolaire", "classe",
+            "note_maths", "note_physique", "note_svt", "note_info",
+            "note_francais", "note_anglais", "note_philosophie", "note_histoire_geo",
+            "note_economie", "note_comptabilite", "note_gestion",
+        ]
+        widgets = {
+            "annee_scolaire": forms.TextInput(attrs={"class": "input_field", "placeholder": "2024-2025"}),
+            "classe": forms.TextInput(attrs={"class": "input_field", "placeholder": _("Ex : Terminale C")}),
+            "note_maths": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_physique": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_svt": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_info": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_francais": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_anglais": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_philosophie": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_histoire_geo": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_economie": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_comptabilite": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+            "note_gestion": forms.NumberInput(attrs={"class": "input_field", "step": "0.25", "min": "0", "max": "20", "placeholder": "/20"}),
+        }

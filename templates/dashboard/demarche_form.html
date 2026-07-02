@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if mode == 'edit' %}Modifier la démarche{% else %}Nouvelle démarche{% endif %} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="detail_container">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h1 style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); margin:0;">
+                            <i class="fas fa-tasks mr-2" style="color:var(--color-primary);"></i>
+                            {% if mode == 'edit' %}Modifier la démarche{% else %}Nouvelle démarche{% endif %}
+                        </h1>
+                        <a href="{% url 'dashboard:mes-demarches' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                    </div>
+
+                    {% if voeu %}
+                    <div class="mb-4 p-3" style="background:var(--color-primary-light); border-radius:var(--radius-sm);">
+                        <small class="text-muted d-block" style="font-size:11px; text-transform:uppercase; font-weight:700;">Vœu associé</small>
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ voeu.formation.nom }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if voeu %}<input type="hidden" name="voeu_pk" value="{{ voeu.pk }}">{% endif %}
+
+                        <div class="mb-4">
+                            <label class="form_label">Titre <span style="color:var(--color-danger);">*</span></label>
+                            {{ form.titre }}
+                            {% if form.titre.errors %}<div class="form_error">{{ form.titre.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label">Type de démarche</label>
+                                {{ form.type }}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label">Statut</label>
+                                {{ form.statut }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label">Date d'échéance</label>
+                                {{ form.date_echeance }}
+                                {% if form.date_echeance.errors %}<div class="form_error">{{ form.date_echeance.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <label class="form_label">Progression (%)</label>
+                                {{ form.progression }}
+                            </div>
+                            <div class="col-md-3 mb-4">
+                                <label class="form_label">Coût (FCFA)</label>
+                                {{ form.cout_estime }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form_label">Description / Instructions</label>
+                            {{ form.description }}
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form_label">Notes personnelles</label>
+                            {{ form.notes_etudiant }}
+                        </div>
+
+                        <div class="d-flex" style="gap:var(--space-3);">
+                            <button type="submit" class="comment_button">
+                                <i class="fas fa-save mr-2"></i>{% if mode == 'edit' %}Mettre à jour{% else %}Créer la démarche{% endif %}
+                            </button>
+                            <a href="{% url 'dashboard:mes-demarches' %}" class="btn_ghost">Annuler</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

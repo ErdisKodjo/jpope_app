@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes favoris — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap" style="gap:var(--space-3);">
+            <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                <i class="fas fa-heart mr-2" style="color:var(--color-danger);"></i>Mes favoris
+            </h1>
+        </div>
+
+        <!-- Onglets par type -->
+        <div class="filter_form_container mb-4">
+            <div class="d-flex flex-wrap" style="gap:var(--space-2);">
+                <a href="?" class="tag_badge {% if not type_filtre %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">
+                    Tous ({{ counts.FORMATION|add:counts.METIER|add:counts.ETABLISSEMENT }})
+                </a>
+                {% for val, label in types %}
+                {% if counts|dictsort:val %}
+                <a href="?type={{ val }}" class="tag_badge {% if type_filtre == val %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">
+                    {{ label }} ({{ counts|dictsort:val }})
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if favoris %}
+        <div class="row">
+            {% for f in favoris %}
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="tag_badge">{{ f.get_type_entite_display }}</span>
+                            <form method="post" action="{% url 'dashboard:favori-toggle' f.type_entite f.entite.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn_ghost btn_sm" style="color:var(--color-danger); border-color:var(--color-danger);" title="Retirer des favoris">
+                                    <i class="fas fa-heart-broken"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                        <h3 style="font-size:var(--text-sm); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">
+                            {{ f.entite_nom }}
+                        </h3>
+
+                        {% if f.type_entite == 'FORMATION' and f.formation %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted);">
+                            <i class="fas fa-university mr-1"></i>{{ f.formation.etablissement.nom }}
+                            &nbsp;|&nbsp; {{ f.formation.cout_annuel|floatformat:0 }} FCFA/an
+                        </p>
+                        {% elif f.type_entite == 'METIER' and f.metier %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted);">
+                            <i class="fas fa-money-bill-wave mr-1"></i>{{ f.metier.revenu_moyen_formate|default:"N/A" }}
+                        </p>
+                        {% elif f.type_entite == 'ETABLISSEMENT' and f.etablissement %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted);">
+                            <i class="fas fa-map-marker-alt mr-1"></i>{{ f.etablissement.ville }}, {{ f.etablissement.pays }}
+                        </p>
+                        {% endif %}
+
+                        {% if f.note_personnelle %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); font-style:italic; margin-top:var(--space-2);">
+                            « {{ f.note_personnelle|truncatewords:15 }} »
+                        </p>
+                        {% endif %}
+
+                        <small class="text-muted" style="font-size:10px;">Ajouté le {{ f.created_at|date:"d/m/Y" }}</small>
+                    </div>
+                    <div class="unified_card_footer">
+                        {% if f.type_entite == 'FORMATION' and f.formation %}
+                        <a href="{% url 'catalog:formation-detail' f.formation.slug %}" class="comment_button btn_sm w-100 text-center">
+                            <i class="fas fa-external-link-alt mr-1"></i>Voir la formation
+                        </a>
+                        {% elif f.type_entite == 'ETABLISSEMENT' and f.etablissement %}
+                        <a href="{% url 'catalog:etablissement-detail' f.etablissement.slug %}" class="comment_button btn_sm w-100 text-center">
+                            <i class="fas fa-external-link-alt mr-1"></i>Voir l'établissement
+                        </a>
+                        {% elif f.type_entite == 'METIER' and f.metier %}
+                        <a href="{% url 'catalog:metier-detail' f.metier.slug %}" class="comment_button btn_sm w-100 text-center">
+                            <i class="fas fa-external-link-alt mr-1"></i>Voir le métier
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-heart empty_state_icon" style="color:var(--color-danger);"></i>
+            <h4>Aucun favori</h4>
+            <p>Sauvegardez des formations, métiers et établissements pour les retrouver facilement.</p>
+            <a href="{% url 'catalog:formation-list' %}" class="comment_button">
+                <i class="fas fa-graduation-cap mr-2"></i>Explorer le catalogue
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

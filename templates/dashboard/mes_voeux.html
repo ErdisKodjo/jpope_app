@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes vœux — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Mes vœux d'inscription</h1>
+            <p>Suivez vos candidatures et l'avancement de vos dossiers</p>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap" style="gap:var(--space-3);">
+            <div>
+                {% if nb_actifs > 0 %}
+                <span class="tag_badge tag_badge--primary">{{ nb_actifs }} vœu{{ nb_actifs|pluralize }} actif{{ nb_actifs|pluralize }}</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'dashboard:voeu-create' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Ajouter un vœu
+            </a>
+        </div>
+
+        {% if voeux %}
+        <div class="row">
+            {% for voeu in voeux %}
+            <div class="col-lg-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100" style="
+                    border-left:4px solid
+                    {% if voeu.statut == 'ACCEPTE' or voeu.statut == 'INSCRIT' %}var(--color-success)
+                    {% elif voeu.statut == 'REFUSE' or voeu.statut == 'ABANDONNE' %}var(--color-danger)
+                    {% elif voeu.statut == 'SOUMIS' or voeu.statut == 'EN_ATTENTE' %}var(--color-primary)
+                    {% else %}var(--color-border){% endif %};">
+                    <div class="unified_card_body">
+                        <!-- Entête -->
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="tag_badge
+                                {% if voeu.statut == 'ACCEPTE' or voeu.statut == 'INSCRIT' %}tag_badge--success
+                                {% elif voeu.statut == 'SOUMIS' or voeu.statut == 'EN_ATTENTE' %}tag_badge--primary
+                                {% elif voeu.statut == 'LISTE_ATTENTE' %}tag_badge--info
+                                {% endif %}">
+                                #{{ voeu.priorite }} — {{ voeu.get_statut_display }}
+                            </span>
+                            <span class="tag_badge" style="font-size:10px;">{{ voeu.get_niveau_priorite_display }}</span>
+                        </div>
+
+                        <!-- Formation -->
+                        <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                            {{ voeu.formation.nom }}
+                        </h3>
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3);">
+                            <i class="fas fa-university mr-1"></i>{{ voeu.formation.etablissement.nom }} — {{ voeu.formation.etablissement.ville }}
+                        </p>
+
+                        <!-- Infos -->
+                        <div class="d-flex flex-wrap" style="gap:var(--space-2); margin-bottom:var(--space-3);">
+                            <span class="tag_badge"><i class="fas fa-money-bill-wave mr-1"></i>{{ voeu.formation.cout_annuel|floatformat:0 }} FCFA/an</span>
+                            <span class="tag_badge"><i class="fas fa-clock mr-1"></i>{{ voeu.formation.duree_annees }} an{{ voeu.formation.duree_annees|pluralize }}</span>
+                            {% if voeu.formation.bourses_disponibles %}
+                            <span class="tag_badge tag_badge--success"><i class="fas fa-award mr-1"></i>Bourse</span>
+                            {% endif %}
+                        </div>
+
+                        {% if voeu.lettre_motivation %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); font-style:italic; margin-bottom:var(--space-2);">
+                            « {{ voeu.lettre_motivation|truncatewords:20 }} »
+                        </p>
+                        {% endif %}
+
+                        <!-- Changer statut -->
+                        {% if voeu.statut == 'BROUILLON' %}
+                        <form method="post" action="{% url 'dashboard:voeu-update-statut' voeu.pk %}" class="mt-2">
+                            {% csrf_token %}
+                            <select name="statut" class="input_field" style="font-size:var(--text-xs); padding:4px 8px; height:auto;" onchange="this.form.submit()">
+                                <option value="">Changer le statut…</option>
+                                <option value="SOUMIS">Marquer comme soumis</option>
+                                <option value="ABANDONNE">Abandonner</option>
+                            </select>
+                        </form>
+                        {% endif %}
+                    </div>
+
+                    <div class="unified_card_footer d-flex" style="gap:var(--space-2);">
+                        <a href="{% url 'dashboard:voeu-update' voeu.pk %}" class="btn_ghost btn_sm flex-grow-1 text-center">
+                            <i class="fas fa-edit mr-1"></i>Modifier
+                        </a>
+                        <a href="{% url 'dashboard:demarche-create' %}?voeu={{ voeu.pk }}" class="comment_button btn_sm flex-grow-1 text-center">
+                            <i class="fas fa-tasks mr-1"></i>Démarche
+                        </a>
+                        {% if voeu.statut == 'BROUILLON' %}
+                        <form method="post" action="{% url 'dashboard:voeu-delete' voeu.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn_ghost btn_sm" style="color:var(--color-danger); border-color:var(--color-danger);"
+                                onclick="return confirm('Supprimer ce vœu ?')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-star empty_state_icon"></i>
+            <h4>Aucun vœu pour le moment</h4>
+            <p>Ajoutez les formations qui vous intéressent pour suivre vos candidatures.</p>
+            <a href="{% url 'catalog:formation-list' %}" class="comment_button">
+                <i class="fas fa-graduation-cap mr-2"></i>Explorer les formations
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

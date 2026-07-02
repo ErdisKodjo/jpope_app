@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes propositions de questions — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-5">
+            <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                <i class="fas fa-clipboard-list mr-2" style="color:var(--color-primary);"></i>Mes propositions de questions
+            </h1>
+            <a href="{% url 'orientation:question-proposer' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Nouvelle proposition
+            </a>
+        </div>
+
+        {% if questions %}
+        <div class="row">
+            {% for q in questions %}
+            <div class="col-lg-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="tag_badge
+                                {% if q.statut == 'EN_ATTENTE' %}tag_badge--info
+                                {% elif q.statut == 'APPROUVEE' %}tag_badge--success
+                                {% else %}{% endif %}">
+                                {% if q.statut == 'EN_ATTENTE' %}<i class="fas fa-clock mr-1"></i>{% elif q.statut == 'APPROUVEE' %}<i class="fas fa-check mr-1"></i>{% else %}<i class="fas fa-times mr-1"></i>{% endif %}
+                                {{ q.get_statut_display }}
+                            </span>
+                            <small class="text-muted">{{ q.date_soumission|date:"d/m/Y" }}</small>
+                        </div>
+
+                        <p class="unified_card_text" style="font-size:var(--text-sm);">{{ q.texte|truncatewords:30 }}</p>
+
+                        <div class="d-flex flex-wrap mt-2" style="gap:var(--space-1);">
+                            <span class="tag_badge">{{ q.get_type_display }}</span>
+                            {% if q.test_cible %}<span class="tag_badge tag_badge--primary">{{ q.test_cible.nom }}</span>{% endif %}
+                        </div>
+
+                        {% if q.statut == 'APPROUVEE' and q.question_creee %}
+                        <div class="mt-3" style="background:var(--color-primary-light); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);">
+                            <small style="font-size:11px; color:var(--color-primary); font-weight:700;">
+                                <i class="fas fa-check-circle mr-1"></i>Intégrée dans {{ q.question_creee.test.nom }} (ordre {{ q.question_creee.ordre }})
+                            </small>
+                        </div>
+                        {% endif %}
+
+                        {% if q.statut == 'REJETEE' and q.motif_rejet %}
+                        <div class="mt-3" style="background:var(--color-danger-bg, #fff5f5); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm); border-left:3px solid var(--color-danger);">
+                            <small style="font-size:11px; color:var(--color-danger); font-weight:700;">Motif du rejet :</small>
+                            <p style="font-size:var(--text-xs); margin:2px 0 0; color:var(--color-text-muted);">{{ q.motif_rejet }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-lightbulb empty_state_icon"></i>
+            <h4>Aucune proposition</h4>
+            <p>Partagez votre expertise en proposant des questions pour enrichir les tests d'orientation.</p>
+            <a href="{% url 'orientation:question-proposer' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Proposer une question
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

@@ -32,4 +32,7 @@ urlpatterns = [
 
     # Simulateur de coût
     path("simulateur/", views.SimulateurView.as_view(), name="simulateur"),
+
+    # Recherche globale
+    path("recherche/", views.RechercheView.as_view(), name="recherche"),
 ]

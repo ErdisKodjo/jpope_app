@@ -1,11 +1,11 @@
 """
-Formulaires dashboard — EvaluationConseiller.
+Formulaires dashboard — EvaluationConseiller, Voeu, DemarcheInscription.
 """
 from django import forms
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from .models import EvaluationConseiller
+from .models import EvaluationConseiller, Voeu, DemarcheInscription, StatutVoeu, StatutDemarche
 
 User = get_user_model()
 
@@ -132,3 +132,59 @@ class AdminReviewForm(forms.Form):
         ],
         widget=forms.HiddenInput(),
     )
+
+
+_FIELD_ATTRS = {"class": "input_field"}
+_TA_ATTRS = {"class": "input_field", "rows": 4}
+
+
+class VoeuForm(forms.ModelForm):
+    class Meta:
+        model = Voeu
+        fields = ["priorite", "niveau_priorite", "lettre_motivation", "notes_etudiant"]
+        widgets = {
+            "priorite": forms.NumberInput(attrs={**_FIELD_ATTRS, "min": 1, "max": 20}),
+            "niveau_priorite": forms.Select(attrs=_FIELD_ATTRS),
+            "lettre_motivation": forms.Textarea(attrs={**_TA_ATTRS, "rows": 6, "placeholder": "Expliquez votre motivation pour cette formation…"}),
+            "notes_etudiant": forms.Textarea(attrs={**_TA_ATTRS, "placeholder": "Notes personnelles, rappels…"}),
+        }
+
+
+class VoeuStatutForm(forms.ModelForm):
+    """Formulaire minimal pour changer le statut d'un vœu."""
+    class Meta:
+        model = Voeu
+        fields = ["statut"]
+        widgets = {"statut": forms.Select(attrs=_FIELD_ATTRS)}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # N'autoriser que les transitions possibles depuis l'étudiant
+        choix_autorises = [
+            StatutVoeu.BROUILLON,
+            StatutVoeu.SOUMIS,
+            StatutVoeu.ABANDONNE,
+        ]
+        self.fields["statut"].choices = [
+            (v, l) for v, l in StatutVoeu.choices if v in choix_autorises
+        ]
+
+
+class DemarcheForm(forms.ModelForm):
+    class Meta:
+        model = DemarcheInscription
+        fields = ["titre", "type", "description", "statut", "progression", "date_echeance", "cout_estime", "notes_etudiant"]
+        widgets = {
+            "titre": forms.TextInput(attrs={**_FIELD_ATTRS, "placeholder": "Ex : Constituer le dossier d'inscription"}),
+            "type": forms.Select(attrs=_FIELD_ATTRS),
+            "description": forms.Textarea(attrs={**_TA_ATTRS, "placeholder": "Instructions, liens utiles…"}),
+            "statut": forms.Select(attrs=_FIELD_ATTRS),
+            "progression": forms.NumberInput(attrs={**_FIELD_ATTRS, "min": 0, "max": 100}),
+            "date_echeance": forms.DateTimeInput(attrs={**_FIELD_ATTRS, "type": "datetime-local"}, format="%Y-%m-%dT%H:%M"),
+            "cout_estime": forms.NumberInput(attrs={**_FIELD_ATTRS, "placeholder": "0"}),
+            "notes_etudiant": forms.Textarea(attrs={**_TA_ATTRS, "placeholder": "Notes personnelles…"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["date_echeance"].input_formats = ["%Y-%m-%dT%H:%M"]

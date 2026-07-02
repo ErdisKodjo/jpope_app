@@ -42,6 +42,30 @@ class RecommendationEngine:
     et les domaines de formation / métiers.
     """
 
+    # MATRICE RIASEC -> DOMAINE ACADÉMIQUE (sciences / lettres / commerce)
+    ACADEMIC_DOMAINES = {
+        "Informatique & Numérique": "sciences",
+        "Ingenierie & Industrie": "sciences",
+        "Santé & Médecine": "sciences",
+        "Agriculture & Environnement": "sciences",
+        "Gestion & Commerce": "commerce",
+        "Droit & Sciences Politiques": "lettres",
+        "Lettres & Sciences Humaines": "lettres",
+        "Éducation & Formation": "lettres",
+    }
+
+    # Compatibilité série BAC -> domaine académique (coefficient 0-1)
+    SERIE_BAC_AFFINITE = {
+        "C":    {"sciences": 1.0, "lettres": 0.25, "commerce": 0.45},
+        "D":    {"sciences": 0.90, "lettres": 0.35, "commerce": 0.40},
+        "E":    {"sciences": 0.80, "lettres": 0.25, "commerce": 0.40},
+        "TI":   {"sciences": 0.75, "lettres": 0.25, "commerce": 0.40},
+        "A":    {"sciences": 0.25, "lettres": 1.0,  "commerce": 0.50},
+        "G2":   {"sciences": 0.25, "lettres": 0.45, "commerce": 1.0},
+        "TGC":  {"sciences": 0.25, "lettres": 0.45, "commerce": 0.95},
+        "AUTRE":{"sciences": 0.50, "lettres": 0.50, "commerce": 0.50},
+    }
+
     # MATRICE DE CORRESPONDANCE RIASEC <-> DOMAINES
     # Pour chaque dimension RIASEC, quels domaines sont pertinents
     RIASEC_DOMAINES = {
@@ -111,11 +135,12 @@ class RecommendationEngine:
         # 1. Recommandations de MÉTIERS
         metiers_scores = cls._scorer_metiers(scores)
 
-        # 2. Recommandations de FORMATIONS
+        # 2. Recommandations de FORMATIONS (avec profil académique si disponible)
         formations_scores = cls._scorer_formations(
             scores,
             budget_max=budget_max,
             villes_preferees=villes_preferees,
+            etudiant=etudiant,
         )
 
         # 3. Combiner et classer
@@ -183,6 +208,7 @@ class RecommendationEngine:
         scores: dict,
         budget_max: Optional[int] = None,
         villes_preferees: Optional[List[str]] = None,
+        etudiant=None,
     ) -> List[ScoreMatch]:
         """Score toutes les formations actives par rapport au profil."""
         formations = Formation.objects.filter(
@@ -200,7 +226,7 @@ class RecommendationEngine:
         matches = []
 
         for formation in formations:
-            score = cls._calculer_score_formation(scores, formation)
+            score = cls._calculer_score_formation(scores, formation, etudiant=etudiant)
 
             if score >= 30:  # Seuil minimum
                 matches.append(ScoreMatch(
@@ -258,19 +284,61 @@ class RecommendationEngine:
         return round(score_domaine + score_demande + score_emploi, 1)
 
     @classmethod
-    def _calculer_score_formation(cls, scores: dict, formation) -> float:
+    def _score_academique(cls, etudiant, domaine_nom: str) -> float:
+        """
+        Score académique (0-20 pts) : combine notes par matière + série BAC.
+        Retourne 10 (neutre) si aucune donnée académique n'est disponible.
+        """
+        score = 0.0
+        has_data = False
+
+        # Notes par domaine (0-12 pts)
+        try:
+            notes = etudiant.notes
+            profil = notes.profil_academique  # {sciences: 0-1, lettres: 0-1, commerce: 0-1}
+            cat = cls.ACADEMIC_DOMAINES.get(domaine_nom)
+            if cat and cat in profil:
+                score += profil[cat] * 12
+                has_data = True
+        except Exception:
+            pass
+
+        # Série BAC (0-8 pts)
+        try:
+            student_profile = etudiant.student_profile
+            if student_profile and student_profile.serie_bac:
+                affinite = cls.SERIE_BAC_AFFINITE.get(student_profile.serie_bac, {})
+                cat = cls.ACADEMIC_DOMAINES.get(domaine_nom)
+                if cat and cat in affinite:
+                    score += affinite[cat] * 8
+                    has_data = True
+        except Exception:
+            pass
+
+        if not has_data:
+            return 10.0  # score neutre sans données
+
+        return round(min(20.0, score), 1)
+
+    @classmethod
+    def _calculer_score_formation(cls, scores: dict, formation, etudiant=None) -> float:
         """
         Calcule le score de compatibilité entre un profil et une formation.
 
-        Formule :
-        score = compatibilite_domaine (50%)
-              + qualite_formation (25%)
-              + importance_strategique (15%)
-              + accessibilite (10%)
+        Formule V2 (avec profil académique) :
+        score = compatibilite_domaine RIASEC (40%)
+              + score_academique notes + serie_bac (20%)
+              + qualite_formation (20%)
+              + importance_strategique (12%)
+              + accessibilite / cout (8%)
+
+        Formule V1 (sans profil académique, scores inchangés) :
+        score = compatibilite_domaine (50%) + qualite (25%) + importance (15%) + cout (10%)
         """
         domaine_nom = formation.domaine.nom
+        has_academic = etudiant is not None
 
-        # 1. Compatibilité domaine (50%)
+        # 1. Compatibilité domaine RIASEC
         score_domaine = 0
         total_coef = 0
         for dim, score_dim in scores.items():
@@ -278,36 +346,43 @@ class RecommendationEngine:
             score_domaine += (score_dim / 100) * coef
             total_coef += coef
 
+        riasec_weight = 40 if has_academic else 50
         if total_coef > 0:
-            score_domaine = (score_domaine / total_coef) * 50
+            score_domaine = (score_domaine / total_coef) * riasec_weight
         else:
-            score_domaine = 10
+            score_domaine = riasec_weight * 0.2
 
-        # 2. Qualité formation (25%)
-        score_qualite = (formation.score_qualite / 100) * 25
+        # 2. Score académique (20%) — uniquement si étudiant fourni
+        score_academique = 0
+        if has_academic:
+            raw = cls._score_academique(etudiant, domaine_nom)  # 0-20
+            score_academique = (raw / 20) * 20
 
-        # 3. Importance stratégique (15%)
+        # 3. Qualité formation
+        qualite_weight = 20 if has_academic else 25
+        score_qualite = (formation.score_qualite / 100) * qualite_weight
+
+        # 4. Importance stratégique
+        importance_weight = 12 if has_academic else 15
         importance_scores = {
-            "CRITIQUE": 15,
-            "ELEVEE": 12,
-            "MOYENNE": 8,
-            "FAIBLE": 3,
+            "CRITIQUE": importance_weight,
+            "ELEVEE": round(importance_weight * 0.8),
+            "MOYENNE": round(importance_weight * 0.53),
+            "FAIBLE": round(importance_weight * 0.2),
         }
-        score_importance = importance_scores.get(
-            formation.importance_strategique, 5
-        )
+        score_importance = importance_scores.get(formation.importance_strategique, round(importance_weight * 0.33))
 
-        # 4. Accessibilité / coût (10%)
+        # 5. Accessibilité / coût
+        cout_weight = 8 if has_academic else 10
         if formation.cout_annuel > 0:
-            score_cout = max(0, 10 - (float(formation.cout_annuel) / 300_000))
+            score_cout = max(0, cout_weight - (float(formation.cout_annuel) / 300_000))
         else:
-            score_cout = 10
+            score_cout = cout_weight
 
-        # Bonus bourse
         if formation.bourses_disponibles:
-            score_cout = min(score_cout + 3, 10)
+            score_cout = min(score_cout + 2, cout_weight)
 
-        return round(score_domaine + score_qualite + score_importance + score_cout, 1)
+        return round(score_domaine + score_academique + score_qualite + score_importance + score_cout, 1)
 
     @classmethod
     def _attribuer_plans(cls, matches: List[ScoreMatch]) -> List[ScoreMatch]:

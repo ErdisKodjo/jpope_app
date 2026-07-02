@@ -30,32 +30,32 @@
         <!-- Statistiques rapides -->
         <div class="row mb-4">
             <div class="col-md-3 mb-3">
-                <div class="admin_card text-center">
-                    <div class="stat_number stat_item_value--primary" id="favoris-count">—</div>
+                <a href="{% url 'dashboard:mes-favoris' %}" class="admin_card text-center d-block" style="text-decoration:none; color:inherit;">
+                    <div class="stat_number stat_item_value--primary">{{ favoris_count|default:"0" }}</div>
                     <div class="stat_item_label">Favoris</div>
                     <i class="fas fa-heart mt-2" style="font-size:var(--text-xl); color:var(--color-primary); opacity:0.25;"></i>
-                </div>
+                </a>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="admin_card text-center">
-                    <div class="stat_number stat_item_value--success" id="voeux-count">—</div>
+                <a href="{% url 'dashboard:mes-voeux' %}" class="admin_card text-center d-block" style="text-decoration:none; color:inherit;">
+                    <div class="stat_number stat_item_value--success">{{ voeux_count|default:"0" }}</div>
                     <div class="stat_item_label">Vœux</div>
                     <i class="fas fa-star mt-2" style="font-size:var(--text-xl); color:var(--color-success); opacity:0.25;"></i>
-                </div>
+                </a>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="admin_card text-center">
-                    <div class="stat_number stat_item_value--info" id="demarches-count">—</div>
+                <a href="{% url 'dashboard:mes-demarches' %}" class="admin_card text-center d-block" style="text-decoration:none; color:inherit;">
+                    <div class="stat_number stat_item_value--info">{{ demarches_count|default:"0" }}</div>
                     <div class="stat_item_label">Démarches</div>
                     <i class="fas fa-tasks mt-2" style="font-size:var(--text-xl); color:var(--color-info); opacity:0.25;"></i>
-                </div>
+                </a>
             </div>
             <div class="col-md-3 mb-3">
-                <div class="admin_card text-center">
-                    <div class="stat_number stat_item_value--danger">0</div>
+                <a href="{% url 'notifications:list' %}" class="admin_card text-center d-block" style="text-decoration:none; color:inherit;">
+                    <div class="stat_number stat_item_value--danger">{{ nb_notifs_non_lues|default:"0" }}</div>
                     <div class="stat_item_label">Notifications</div>
                     <i class="fas fa-bell mt-2" style="font-size:var(--text-xl); color:var(--color-danger); opacity:0.25;"></i>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -104,6 +104,18 @@
                             <a href="{% url 'accounts:profile' %}" class="quick_access_card">
                                 <i class="fas fa-user-cog" style="color:var(--color-text-muted);"></i>
                                 <span>Mon profil</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'orientation:mes-rdv' %}" class="quick_access_card">
+                                <i class="fas fa-calendar-check" style="color:var(--color-success);"></i>
+                                <span>Mes RDV</span>
+                            </a>
+                        </div>
+                        <div class="col-6 col-md-4 mb-3">
+                            <a href="{% url 'orientation:conseillers' %}" class="quick_access_card">
+                                <i class="fas fa-user-tie" style="color:var(--color-primary);"></i>
+                                <span>Conseillers</span>
                             </a>
                         </div>
                     </div>
@@ -181,47 +193,109 @@
                 </div>
                 {% endif %}
 
-                <!-- Démarches Kanban -->
-                <div class="dashboard_card">
-                    <h2 class="profile_section_title">
-                        <i class="fas fa-tasks mr-2" style="color:var(--color-primary);"></i>Suivi de mes démarches
-                    </h2>
-                    <div class="row">
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <div class="kanban_header" style="background:var(--color-bg-subtle);">
-                                <h5>À candidater</h5>
-                            </div>
-                            <div class="kanban_column">
-                                <div class="empty_state" style="padding:var(--space-5) var(--space-3);">
-                                    <i class="fas fa-inbox" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
-                                    <small class="text-muted">Aucune démarche en attente</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4 mb-3 mb-md-0">
-                            <div class="kanban_header" style="background:var(--color-bg-warm);">
-                                <h5>Dossier envoyé</h5>
-                            </div>
-                            <div class="kanban_column">
-                                <div class="empty_state" style="padding:var(--space-5) var(--space-3);">
-                                    <i class="fas fa-paper-plane" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
-                                    <small class="text-muted">Aucun dossier envoyé</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="kanban_header" style="background:var(--lagune-50);">
-                                <h5>Réponses</h5>
-                            </div>
-                            <div class="kanban_column">
-                                <div class="empty_state" style="padding:var(--space-5) var(--space-3);">
-                                    <i class="fas fa-envelope-open" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
-                                    <small class="text-muted">Aucune réponse reçue</small>
-                                </div>
-                            </div>
+                <!-- ── Étudiant : vœux récents ── -->
+                {% if request.user.is_student %}
+                <div class="dashboard_card mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h2 class="profile_section_title mb-0">
+                            <i class="fas fa-star mr-2" style="color:var(--color-accent);"></i>Mes vœux
+                        </h2>
+                        <div class="d-flex" style="gap:var(--space-2);">
+                            <a href="{% url 'dashboard:mes-voeux' %}" class="btn_ghost btn_sm">Voir tout</a>
+                            <a href="{% url 'dashboard:voeu-create' %}" class="comment_button btn_sm"><i class="fas fa-plus mr-1"></i>Ajouter</a>
                         </div>
                     </div>
+                    {% if voeux_recents %}
+                    {% for voeu in voeux_recents %}
+                    <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom:1px solid var(--color-border-light);">
+                        <div>
+                            <div style="font-size:var(--text-sm); font-weight:var(--weight-semibold);">#{{ voeu.priorite }} {{ voeu.formation.nom }}</div>
+                            <small class="text-muted" style="font-size:11px;">{{ voeu.formation.etablissement.nom }}</small>
+                        </div>
+                        <span class="tag_badge {% if voeu.statut == 'ACCEPTE' %}tag_badge--success{% elif voeu.statut == 'SOUMIS' or voeu.statut == 'EN_ATTENTE' %}tag_badge--primary{% endif %}" style="font-size:10px;">{{ voeu.get_statut_display }}</span>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div style="text-align:center; padding:var(--space-5) var(--space-3);">
+                        <i class="fas fa-star" style="font-size:28px; color:var(--color-text-light); display:block; margin-bottom:var(--space-2);"></i>
+                        <small class="text-muted">Ajoutez des formations à vos vœux</small>
+                    </div>
+                    {% endif %}
                 </div>
+
+                <!-- ── Étudiant : démarches urgentes ── -->
+                {% if demarches_urgentes %}
+                <div class="dashboard_card mb-4" style="border-left:4px solid var(--color-accent);">
+                    <h2 class="profile_section_title">
+                        <i class="fas fa-tasks mr-2" style="color:var(--color-accent);"></i>Démarches urgentes
+                        {% if demarches_retard > 0 %}<span class="tag_badge ml-2" style="background:#fff5f5; color:var(--color-danger); font-size:11px;">{{ demarches_retard }} en retard</span>{% endif %}
+                    </h2>
+                    {% for d in demarches_urgentes %}
+                    <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom:1px solid var(--color-border-light);">
+                        <div>
+                            <div style="font-size:var(--text-sm); font-weight:var(--weight-semibold);">{{ d.titre }}</div>
+                            <small class="text-muted" style="font-size:11px;"><i class="fas fa-calendar mr-1"></i>{{ d.date_echeance|date:"d/m/Y" }} — J-{{ d.jours_restants }}</small>
+                        </div>
+                        <a href="{% url 'dashboard:demarche-update' d.pk %}" class="btn_ghost btn_sm" style="font-size:11px;">Maj</a>
+                    </div>
+                    {% endfor %}
+                    <div class="mt-3"><a href="{% url 'dashboard:mes-demarches' %}" class="btn_ghost btn_sm">Toutes mes démarches</a></div>
+                </div>
+                {% endif %}
+
+                <!-- ── Étudiant : accompagnement actif ── -->
+                {% if accompagnement_actif %}
+                <div class="dashboard_card mb-4" style="border-left:4px solid var(--color-primary);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="profile_section_title mb-1"><i class="fas fa-hands-helping mr-2" style="color:var(--color-primary);"></i>Accompagnement en cours</h2>
+                            <p class="text-muted mb-0" style="font-size:var(--text-sm);">Avec {{ accompagnement_actif.conseiller.get_full_name }}</p>
+                        </div>
+                        <a href="{% url 'orientation:demande-detail' accompagnement_actif.pk %}" class="comment_button btn_sm"><i class="fas fa-comments mr-1"></i>Ouvrir</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- ── Étudiant : top recommandations ── -->
+                {% if top_recommandations %}
+                <div class="dashboard_card mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h2 class="profile_section_title mb-0"><i class="fas fa-lightbulb mr-2" style="color:var(--color-accent);"></i>Mes recommandations</h2>
+                        <a href="{% url 'orientation:recommandations' %}" class="btn_ghost btn_sm">Voir tout</a>
+                    </div>
+                    {% for reco in top_recommandations %}
+                    <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom:1px solid var(--color-border-light);">
+                        <div>
+                            <div style="font-size:var(--text-sm); font-weight:var(--weight-semibold);">{{ reco.entite_nom }}</div>
+                            <span class="tag_badge" style="font-size:10px;">{{ reco.get_plan_display }}</span>
+                        </div>
+                        <div style="font-weight:var(--weight-bold); color:var(--color-primary); font-size:var(--text-sm);">{{ reco.taux_compatibilite|floatformat:0 }}%</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endif %}
+
+                <!-- ── Conseiller : demandes en attente ── -->
+                {% if request.user.is_counselor and demandes_en_attente %}
+                <div class="dashboard_card mb-4" style="border-left:4px solid var(--color-accent);">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h2 class="profile_section_title mb-1"><i class="fas fa-hands-helping mr-2" style="color:var(--color-accent);"></i>Demandes en attente</h2>
+                            <p class="text-muted mb-0" style="font-size:var(--text-sm);"><strong style="color:var(--color-accent);">{{ demandes_en_attente }}</strong> demande{{ demandes_en_attente|pluralize }} sans conseiller</p>
+                        </div>
+                        <a href="{% url 'orientation:conseiller-demandes' %}" class="comment_button btn_sm"><i class="fas fa-eye mr-1"></i>Voir</a>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- ── Admin : alertes ── -->
+                {% if request.user.is_admin_role %}
+                <div class="row mb-4">
+                    {% if nb_questions_en_attente %}<div class="col-6 mb-3"><div class="dashboard_card h-100" style="border-left:4px solid var(--color-info);"><h2 class="profile_section_title mb-1" style="font-size:var(--text-sm);">Questions</h2><p class="mb-1" style="font-size:var(--text-xl); font-weight:800; color:var(--color-info);">{{ nb_questions_en_attente }}</p><a href="{% url 'orientation:admin-questions-proposees' %}" class="btn_ghost btn_sm">Traiter</a></div></div>{% endif %}
+                    {% if nb_ristournes_en_attente %}<div class="col-6 mb-3"><div class="dashboard_card h-100" style="border-left:4px solid var(--color-accent);"><h2 class="profile_section_title mb-1" style="font-size:var(--text-sm);">Ristournes</h2><p class="mb-1" style="font-size:var(--text-xl); font-weight:800; color:var(--color-accent);">{{ nb_ristournes_en_attente }}</p><a href="{% url 'orientation:admin-ristournes' %}" class="btn_ghost btn_sm">Payer</a></div></div>{% endif %}
+                </div>
+                {% endif %}
 
             </div>
 
@@ -263,18 +337,46 @@
                     <a href="{% url 'accounts:profile' %}" class="admin_sidebar_item">
                         <i class="fas fa-user"></i>Mon profil
                     </a>
+                    <a href="{% url 'notifications:list' %}" class="admin_sidebar_item">
+                        <i class="fas fa-bell"></i>Notifications
+                        {% if nb_notifs_non_lues > 0 %}<span class="tag_badge tag_badge--info ml-auto" style="font-size:10px;">{{ nb_notifs_non_lues }}</span>{% endif %}
+                    </a>
                     {% if request.user.role == 'STUDENT' %}
                     <a href="{% url 'accounts:student_profile_edit' %}" class="admin_sidebar_item">
                         <i class="fas fa-graduation-cap"></i>Profil étudiant
                     </a>
-                    {% endif %}
-                    <a href="{% url 'orientation:home' %}" class="admin_sidebar_item">
-                        <i class="fas fa-compass"></i>Mes tests d'orientation
+                    <a href="{% url 'dashboard:mes-voeux' %}" class="admin_sidebar_item">
+                        <i class="fas fa-star"></i>Mes vœux
                     </a>
-                    <a href="{% url 'catalog:formation-list' %}" class="admin_sidebar_item">
+                    <a href="{% url 'dashboard:mes-demarches' %}" class="admin_sidebar_item">
+                        <i class="fas fa-tasks"></i>Mes démarches
+                    </a>
+                    <a href="{% url 'dashboard:mes-favoris' %}" class="admin_sidebar_item">
                         <i class="fas fa-heart"></i>Mes favoris
                     </a>
+                    <a href="{% url 'orientation:mes-demandes' %}" class="admin_sidebar_item">
+                        <i class="fas fa-hands-helping"></i>Accompagnements
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'orientation:home' %}" class="admin_sidebar_item">
+                        <i class="fas fa-compass"></i>Tests d'orientation
+                    </a>
+                    <a href="{% url 'chatbot:home' %}" class="admin_sidebar_item">
+                        <i class="fas fa-robot" style="color:var(--color-primary);"></i>AvenBot
+                    </a>
+                    <a href="{% url 'ranking:classement-list' %}" class="admin_sidebar_item">
+                        <i class="fas fa-trophy" style="color:#B8860B;"></i>Classements
+                    </a>
+                    <a href="{% url 'events:mes-evenements' %}" class="admin_sidebar_item">
+                        <i class="fas fa-calendar-check"></i>Mes événements
+                    </a>
+                    <a href="{% url 'community:forum-list' %}" class="admin_sidebar_item">
+                        <i class="fas fa-comments"></i>Communauté
+                    </a>
                     {% if request.user.is_counselor %}
+                    <a href="{% url 'orientation:conseiller-demandes' %}" class="admin_sidebar_item">
+                        <i class="fas fa-hands-helping"></i>Mes sessions
+                    </a>
                     <a href="{% url 'dashboard:conseiller-eval-list' %}" class="admin_sidebar_item">
                         <i class="fas fa-file-alt"></i>Fiches d'évaluation
                     </a>
@@ -282,6 +384,12 @@
                     {% if request.user.is_admin_role %}
                     <a href="{% url 'dashboard:admin-eval-list' %}" class="admin_sidebar_item">
                         <i class="fas fa-file-alt"></i>Évaluations conseillers
+                    </a>
+                    <a href="{% url 'orientation:admin-questions-proposees' %}" class="admin_sidebar_item">
+                        <i class="fas fa-clipboard-check"></i>Questions proposées
+                    </a>
+                    <a href="{% url 'orientation:admin-ristournes' %}" class="admin_sidebar_item">
+                        <i class="fas fa-coins"></i>Ristournes
                     </a>
                     {% endif %}
                     <a href="#" class="admin_sidebar_item"

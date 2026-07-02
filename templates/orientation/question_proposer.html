@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Proposer une question — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="detail_container">
+
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                            <i class="fas fa-lightbulb mr-2" style="color:var(--color-accent);"></i>Proposer une question
+                        </h1>
+                        <a href="{% url 'orientation:mes-questions-proposees' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Mes propositions
+                        </a>
+                    </div>
+                    <p style="color:var(--color-text-muted); font-size:var(--text-sm); margin-bottom:var(--space-6);">
+                        En tant que conseiller, vous pouvez enrichir nos tests d'orientation en proposant des questions.
+                        Chaque proposition sera examinée par l'équipe avant d'être intégrée.
+                    </p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label class="form_label">Texte de la question <span style="color:var(--color-danger);">*</span></label>
+                            {{ form.texte }}
+                            {% if form.texte.errors %}<div class="form_error">{{ form.texte.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label">Type de question</label>
+                                {{ form.type }}
+                                {% if form.type.errors %}<div class="form_error">{{ form.type.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form_label">Test cible</label>
+                                {{ form.test_cible }}
+                                {% if form.test_cible.errors %}<div class="form_error">{{ form.test_cible.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-8 mb-4">
+                                <label class="form_label">
+                                    Dimensions évaluées
+                                    <small class="text-muted" style="font-size:11px;">(JSON — ex: {"R": 0.8, "I": 0.5})</small>
+                                </label>
+                                {{ form.dimensions }}
+                                <small class="text-muted" style="font-size:11px;">
+                                    Dimensions : R (Réaliste), I (Investigateur), A (Artistique), S (Social), E (Entrepreneur), C (Conventionnel)
+                                </small>
+                                {% if form.dimensions.errors %}<div class="form_error">{{ form.dimensions.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-4 mb-4">
+                                <label class="form_label">Poids</label>
+                                {{ form.poids }}
+                                <small class="text-muted" style="font-size:11px;">1.0 = poids normal</small>
+                                {% if form.poids.errors %}<div class="form_error">{{ form.poids.errors.0 }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form_label">Explication / aide pour l'étudiant</label>
+                            {{ form.explication }}
+                            {% if form.explication.errors %}<div class="form_error">{{ form.explication.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form_label">Contexte de la situation <small class="text-muted">(pour questions situationnelles)</small></label>
+                            {{ form.contexte_situation }}
+                            {% if form.contexte_situation.errors %}<div class="form_error">{{ form.contexte_situation.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form_label">Justification de votre proposition</label>
+                            {{ form.justification_proposition }}
+                            <small class="text-muted" style="font-size:11px;">Expliquez pourquoi cette question est pertinente et ce qu'elle apporte.</small>
+                            {% if form.justification_proposition.errors %}<div class="form_error">{{ form.justification_proposition.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="d-flex" style="gap:var(--space-3);">
+                            <button type="submit" class="comment_button">
+                                <i class="fas fa-paper-plane mr-2"></i>Soumettre la question
+                            </button>
+                            <a href="{% url 'orientation:conseiller-demandes' %}" class="btn_ghost">Annuler</a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

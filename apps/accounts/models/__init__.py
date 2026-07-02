@@ -7,6 +7,7 @@ from .profiles import (
 )
 from .enums import UserRole, SerieBac, Genre, StatutCompte
 from .verification import DocumentVerification, StatutVerification, TypeDocument
+from .notes import NotesEtudiant
 
 __all__ = [
     "User",
@@ -21,4 +22,5 @@ __all__ = [
     "DocumentVerification",
     "StatutVerification",
     "TypeDocument",
+    "NotesEtudiant",
 ]

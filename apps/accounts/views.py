@@ -18,6 +18,7 @@ from .forms import (
     StudentProfileForm,
     PasswordResetRequestForm,
     RejectVerificationForm,
+    NotesEtudiantForm,
 )
 from .mixins import AdminRequiredMixin
 from .models.enums import StatutCompte, UserRole
@@ -284,6 +285,67 @@ class StudentProfileEditView(LoginRequiredMixin, FormView):
 
         messages.success(self.request, _("Profil étudiant mis à jour avec succès."))
         return super().form_valid(form)
+
+
+class NotesEtudiantView(LoginRequiredMixin, FormView):
+    """Vue de saisie des notes académiques (étudiants uniquement)."""
+    template_name = "accounts/notes_etudiant.html"
+    form_class = NotesEtudiantForm
+    success_url = reverse_lazy("accounts:notes_etudiant")
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and not request.user.is_student:
+            messages.error(request, _("Accès réservé aux étudiants."))
+            return redirect("accounts:profile")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        from .models.notes import NotesEtudiant
+        notes, _ = NotesEtudiant.objects.get_or_create(etudiant=self.request.user)
+        kwargs["instance"] = notes
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        from .models.notes import NotesEtudiant
+        notes, _ = NotesEtudiant.objects.get_or_create(etudiant=self.request.user)
+        context["notes"] = notes
+        return context
+
+    def form_valid(self, form):
+        notes = form.save(commit=False)
+        notes.etudiant = self.request.user
+        notes.save()
+
+        # Régénérer les recommandations si l'étudiant a déjà passé un test
+        self._regenerer_recommandations()
+
+        messages.success(self.request, _("Notes enregistrées ! Vos recommandations ont été mises à jour."))
+        return super().form_valid(form)
+
+    def _regenerer_recommandations(self):
+        """Relance le moteur de recommandation avec le nouveau profil académique."""
+        try:
+            from apps.orientation.models import ReponseUtilisateur
+            from apps.orientation.services.recommendation_engine import RecommendationEngine
+
+            dernier_resultat = (
+                ReponseUtilisateur.objects
+                .filter(etudiant=self.request.user, resultat__isnull=False)
+                .select_related("resultat")
+                .order_by("-date_soumission")
+                .first()
+            )
+            if dernier_resultat and hasattr(dernier_resultat, "resultat"):
+                profile = getattr(self.request.user, "student_profile", None)
+                RecommendationEngine.generer_recommandations(
+                    resultat=dernier_resultat.resultat,
+                    budget_max=profile.budget_max_annuel if profile else None,
+                    villes_preferees=profile.villes_preferees if profile else None,
+                )
+        except Exception:
+            pass
 
 
 # ─────────────────────────────────────────────────────

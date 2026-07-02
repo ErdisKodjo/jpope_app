@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ thread.titre }} — Communauté AvenSU{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>{{ thread.titre|truncatechars:60 }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'community:forum-list' %}">Communauté</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'community:forum-detail' thread.forum.slug %}">{{ thread.forum.nom }}</a></li>
+                    <li class="breadcrumb-item active">Discussion</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Thread + messages -->
+            <div class="col-lg-8">
+
+                <!-- Message initial (contenu du thread) -->
+                <div class="detail_container mb-4">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div class="d-flex align-items-center" style="gap:var(--space-3);">
+                            <div style="width:40px; height:40px; background:var(--color-primary-light); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <i class="fas fa-user" style="color:var(--color-primary); font-size:var(--text-sm);"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight:var(--weight-bold); font-size:var(--text-sm);">{{ thread.auteur.get_full_name|default:thread.auteur.email }}</div>
+                                <small class="text-muted" style="font-size:11px;">{{ thread.created_at|date:"d/m/Y à H:i" }}</small>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center" style="gap:var(--space-2);">
+                            {% if thread.est_resolu %}
+                            <span class="tag_badge tag_badge--success" style="font-size:10px;"><i class="fas fa-check-circle mr-1"></i>Résolu</span>
+                            {% endif %}
+                            <span class="tag_badge" style="font-size:10px;"><i class="fas fa-eye mr-1"></i>{{ thread.nombre_vues }} vues</span>
+                        </div>
+                    </div>
+                    <div style="font-size:var(--text-base); line-height:var(--leading-relaxed); color:var(--color-text);">
+                        {{ thread.contenu|linebreaksbr }}
+                    </div>
+                </div>
+
+                <!-- Réponses -->
+                {% if messages_forum %}
+                <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+                    {{ messages_forum|length }} réponse{{ messages_forum|length|pluralize }}
+                </h3>
+
+                {% for msg in messages_forum %}
+                <div class="card unified_card mb-3" id="msg-{{ msg.pk }}"
+                     style="{% if msg.is_solution %}border-left:4px solid var(--color-success);{% endif %}">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-start justify-content-between mb-3">
+                            <div class="d-flex align-items-center" style="gap:var(--space-3);">
+                                <div style="width:36px; height:36px; background:var(--color-bg-subtle); border-radius:var(--radius-full); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <i class="fas fa-user" style="color:var(--color-text-muted); font-size:12px;"></i>
+                                </div>
+                                <div>
+                                    <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">
+                                        {{ msg.auteur.get_full_name|default:msg.auteur.email }}
+                                    </div>
+                                    <small class="text-muted" style="font-size:11px;">{{ msg.created_at|date:"d/m/Y à H:i" }}</small>
+                                </div>
+                            </div>
+                            {% if msg.is_solution %}
+                            <span class="tag_badge tag_badge--success" style="font-size:10px;"><i class="fas fa-check-circle mr-1"></i>Meilleure réponse</span>
+                            {% endif %}
+                        </div>
+                        <div style="font-size:var(--text-sm); line-height:var(--leading-relaxed); color:var(--color-text); margin-bottom:var(--space-3);">
+                            {{ msg.contenu|linebreaksbr }}
+                        </div>
+                        <!-- Like button -->
+                        {% if request.user.is_authenticated %}
+                        <form method="post" action="{% url 'community:message-like' msg.pk %}" class="d-inline" data-like-form>
+                            {% csrf_token %}
+                            <button type="submit" class="btn_ghost btn_sm" style="{% if msg.pk in liked_ids %}color:var(--color-primary); border-color:var(--color-primary);{% endif %}">
+                                <i class="fas fa-thumbs-up mr-1"></i>{{ msg.nombre_likes }}
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="tag_badge" style="font-size:11px;"><i class="fas fa-thumbs-up mr-1"></i>{{ msg.nombre_likes }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <!-- Formulaire de réponse -->
+                {% if request.user.is_authenticated %}
+                {% if not thread.is_ferme %}
+                <div class="detail_container mt-4">
+                    <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+                        <i class="fas fa-reply mr-2" style="color:var(--color-primary);"></i>Votre réponse
+                    </h3>
+                    <form method="post" action="{% url 'community:message-create' thread.pk %}" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            {{ reply_form.contenu }}
+                        </div>
+                        <button type="submit" class="comment_button">
+                            <i class="fas fa-paper-plane mr-2"></i>Publier la réponse
+                        </button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="mt-4 p-3 text-center" style="background:var(--color-bg-subtle); border-radius:var(--radius-md);">
+                    <i class="fas fa-lock text-muted mr-2"></i>
+                    <span class="text-muted">Cette discussion est fermée aux nouvelles réponses.</span>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="detail_container mt-4 text-center">
+                    <p class="text-muted mb-3">Connectez-vous pour répondre à cette discussion.</p>
+                    <a href="{% url 'accounts:login' %}?next={{ request.path }}" class="comment_button btn_sm">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Se connecter
+                    </a>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">Infos discussion</h3>
+                    <div class="d-flex flex-column" style="gap:var(--space-2);">
+                        <small class="text-muted"><i class="fas fa-user mr-2" style="color:var(--color-primary);"></i>{{ thread.auteur.get_full_name|default:thread.auteur.email }}</small>
+                        <small class="text-muted"><i class="fas fa-calendar mr-2" style="color:var(--color-primary);"></i>{{ thread.created_at|date:"d/m/Y" }}</small>
+                        <small class="text-muted"><i class="fas fa-comment mr-2" style="color:var(--color-primary);"></i>{{ thread.nombre_reponses }} réponse{{ thread.nombre_reponses|pluralize }}</small>
+                        <small class="text-muted"><i class="fas fa-eye mr-2" style="color:var(--color-primary);"></i>{{ thread.nombre_vues }} vue{{ thread.nombre_vues|pluralize }}</small>
+                    </div>
+                </div>
+
+                <a href="{% url 'community:forum-detail' thread.forum.slug %}" class="btn_ghost w-100 mb-2">
+                    <i class="fas fa-arrow-left mr-2"></i>Retour au forum
+                </a>
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'community:thread-create' thread.forum.slug %}" class="comment_button w-100">
+                    <i class="fas fa-plus mr-2"></i>Nouvelle discussion
+                </a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes notifications — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap" style="gap:var(--space-3);">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                    <i class="fas fa-bell mr-2" style="color:var(--color-primary);"></i>Mes notifications
+                </h1>
+                {% if nb_non_lues > 0 %}
+                <p style="margin:4px 0 0; font-size:var(--text-sm);">
+                    <span class="tag_badge tag_badge--info">{{ nb_non_lues }} non lue{{ nb_non_lues|pluralize }}</span>
+                </p>
+                {% endif %}
+            </div>
+            {% if nb_non_lues > 0 %}
+            <form method="post" action="{% url 'notifications:mark-all-read' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn_ghost btn_sm">
+                    <i class="fas fa-check-double mr-1"></i>Tout marquer comme lu
+                </button>
+            </form>
+            {% endif %}
+        </div>
+
+        <!-- Filtres -->
+        <div class="filter_form_container mb-4">
+            <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                <a href="?" class="tag_badge {% if not filtre %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">Toutes</a>
+                <a href="?filtre=non_lues" class="tag_badge {% if filtre == 'non_lues' %}tag_badge--info{% endif %}" style="cursor:pointer; text-decoration:none;">Non lues</a>
+                <a href="?filtre=lues" class="tag_badge {% if filtre == 'lues' %}tag_badge--success{% endif %}" style="cursor:pointer; text-decoration:none;">Lues</a>
+            </div>
+        </div>
+
+        {% if notifications %}
+        <div class="detail_container" style="padding:0;">
+            {% for notif in notifications %}
+            <div class="d-flex align-items-start" style="
+                padding:var(--space-4);
+                border-bottom:1px solid var(--color-border-light);
+                {% if not notif.is_read %}background:var(--color-bg-warm);{% endif %}
+                gap:var(--space-4);">
+
+                <!-- Icône type -->
+                <div style="
+                    width:40px; height:40px; border-radius:var(--radius-full); flex-shrink:0;
+                    display:flex; align-items:center; justify-content:center;
+                    background:{% if notif.type_notification == 'SUCCESS' %}var(--color-success-bg){% elif notif.type_notification == 'WARNING' %}var(--color-bg-warm){% elif notif.type_notification == 'ALERT' %}#fff5f5{% else %}var(--color-primary-light){% endif %};">
+                    <i class="fas {% if notif.type_notification == 'SUCCESS' %}fa-check-circle{% elif notif.type_notification == 'WARNING' %}fa-exclamation-triangle{% elif notif.type_notification == 'ALERT' %}fa-bell{% elif notif.type_notification == 'NOUV_MESSAGE' %}fa-comment{% else %}fa-info-circle{% endif %}" style="
+                        color:{% if notif.type_notification == 'SUCCESS' %}var(--color-success){% elif notif.type_notification == 'WARNING' %}var(--color-accent){% elif notif.type_notification == 'ALERT' %}var(--color-danger){% else %}var(--color-primary){% endif %};
+                        font-size:16px;"></i>
+                </div>
+
+                <!-- Contenu -->
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-start justify-content-between">
+                        <div>
+                            <div style="font-weight:{% if not notif.is_read %}var(--weight-bold){% else %}var(--weight-semibold){% endif %}; font-size:var(--text-sm);">
+                                {{ notif.titre }}
+                            </div>
+                            <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:4px 0 0;">{{ notif.message }}</p>
+                            <small class="text-muted" style="font-size:11px;">{{ notif.created_at|timesince }} ago</small>
+                        </div>
+                        <div class="d-flex align-items-center ml-3" style="gap:var(--space-2); flex-shrink:0;">
+                            {% if not notif.is_read %}
+                            <span style="width:8px; height:8px; border-radius:var(--radius-full); background:var(--color-primary); display:inline-block;"></span>
+                            {% endif %}
+                            {% if not notif.is_read %}
+                            <form method="post" action="{% url 'notifications:mark-read' notif.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{% url 'notifications:list' %}{% if filtre %}?filtre={{ filtre }}{% endif %}">
+                                <button type="submit" class="btn_ghost btn_sm" title="Marquer comme lu">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            {% if notif.action_url %}
+                            <a href="{{ notif.action_url }}" class="comment_button btn_sm">
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if filtre %}&filtre={{ filtre }}{% endif %}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}{% if filtre %}&filtre={{ filtre }}{% endif %}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if filtre %}&filtre={{ filtre }}{% endif %}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-bell-slash empty_state_icon"></i>
+            <h4>Aucune notification</h4>
+            <p>Vous recevrez ici des alertes sur votre accompagnement, vos questions et vos ristournes.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

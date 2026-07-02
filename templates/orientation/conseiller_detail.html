@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ conseiller.get_full_name }} — Conseiller AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+{% with cp=conseiller.counselor_profile %}
+
+<div class="page_header" style="min-height:200px;">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'orientation:conseillers' %}">Conseillers</a></li>
+                    <li class="breadcrumb-item active">{{ conseiller.get_full_name }}</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center" style="gap:var(--space-5);">
+                <div style="width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,var(--color-primary),var(--color-accent)); display:flex; align-items:center; justify-content:center; color:white; font-size:2rem; font-weight:var(--weight-bold); flex-shrink:0; border:3px solid rgba(255,255,255,0.3);">
+                    {{ conseiller.first_name|first|upper }}{{ conseiller.last_name|first|upper }}
+                </div>
+                <div>
+                    <h1 style="margin-bottom:var(--space-1);">{{ conseiller.get_full_name }}</h1>
+                    {% if cp.note_moyenne %}
+                    <span style="font-size:var(--text-lg); color:var(--color-accent); font-weight:var(--weight-bold);">
+                        ★ {{ cp.note_moyenne|floatformat:1 }}/5
+                    </span>
+                    <span style="font-size:var(--text-sm); color:rgba(255,255,255,0.7); margin-left:var(--space-2);">{{ cp.nombre_evaluations }} évaluation{{ cp.nombre_evaluations|pluralize }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Infos & CTA -->
+            <div class="col-lg-4 mb-4">
+                <div class="detail_container">
+
+                    <!-- Disponibilité -->
+                    <div class="mb-4">
+                        {% if cp.is_available %}
+                        <span class="tag_badge tag_badge--success" style="font-size:var(--text-sm);">
+                            <i class="fas fa-circle mr-1" style="font-size:8px;"></i>Disponible pour accompagnement
+                        </span>
+                        {% else %}
+                        <span class="tag_badge" style="font-size:var(--text-sm);">Indisponible actuellement</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="row text-center mb-4">
+                        <div class="col-4">
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-primary);">{{ cp.nombre_accompagnements_total }}</div>
+                            <div style="font-size:10px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Accompl.</div>
+                        </div>
+                        <div class="col-4">
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-accent);">{{ cp.annees_experience }}</div>
+                            <div style="font-size:10px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px;">Ans d'exp.</div>
+                        </div>
+                        <div class="col-4">
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-success);">{{ cp.nombre_accompagnements_actifs }}</div>
+                            <div style="font-size:10px; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px;">En cours</div>
+                        </div>
+                    </div>
+
+                    <!-- Tarif -->
+                    {% if cp.tarif_consultation %}
+                    <div class="mb-4 p-3 text-center" style="background:var(--color-bg-warm); border-radius:var(--radius-md);">
+                        <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-primary);">{{ cp.tarif_consultation|floatformat:0 }} FCFA</div>
+                        <div style="font-size:var(--text-xs); color:var(--color-text-muted);">par séance</div>
+                    </div>
+                    {% endif %}
+
+                    <!-- CTA -->
+                    {% if peut_demander %}
+                    <a href="{% url 'orientation:accompagnement-create' %}?conseiller={{ conseiller.pk }}" class="comment_button w-100 mb-2">
+                        <i class="fas fa-hands-helping mr-2"></i>Demander un accompagnement
+                    </a>
+                    {% elif not request.user.is_authenticated %}
+                    <a href="{% url 'accounts:login' %}" class="comment_button w-100 mb-2">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Se connecter pour demander
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'orientation:conseillers' %}" class="btn_ghost w-100">
+                        <i class="fas fa-arrow-left mr-1"></i>Tous les conseillers
+                    </a>
+
+                    <!-- Spécialités -->
+                    {% if cp.specialites %}
+                    <div class="mt-4 pt-4" style="border-top:1px solid var(--color-border-light);">
+                        <small class="text-muted d-block mb-2" style="text-transform:uppercase; font-size:10px; font-weight:700; letter-spacing:0.5px;">Spécialités</small>
+                        <div class="d-flex flex-wrap" style="gap:6px;">
+                            {% for s in cp.specialites %}
+                            <span class="tag_badge">{{ s }}</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Profil détaillé + évaluations -->
+            <div class="col-lg-8 mb-4">
+
+                {% if cp.qualifications %}
+                <div class="detail_container mb-4">
+                    <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+                        <i class="fas fa-certificate mr-2" style="color:var(--color-primary);"></i>Qualifications
+                    </h2>
+                    <p style="font-size:var(--text-base); line-height:var(--leading-relaxed); color:var(--color-text);">{{ cp.qualifications }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Évaluations -->
+                <div class="detail_container">
+                    <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-5);">
+                        <i class="fas fa-star mr-2" style="color:var(--color-accent);"></i>Avis d'étudiants
+                    </h2>
+
+                    {% if evaluations %}
+                    {% for ev in evaluations %}
+                    <div class="mb-4 pb-4" style="{% if not forloop.last %}border-bottom:1px solid var(--color-border-light);{% endif %}">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">
+                                {{ ev.etudiant.first_name }} {{ ev.etudiant.last_name|first }}.
+                            </div>
+                            <div>
+                                {% for i in "12345" %}
+                                <span style="color:{% if forloop.counter <= ev.note_conseiller %}var(--color-accent){% else %}var(--color-border-light){% endif %}; font-size:var(--text-base);">★</span>
+                                {% endfor %}
+                                <span style="font-size:var(--text-xs); color:var(--color-text-muted); margin-left:4px;">{{ ev.date_fin|date:"M Y" }}</span>
+                            </div>
+                        </div>
+                        {% if ev.commentaire_note %}
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin:0; font-style:italic;">« {{ ev.commentaire_note }} »</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-star fa-2x text-muted mb-3 d-block" style="opacity:0.2;"></i>
+                        <p class="text-muted">Aucun avis pour le moment.</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endwith %}
+{% endblock %}

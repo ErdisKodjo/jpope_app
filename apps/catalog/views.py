@@ -1,7 +1,9 @@
 """
 Vues web pour l'application catalog.
 """
-from django.views.generic import ListView, DetailView, TemplateView
+from django.db.models import Q
+from django.views.generic import ListView, DetailView, TemplateView, View
+from django.shortcuts import render
 
 from .models import Domaine, Etablissement, Formation, Metier
 from .services import CatalogService
@@ -240,3 +242,45 @@ class SimulateurView(TemplateView):
             is_active=True
         ).select_related("etablissement").order_by("nom")
         return context
+
+
+class RechercheView(View):
+    """Recherche globale multi-entités."""
+    template_name = "catalog/recherche.html"
+
+    def get(self, request):
+        q = request.GET.get("q", "").strip()
+        ctx = {"q": q, "formations": [], "etablissements": [], "metiers": []}
+
+        if len(q) >= 2:
+            ctx["formations"] = (
+                Formation.objects.filter(
+                    Q(nom__icontains=q) | Q(description__icontains=q),
+                    is_active=True,
+                ).select_related("etablissement", "domaine").order_by("-score_qualite")[:8]
+            )
+            ctx["etablissements"] = (
+                Etablissement.objects.filter(
+                    Q(nom__icontains=q) | Q(description__icontains=q) | Q(ville__icontains=q),
+                    is_active=True,
+                ).order_by("-score_qualite_global")[:6]
+            )
+            ctx["metiers"] = (
+                Metier.objects.filter(
+                    Q(nom__icontains=q) | Q(description__icontains=q),
+                    is_active=True,
+                ).select_related("domaine").order_by("-score_attractivite")[:6]
+            )
+            ctx["nb_total"] = (
+                len(ctx["formations"]) + len(ctx["etablissements"]) + len(ctx["metiers"])
+            )
+            # Community threads
+            try:
+                from apps.community.models import Thread
+                ctx["threads"] = Thread.objects.filter(
+                    Q(titre__icontains=q) | Q(contenu__icontains=q),
+                ).exclude(statut="SUPPRIME").select_related("forum", "auteur").order_by("-created_at")[:4]
+                ctx["nb_total"] += len(ctx["threads"])
+            except Exception:
+                ctx["threads"] = []
+        return render(request, self.template_name, ctx)

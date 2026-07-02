@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes accompagnements — Conseiller — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Mes accompagnements</h1>
+            <p>Gérez vos sessions d'accompagnement avec les étudiants</p>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="sidebar_section mb-4">
+                    <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:var(--space-3);">Navigation</h3>
+                    <a href="{% url 'orientation:conseiller-demandes' %}" class="admin_sidebar_item {% if not statut_filtre %}active{% endif %}" style="border-left-color:var(--color-primary);">
+                        <i class="fas fa-list"></i>Toutes les demandes
+                    </a>
+                    <a href="?statut=EN_COURS" class="admin_sidebar_item {% if statut_filtre == 'EN_COURS' %}active{% endif %}">
+                        <i class="fas fa-spinner" style="color:var(--color-accent);"></i>En cours
+                    </a>
+                    <a href="?statut=ACCEPTEE" class="admin_sidebar_item {% if statut_filtre == 'ACCEPTEE' %}active{% endif %}">
+                        <i class="fas fa-check-circle" style="color:var(--color-success);"></i>Acceptées
+                    </a>
+                    <a href="?statut=TERMINEE" class="admin_sidebar_item {% if statut_filtre == 'TERMINEE' %}active{% endif %}">
+                        <i class="fas fa-flag-checkered" style="color:var(--color-primary);"></i>Terminées
+                    </a>
+                    <hr>
+                    <a href="{% url 'orientation:question-proposer' %}" class="admin_sidebar_item">
+                        <i class="fas fa-lightbulb" style="color:var(--color-accent);"></i>Proposer une question
+                    </a>
+                    <a href="{% url 'orientation:mes-questions-proposees' %}" class="admin_sidebar_item">
+                        <i class="fas fa-clipboard-list"></i>Mes propositions
+                    </a>
+                    <a href="{% url 'orientation:resultats-conseiller' %}" class="admin_sidebar_item">
+                        <i class="fas fa-chart-bar"></i>Résultats étudiants
+                    </a>
+                </div>
+
+                <!-- Stats conseiller -->
+                {% with cp=request.user.counselor_profile %}
+                {% if cp %}
+                <div class="sidebar_section">
+                    <h3 style="font-size:var(--text-sm); font-weight:var(--weight-bold); margin-bottom:var(--space-3); text-transform:uppercase; letter-spacing:0.5px;">Mon profil</h3>
+                    <div class="text-center mb-3">
+                        <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-accent);">
+                            ★ {{ cp.note_moyenne|floatformat:1 }}<small style="font-size:var(--text-sm); color:var(--color-text-muted);">/5</small>
+                        </div>
+                        <small class="text-muted">{{ cp.nombre_evaluations }} évaluation{{ cp.nombre_evaluations|pluralize }}</small>
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:var(--space-2); font-size:var(--text-xs); text-align:center;">
+                        <div style="background:var(--color-bg-warm); padding:var(--space-2); border-radius:var(--radius-sm);">
+                            <div style="font-weight:var(--weight-bold); font-size:var(--text-base);">{{ cp.nombre_accompagnements_actifs }}</div>
+                            <div style="color:var(--color-text-muted);">Actifs</div>
+                        </div>
+                        <div style="background:var(--color-bg-warm); padding:var(--space-2); border-radius:var(--radius-sm);">
+                            <div style="font-weight:var(--weight-bold); font-size:var(--text-base);">{{ cp.nombre_accompagnements_total }}</div>
+                            <div style="color:var(--color-text-muted);">Total</div>
+                        </div>
+                    </div>
+                    {% if cp.solde_ristournes %}
+                    <div class="mt-3 text-center" style="background:var(--color-primary-light); padding:var(--space-3); border-radius:var(--radius-sm);">
+                        <div style="font-size:var(--text-base); font-weight:var(--weight-bold); color:var(--color-primary);">
+                            {{ cp.solde_ristournes|floatformat:0 }} FCFA
+                        </div>
+                        <small class="text-muted">Ristournes à percevoir</small>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Demandes entrantes non assignées -->
+            <div class="col-lg-9">
+                {% if en_attente %}
+                <div class="detail_container mb-4" style="border-left:3px solid var(--color-accent);">
+                    <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:var(--space-3); color:var(--color-accent);">
+                        <i class="fas fa-bell mr-2"></i>Demandes sans conseiller <span class="tag_badge tag_badge--info">{{ en_attente|length }}</span>
+                    </h3>
+                    {% for demande in en_attente %}
+                    <div class="d-flex align-items-center justify-content-between py-2" style="border-bottom:1px solid var(--color-border-light);">
+                        <div>
+                            <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ demande.etudiant.get_full_name }}</div>
+                            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin:2px 0 0;">{{ demande.motif|truncatewords:15 }}</p>
+                        </div>
+                        <div class="d-flex" style="gap:var(--space-2);">
+                            <form method="post" action="{% url 'orientation:accepter-demande' demande.pk %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="message_reponse" value="">
+                                <button type="submit" class="comment_button btn_sm">
+                                    <i class="fas fa-check mr-1"></i>Accepter
+                                </button>
+                            </form>
+                            <a href="{% url 'orientation:demande-detail' demande.pk %}" class="btn_ghost btn_sm">Voir</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Mes demandes -->
+                <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+                    Mes sessions {% if statut_filtre %}<span class="tag_badge">{{ statut_filtre }}</span>{% endif %}
+                </h2>
+
+                {% if demandes %}
+                <div class="row">
+                    {% for demande in demandes %}
+                    <div class="col-md-6 mb-4 d-flex align-items-stretch">
+                        <div class="card unified_card w-100">
+                            <div class="unified_card_body">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="tag_badge
+                                        {% if demande.statut == 'EN_ATTENTE' %}tag_badge--info
+                                        {% elif demande.statut in 'ACCEPTEE,EN_COURS' %}tag_badge--success
+                                        {% elif demande.statut == 'TERMINEE' %}tag_badge--primary
+                                        {% endif %}">
+                                        {{ demande.get_statut_display }}
+                                    </span>
+                                    <small class="text-muted">{{ demande.date_demande|date:"d/m/Y" }}</small>
+                                </div>
+                                <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm); margin-bottom:4px;">
+                                    <i class="fas fa-user-graduate mr-1" style="color:var(--color-primary);"></i>
+                                    {{ demande.etudiant.get_full_name }}
+                                </div>
+                                <p class="unified_card_text" style="font-size:var(--text-xs);">{{ demande.motif|truncatewords:20 }}</p>
+                                {% if demande.note_conseiller %}
+                                <div style="color:var(--color-accent); font-size:var(--text-sm);">★ {{ demande.note_conseiller }}/5</div>
+                                {% endif %}
+                            </div>
+                            <div class="unified_card_footer">
+                                <a href="{% url 'orientation:demande-detail' demande.pk %}" class="comment_button btn_sm w-100 text-center">
+                                    <i class="fas fa-comments mr-1"></i>Ouvrir la session
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty_state" style="padding:var(--space-8) var(--space-4);">
+                    <i class="fas fa-inbox empty_state_icon"></i>
+                    <h4>Aucune session trouvée</h4>
+                    <p>Acceptez des demandes pour commencer à accompagner des étudiants.</p>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

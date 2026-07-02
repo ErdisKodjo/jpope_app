@@ -175,6 +175,25 @@ class CounselorProfile(models.Model):
 
     # Statistiques
     nombre_eleves_suivis = models.PositiveIntegerField(default=0)
+    nombre_accompagnements_total = models.PositiveIntegerField(
+        _("nombre total d'accompagnements"),
+        default=0,
+    )
+    nombre_accompagnements_actifs = models.PositiveIntegerField(
+        _("nombre d'accompagnements actifs"),
+        default=0,
+    )
+
+    # Notation
+    note_moyenne = models.FloatField(
+        _("note moyenne (0-5)"),
+        default=0.0,
+        validators=[MinValueValidator(0), MaxValueValidator(5)],
+    )
+    nombre_evaluations = models.PositiveIntegerField(
+        _("nombre d'évaluations reçues"),
+        default=0,
+    )
 
     # Disponibilité
     is_available = models.BooleanField(
@@ -187,6 +206,18 @@ class CounselorProfile(models.Model):
         decimal_places=0,
         blank=True,
         null=True,
+    )
+    taux_ristourne = models.FloatField(
+        _("taux de ristourne (%)"),
+        default=10.0,
+        validators=[MinValueValidator(0), MaxValueValidator(100)],
+        help_text=_("Pourcentage du tarif consultation reversé comme commission"),
+    )
+    solde_ristournes = models.DecimalField(
+        _("solde ristournes (FCFA)"),
+        max_digits=12,
+        decimal_places=0,
+        default=0,
     )
 
     # Timestamps

@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .enums import TypeFavori
+from ..managers import FavoriManager
 
 class Favori(models.Model):
     """
@@ -99,6 +100,8 @@ class Favori(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = FavoriManager()
 
     class Meta:
         verbose_name = _("favori")

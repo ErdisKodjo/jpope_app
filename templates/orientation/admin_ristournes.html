@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Ristournes conseillers — Admin — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                    <i class="fas fa-coins mr-2" style="color:var(--color-accent);"></i>Ristournes des conseillers
+                </h1>
+                {% if total_en_attente %}
+                <p style="margin:4px 0 0; font-size:var(--text-sm);">
+                    <span class="tag_badge tag_badge--info">{{ total_en_attente }} en attente</span>
+                    <span class="tag_badge ml-2" style="background:var(--color-primary-light); color:var(--color-primary);">
+                        Total : {{ montant_en_attente|floatformat:0 }} FCFA
+                    </span>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filter_form_container mb-4">
+            <div class="d-flex" style="gap:var(--space-2);">
+                <a href="?statut=EN_ATTENTE" class="tag_badge {% if statut_filtre == 'EN_ATTENTE' %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">
+                    En attente
+                </a>
+                <a href="?statut=PAYEE" class="tag_badge {% if statut_filtre == 'PAYEE' %}tag_badge--success{% endif %}" style="cursor:pointer; text-decoration:none;">
+                    Payées
+                </a>
+                <a href="?statut=ANNULEE" class="tag_badge {% if statut_filtre == 'ANNULEE' %}{% endif %}" style="cursor:pointer; text-decoration:none;">
+                    Annulées
+                </a>
+            </div>
+        </div>
+
+        {% if ristournes %}
+        <div class="detail_container" style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:var(--text-sm);">
+                <thead>
+                    <tr style="border-bottom:2px solid var(--color-border-light);">
+                        <th style="padding:var(--space-3); text-align:left; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Référence</th>
+                        <th style="padding:var(--space-3); text-align:left; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Conseiller</th>
+                        <th style="padding:var(--space-3); text-align:left; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Étudiant</th>
+                        <th style="padding:var(--space-3); text-align:right; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Montant</th>
+                        <th style="padding:var(--space-3); text-align:center; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Note</th>
+                        <th style="padding:var(--space-3); text-align:left; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Date</th>
+                        <th style="padding:var(--space-3); text-align:center; font-weight:var(--weight-bold); color:var(--color-text-muted); font-size:11px; text-transform:uppercase;">Statut / Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in ristournes %}
+                    <tr style="border-bottom:1px solid var(--color-border-light);">
+                        <td style="padding:var(--space-3);">
+                            <code style="font-size:11px; background:var(--color-bg-warm); padding:2px 6px; border-radius:4px;">{{ r.reference }}</code>
+                        </td>
+                        <td style="padding:var(--space-3);">
+                            <div style="font-weight:var(--weight-semibold);">{{ r.conseiller.get_full_name }}</div>
+                        </td>
+                        <td style="padding:var(--space-3);">
+                            <div style="color:var(--color-text-muted);">{{ r.demande_accompagnement.etudiant.get_full_name }}</div>
+                        </td>
+                        <td style="padding:var(--space-3); text-align:right; font-weight:var(--weight-bold); color:var(--color-primary);">
+                            {{ r.montant|floatformat:0 }} FCFA
+                            <div style="font-size:10px; color:var(--color-text-muted); font-weight:normal;">taux {{ r.taux_applique }}%</div>
+                        </td>
+                        <td style="padding:var(--space-3); text-align:center;">
+                            {% if r.note_etudiant %}
+                            <span style="color:var(--color-accent); font-weight:var(--weight-bold);">★ {{ r.note_etudiant }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td style="padding:var(--space-3); color:var(--color-text-muted); font-size:12px;">
+                            {{ r.date_creation|date:"d/m/Y" }}
+                            {% if r.date_paiement %}<br><small>Payé : {{ r.date_paiement|date:"d/m/Y" }}</small>{% endif %}
+                        </td>
+                        <td style="padding:var(--space-3); text-align:center;">
+                            {% if r.statut == 'EN_ATTENTE' %}
+                            <form method="post" action="{% url 'orientation:admin-payer-ristourne' r.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="comment_button btn_sm">
+                                    <i class="fas fa-money-bill-wave mr-1"></i>Marquer payée
+                                </button>
+                            </form>
+                            {% elif r.statut == 'PAYEE' %}
+                            <span class="tag_badge tag_badge--success"><i class="fas fa-check mr-1"></i>Payée</span>
+                            {% else %}
+                            <span class="tag_badge">{{ r.get_statut_display }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&statut={{ statut_filtre }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&statut={{ statut_filtre }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&statut={{ statut_filtre }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-coins empty_state_icon"></i>
+            <h4>Aucune ristourne</h4>
+            <p>Les ristournes apparaissent ici dès qu'un étudiant évalue un conseiller.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

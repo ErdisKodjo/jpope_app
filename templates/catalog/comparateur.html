@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Comparateur de formations — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1><i class="fas fa-balance-scale mr-2"></i>Comparateur</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'catalog:formation-list' %}">Formations</a></li>
+                    <li class="breadcrumb-item active">Comparateur</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- Sélecteurs -->
+        <div class="filter_form_container mb-5">
+            <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+                <i class="fas fa-sliders-h mr-2" style="color:var(--color-primary);"></i>Sélectionnez jusqu'à 3 formations à comparer
+            </h2>
+            <div class="row">
+                {% for i in "123" %}
+                <div class="col-lg-4 mb-3">
+                    <label class="form_label">Formation {{ forloop.counter }}</label>
+                    <select id="select-{{ forloop.counter }}" class="input_field formation-select" style="height:42px; appearance:auto;">
+                        <option value="">— Choisir une formation —</option>
+                        {% for f in formations %}
+                        <option value="{{ f.pk }}"
+                                data-nom="{{ f.nom }}"
+                                data-etab="{{ f.etablissement.nom }}"
+                                data-niveau="{{ f.get_niveau_display }}"
+                                data-duree="{{ f.duree_annees }}"
+                                data-cout="{{ f.cout_annuel }}"
+                                data-taux-reussite="{{ f.taux_reussite|floatformat:0 }}"
+                                data-insertion="{{ f.taux_insertion_6mois|floatformat:0 }}"
+                                data-modalite="{{ f.get_modalite_display }}"
+                                data-slug="{{ f.slug }}">
+                            {{ f.nom }} — {{ f.etablissement.nom }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+            </div>
+            <button onclick="comparer()" class="comment_button mt-2">
+                <i class="fas fa-balance-scale mr-2"></i>Comparer
+            </button>
+        </div>
+
+        <!-- Tableau de comparaison -->
+        <div id="comparaisonResult" style="display:none;">
+            <h3 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">Comparaison</h3>
+            <div class="detail_container" style="padding:0; overflow-x:auto;">
+                <table id="comparaisonTable" style="width:100%; border-collapse:collapse; min-width:500px;">
+                    <thead>
+                        <tr style="background:var(--color-bg-subtle);">
+                            <th style="padding:var(--space-3) var(--space-4); font-size:var(--text-xs); text-transform:uppercase; font-weight:700; color:var(--color-text-muted); text-align:left; width:180px;">Critère</th>
+                            <th id="th-1" style="padding:var(--space-3) var(--space-4); font-size:var(--text-sm); font-weight:700; text-align:center; color:var(--color-primary);"></th>
+                            <th id="th-2" style="padding:var(--space-3) var(--space-4); font-size:var(--text-sm); font-weight:700; text-align:center; color:var(--color-accent);"></th>
+                            <th id="th-3" style="padding:var(--space-3) var(--space-4); font-size:var(--text-sm); font-weight:700; text-align:center; color:var(--color-success);"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparaisonBody"></tbody>
+                </table>
+            </div>
+            <div class="mt-4" id="comparaisonLinks"></div>
+        </div>
+
+        <!-- État vide initial -->
+        <div id="comparaisonEmpty" class="text-center py-5">
+            <i class="fas fa-balance-scale fa-3x text-muted mb-4 d-block" style="opacity:0.2;"></i>
+            <h4 class="text-muted">Sélectionnez au moins 2 formations pour comparer</h4>
+            <p class="text-muted">Comparez les coûts, durées, taux de réussite et débouchés côte à côte.</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const ROWS = [
+        { label: "Établissement",     key: "etab" },
+        { label: "Niveau",            key: "niveau" },
+        { label: "Durée",             key: "duree",       suffix: " an(s)" },
+        { label: "Coût annuel",       key: "cout",        suffix: " FCFA/an", highlight: "min" },
+        { label: "Modalité",          key: "modalite" },
+        { label: "Taux de réussite",  key: "taux-reussite", suffix: "%", highlight: "max" },
+        { label: "Insertion 6 mois",  key: "insertion",   suffix: "%", highlight: "max" },
+    ];
+    const COLORS = ["var(--color-primary)", "var(--color-accent)", "var(--color-success)"];
+
+    window.comparer = function () {
+        const selects = document.querySelectorAll(".formation-select");
+        const chosen = [];
+        selects.forEach(function (sel) {
+            if (sel.value) {
+                const opt = sel.options[sel.selectedIndex];
+                const d = opt.dataset;
+                chosen.push({ nom: d.nom, etab: d.etab, niveau: d.niveau, duree: d.duree, cout: parseInt(d.cout), "taux-reussite": parseFloat(d.tauxReussite), insertion: parseFloat(d.insertion), modalite: d.modalite, slug: d.slug });
+            }
+        });
+
+        if (chosen.length < 2) {
+            alert("Veuillez sélectionner au moins 2 formations.");
+            return;
+        }
+
+        document.getElementById("comparaisonEmpty").style.display = "none";
+        document.getElementById("comparaisonResult").style.display = "block";
+
+        // En-têtes
+        chosen.forEach(function (f, i) {
+            const th = document.getElementById("th-" + (i + 1));
+            if (th) th.textContent = f.nom.length > 25 ? f.nom.substring(0, 24) + "…" : f.nom;
+        });
+        for (let i = chosen.length; i < 3; i++) {
+            const th = document.getElementById("th-" + (i + 1));
+            if (th) th.textContent = "";
+        }
+
+        // Corps
+        const tbody = document.getElementById("comparaisonBody");
+        tbody.innerHTML = "";
+        ROWS.forEach(function (row) {
+            const tr = document.createElement("tr");
+            tr.style.borderBottom = "1px solid var(--color-border-light)";
+            const tdLabel = document.createElement("td");
+            tdLabel.style.cssText = "padding:12px 16px; font-size:12px; font-weight:700; color:var(--color-text-muted); text-transform:uppercase;";
+            tdLabel.textContent = row.label;
+            tr.appendChild(tdLabel);
+
+            // Trouver min/max pour highlight
+            let best = null;
+            if (row.highlight) {
+                const vals = chosen.map(function (f) { return parseFloat(f[row.key]) || 0; });
+                best = row.highlight === "max" ? Math.max(...vals) : Math.min(...vals);
+            }
+
+            chosen.forEach(function (f, i) {
+                const td = document.createElement("td");
+                td.style.cssText = "padding:12px 16px; text-align:center; font-size:var(--text-sm);";
+                const val = f[row.key];
+                const display = val !== undefined && val !== "" ? val + (row.suffix || "") : "—";
+                const isWinner = best !== null && (parseFloat(val) === best);
+                td.innerHTML = isWinner
+                    ? "<strong style='color:" + COLORS[i] + ";'>" + display + "</strong>"
+                    : display;
+                tr.appendChild(td);
+            });
+            // Colonnes vides
+            for (let i = chosen.length; i < 3; i++) {
+                const td = document.createElement("td");
+                td.style.cssText = "padding:12px 16px; text-align:center; color:var(--color-text-muted);";
+                td.textContent = "—";
+                tr.appendChild(td);
+            }
+            tbody.appendChild(tr);
+        });
+
+        // Liens
+        const links = document.getElementById("comparaisonLinks");
+        links.innerHTML = "<div class='d-flex flex-wrap' style='gap:8px;'>";
+        chosen.forEach(function (f, i) {
+            links.innerHTML += "<a href='/catalogue/formations/" + f.slug + "/' class='comment_button btn_sm' style='background:" + COLORS[i] + "; border-color:" + COLORS[i] + ";'><i class='fas fa-external-link-alt mr-1'></i>Voir " + (f.nom.length > 20 ? f.nom.substring(0, 19) + "…" : f.nom) + "</a>";
+        });
+        links.innerHTML += "</div>";
+    };
+})();
+</script>
+{% endblock %}

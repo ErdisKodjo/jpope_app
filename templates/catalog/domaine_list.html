@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Domaines d'études — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Domaines d'études</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Domaines</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- Stats globales -->
+        <div class="row mb-5">
+            <div class="col-6 col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--primary">{{ stats.nombre_domaines }}</div>
+                    <div class="stat_item_label">Domaines</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--success">{{ stats.nombre_formations }}</div>
+                    <div class="stat_item_label">Formations</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--info">{{ stats.nombre_metiers }}</div>
+                    <div class="stat_item_label">Métiers</div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3 mb-3">
+                <div class="admin_card text-center">
+                    <div class="stat_number stat_item_value--accent">{{ stats.etablissements_verifies }}</div>
+                    <div class="stat_item_label">Établissements vérifiés</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille domaines -->
+        <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin-bottom:var(--space-5);">Choisissez votre domaine</h2>
+
+        {% if domaines %}
+        <div class="row">
+            {% for domaine in domaines %}
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <a href="{% url 'catalog:domaine-detail' domaine.slug %}" class="card unified_card w-100" style="text-decoration:none; color:inherit; border-top:4px solid {{ domaine.couleur }};">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-center mb-3" style="gap:var(--space-3);">
+                            <div style="width:52px; height:52px; border-radius:var(--radius-md); background:{{ domaine.couleur }}20; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1.6rem;">
+                                {% if domaine.icon %}{{ domaine.icon }}{% else %}<i class="fas fa-graduation-cap" style="color:{{ domaine.couleur }};"></i>{% endif %}
+                            </div>
+                            <div>
+                                <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin:0; color:var(--color-dark);">{{ domaine.nom }}</h3>
+                            </div>
+                        </div>
+                        {% if domaine.description %}
+                        <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3); line-height:1.5;">{{ domaine.description|truncatewords:20 }}</p>
+                        {% endif %}
+                        <div class="d-flex" style="gap:var(--space-3);">
+                            <span class="tag_badge" style="font-size:10px; background:{{ domaine.couleur }}15; color:{{ domaine.couleur }}; border-color:{{ domaine.couleur }}40;">
+                                <i class="fas fa-graduation-cap mr-1"></i>{{ domaine.nombre_formations }} formation{{ domaine.nombre_formations|pluralize }}
+                            </span>
+                            <span class="tag_badge" style="font-size:10px;">
+                                <i class="fas fa-briefcase mr-1"></i>{{ domaine.nombre_metiers }} métier{{ domaine.nombre_metiers|pluralize }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="unified_card_footer">
+                        <span style="font-size:var(--text-sm); font-weight:var(--weight-semibold); color:{{ domaine.couleur }};">
+                            Explorer ce domaine <i class="fas fa-arrow-right ml-1"></i>
+                        </span>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-graduation-cap empty_state_icon"></i>
+            <h4>Aucun domaine disponible</h4>
+            <p>Les domaines d'études seront bientôt disponibles.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

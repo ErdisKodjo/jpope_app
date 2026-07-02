@@ -63,3 +63,27 @@ class NiveauConfiance(models.TextChoices):
     HAUTE = "HAUTE", _("Haute (70-85%)")
     MOYENNE = "MOYENNE", _("Moyenne (50-70%)")
     FAIBLE = "FAIBLE", _("Faible (<50%)")
+
+
+class StatutDemande(models.TextChoices):
+    """Statut d'une demande d'accompagnement."""
+    EN_ATTENTE = "EN_ATTENTE", _("En attente")
+    ACCEPTEE = "ACCEPTEE", _("Acceptée")
+    EN_COURS = "EN_COURS", _("En cours")
+    TERMINEE = "TERMINEE", _("Terminée")
+    REFUSEE = "REFUSEE", _("Refusée")
+    ANNULEE = "ANNULEE", _("Annulée par l'étudiant")
+
+
+class StatutQuestionProposee(models.TextChoices):
+    """Statut d'une question proposée par un conseiller."""
+    EN_ATTENTE = "EN_ATTENTE", _("En attente d'approbation")
+    APPROUVEE = "APPROUVEE", _("Approuvée et intégrée")
+    REJETEE = "REJETEE", _("Rejetée")
+
+
+class StatutRistourne(models.TextChoices):
+    """Statut d'une ristourne conseiller."""
+    EN_ATTENTE = "EN_ATTENTE", _("En attente de paiement")
+    PAYEE = "PAYEE", _("Payée")
+    ANNULEE = "ANNULEE", _("Annulée")

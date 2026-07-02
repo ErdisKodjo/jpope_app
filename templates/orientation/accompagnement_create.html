@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Demander un accompagnement — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}">
+<style>
+.conseiller_card {
+    border: 2px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-2);
+}
+.conseiller_card:hover,
+.conseiller_card.selected {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+}
+.conseiller_card input[type="radio"] { display: none; }
+.conseiller_avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--color-bg-warm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.star_rating { color: var(--color-accent); font-size: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <div class="detail_container">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                            <i class="fas fa-hands-helping mr-2" style="color:var(--color-primary);"></i>Demander un accompagnement
+                        </h1>
+                        <a href="{% url 'orientation:recommandations' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                    </div>
+
+                    {% if resultat %}
+                    <div style="background:var(--color-primary-light); border-left:3px solid var(--color-primary); padding:var(--space-3) var(--space-4); border-radius:var(--radius-sm); margin-bottom:var(--space-5);">
+                        <p style="margin:0; font-size:var(--text-sm);">
+                            <i class="fas fa-link mr-2" style="color:var(--color-primary);"></i>
+                            Cette demande sera liée à votre résultat <strong>{{ resultat.code_holland }}</strong>
+                            du {{ resultat.date_calcul|date:"d/m/Y" }}.
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <p style="color:var(--color-text-muted); font-size:var(--text-sm); margin-bottom:var(--space-6);">
+                        Un conseiller d'orientation va vous aider à interpréter vos recommandations,
+                        clarifier vos doutes et vous guider dans votre choix d'orientation.
+                    </p>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- Motif -->
+                        <div class="mb-5">
+                            <label class="form_label" for="{{ form.motif.id_for_label }}">
+                                Décrivez votre situation et vos questions
+                                <span style="color:var(--color-danger);">*</span>
+                            </label>
+                            {{ form.motif }}
+                            {% if form.motif.errors %}<div class="form_error">{{ form.motif.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <!-- Domaines -->
+                        <div class="mb-5">
+                            <label class="form_label">Domaines concernés <small class="text-muted">(optionnel)</small></label>
+                            <div class="row">
+                                {% for value, label in form.domaines_concernes.field.choices %}
+                                <div class="col-md-6 mb-2">
+                                    <label style="display:flex; align-items:center; gap:var(--space-2); cursor:pointer; font-size:var(--text-sm);">
+                                        <input type="checkbox" name="domaines_concernes" value="{{ value }}" style="width:16px; height:16px; cursor:pointer;">
+                                        {{ label }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Choix du conseiller -->
+                        {% if conseillers_disponibles %}
+                        <div class="mb-5">
+                            <label class="form_label">Choisir un conseiller <small class="text-muted">(optionnel — sinon affecté automatiquement)</small></label>
+                            {% for conseiller in conseillers_disponibles %}
+                            <label class="conseiller_card" onclick="this.classList.toggle('selected')">
+                                <input type="radio" name="conseiller_id" value="{{ conseiller.pk }}">
+                                <div class="conseiller_avatar">
+                                    {% if conseiller.avatar %}
+                                    <img src="{{ conseiller.avatar.url }}" style="width:44px; height:44px; border-radius:50%; object-fit:cover;">
+                                    {% else %}
+                                    <i class="fas fa-user-tie" style="color:var(--color-primary);"></i>
+                                    {% endif %}
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ conseiller.get_full_name }}</div>
+                                    {% with cp=conseiller.counselor_profile %}
+                                    <div class="star_rating">
+                                        {% for i in "12345" %}★{% endfor %}
+                                        <span style="color:var(--color-text-muted); font-size:11px;"> {{ cp.note_moyenne|floatformat:1 }}/5</span>
+                                    </div>
+                                    {% if cp.specialites %}
+                                    <div style="font-size:11px; color:var(--color-text-muted);">{{ cp.specialites|join:", " }}</div>
+                                    {% endif %}
+                                    {% if cp.tarif_consultation %}
+                                    <div style="font-size:11px; color:var(--color-accent); font-weight:600;">{{ cp.tarif_consultation }} FCFA / session</div>
+                                    {% endif %}
+                                    {% endwith %}
+                                </div>
+                                <span class="tag_badge tag_badge--success">Disponible</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex align-items-center" style="gap:var(--space-3);">
+                            <button type="submit" class="comment_button">
+                                <i class="fas fa-paper-plane mr-2"></i>Envoyer ma demande
+                            </button>
+                            <a href="{% url 'orientation:recommandations' %}" class="btn_ghost">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

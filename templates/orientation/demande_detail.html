@@ -1,0 +1,450 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accompagnement — AvenSU-Orienta{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat_container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    max-height: 480px;
+    overflow-y: auto;
+    padding: var(--space-4);
+    background: var(--color-bg-warm);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-light);
+}
+.chat_bubble {
+    max-width: 78%;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-sm);
+    line-height: var(--leading-relaxed);
+    position: relative;
+}
+.chat_bubble--mine {
+    background: var(--color-primary);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+}
+.chat_bubble--other {
+    background: var(--color-bg-card);
+    color: var(--color-text-primary);
+    align-self: flex-start;
+    border: 1px solid var(--color-border-light);
+    border-bottom-left-radius: 4px;
+}
+.chat_meta {
+    font-size: 10px;
+    opacity: 0.7;
+    margin-top: 4px;
+}
+.chat_bubble--mine .chat_meta { text-align: right; }
+.status_timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: var(--space-5);
+    overflow-x: auto;
+}
+.status_step {
+    flex: 1;
+    text-align: center;
+    font-size: 11px;
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-muted);
+    padding: var(--space-2) var(--space-1);
+    position: relative;
+}
+.status_step::before {
+    content: '';
+    display: block;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--color-border-light);
+    margin: 0 auto var(--space-1);
+    border: 2px solid var(--color-border-light);
+}
+.status_step.active::before {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+}
+.status_step.done::before {
+    background: var(--color-success);
+    border-color: var(--color-success);
+}
+.star_picker { display: flex; gap: 4px; font-size: 28px; }
+.star_picker span { cursor: pointer; color: var(--color-border-light); transition: color 0.15s; }
+.star_picker span.active { color: var(--color-accent); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Info demande -->
+            <div class="col-lg-4 mb-4">
+                <div class="detail_container h-100">
+
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin:0;">
+                            <i class="fas fa-hands-helping mr-2" style="color:var(--color-primary);"></i>Accompagnement
+                        </h2>
+                        <a href="{% url 'orientation:mes-demandes' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                    </div>
+
+                    <!-- Timeline statut -->
+                    <div class="status_timeline mb-4">
+                        {% with s=demande.statut %}
+                        <div class="status_step {% if s != 'EN_ATTENTE' %}done{% elif s == 'EN_ATTENTE' %}active{% endif %}">
+                            <div></div>Demande
+                        </div>
+                        <div class="status_step {% if s in 'EN_COURS,TERMINEE' %}done{% elif s == 'ACCEPTEE' %}active{% endif %}">
+                            <div></div>Acceptée
+                        </div>
+                        <div class="status_step {% if s == 'TERMINEE' %}done{% elif s == 'EN_COURS' %}active{% endif %}">
+                            <div></div>En cours
+                        </div>
+                        <div class="status_step {% if s == 'TERMINEE' %}done{% endif %}">
+                            <div></div>Terminée
+                        </div>
+                        {% endwith %}
+                    </div>
+
+                    <!-- Statut badge -->
+                    <div class="mb-3">
+                        <span class="tag_badge
+                            {% if demande.statut == 'EN_ATTENTE' %}tag_badge--info
+                            {% elif demande.statut in 'ACCEPTEE,EN_COURS' %}tag_badge--success
+                            {% elif demande.statut == 'TERMINEE' %}tag_badge--primary
+                            {% endif %}">
+                            {{ demande.get_statut_display }}
+                        </span>
+                    </div>
+
+                    <!-- Participants -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1" style="text-transform:uppercase; font-size:10px; letter-spacing:0.5px; font-weight:700;">Étudiant</small>
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ demande.etudiant.get_full_name }}</div>
+                    </div>
+
+                    {% if demande.conseiller %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1" style="text-transform:uppercase; font-size:10px; letter-spacing:0.5px; font-weight:700;">Conseiller</small>
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ demande.conseiller.get_full_name }}</div>
+                        {% with cp=demande.conseiller.counselor_profile %}
+                        {% if cp.note_moyenne %}
+                        <div style="font-size:12px; color:var(--color-accent);">★ {{ cp.note_moyenne|floatformat:1 }}/5</div>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Motif -->
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1" style="text-transform:uppercase; font-size:10px; letter-spacing:0.5px; font-weight:700;">Motif</small>
+                        <p style="font-size:var(--text-sm); margin:0; line-height:var(--leading-relaxed);">{{ demande.motif }}</p>
+                    </div>
+
+                    {% if demande.resultat_test %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1" style="text-transform:uppercase; font-size:10px; letter-spacing:0.5px; font-weight:700;">Test associé</small>
+                        <span class="tag_badge">{{ demande.resultat_test.code_holland }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if demande.message_reponse %}
+                    <div class="mb-3" style="background:var(--color-bg-warm); padding:var(--space-3); border-radius:var(--radius-sm); border-left:3px solid var(--color-primary);">
+                        <small class="text-muted d-block mb-1" style="font-size:10px; font-weight:700; text-transform:uppercase;">Message du conseiller</small>
+                        <p style="font-size:var(--text-sm); margin:0;">{{ demande.message_reponse }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Note finale -->
+                    {% if demande.statut == 'TERMINEE' and demande.note_conseiller %}
+                    <div class="mb-3">
+                        <small class="text-muted d-block mb-1" style="text-transform:uppercase; font-size:10px; letter-spacing:0.5px; font-weight:700;">Votre évaluation</small>
+                        <div style="font-size:var(--text-xl); color:var(--color-accent); font-weight:var(--weight-bold);">
+                            ★ {{ demande.note_conseiller }}/5
+                        </div>
+                        {% if demande.commentaire_note %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:4px;">{{ demande.commentaire_note }}</p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+
+                    <!-- Actions conseiller -->
+                    {% if request.user.role == 'COUNSELOR' and demande.conseiller == request.user %}
+                    {% if demande.statut in 'ACCEPTEE,EN_COURS' %}
+                    <div class="mt-4 pt-3" style="border-top:1px solid var(--color-border-light);">
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                            Clôturer une fois que l'accompagnement est terminé.
+                        </p>
+                        <form method="post" action="{% url 'orientation:evaluer-conseiller' demande.pk %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="note" value="5">
+                            <button type="button" class="btn_ghost btn_sm w-100" onclick="document.getElementById('eval-modal').style.display='flex'">
+                                <i class="fas fa-flag-checkered mr-1"></i>Clôturer la session
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <!-- Chat -->
+            <div class="col-lg-8 mb-4">
+                <div class="detail_container h-100" style="display:flex; flex-direction:column;">
+                    <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+                        <i class="fas fa-comments mr-2" style="color:var(--color-primary);"></i>Échanges
+                    </h3>
+
+                    {% if demande.statut in 'EN_ATTENTE,REFUSEE,ANNULEE' %}
+                    <div class="empty_state" style="padding:var(--space-8) var(--space-4); flex:1;">
+                        <i class="fas fa-comments empty_state_icon" style="font-size:32px;"></i>
+                        <h4>{% if demande.statut == 'EN_ATTENTE' %}En attente d'acceptation{% else %}Session terminée{% endif %}</h4>
+                        <p>{% if demande.statut == 'EN_ATTENTE' %}Les échanges débuteront dès qu'un conseiller acceptera votre demande.{% else %}Cette session n'est plus active.{% endif %}</p>
+                    </div>
+                    {% else %}
+
+                    <!-- Messages fil -->
+                    <div class="chat_container mb-3" id="chat-box">
+                        {% for msg in messages_fil %}
+                        <div>
+                            {% if msg.auteur == request.user %}
+                            <div class="chat_bubble chat_bubble--mine">
+                                {{ msg.contenu }}
+                                <div class="chat_meta">{{ msg.created_at|date:"d/m H:i" }}</div>
+                            </div>
+                            {% else %}
+                            <div>
+                                <small style="font-size:10px; color:var(--color-text-muted); display:block; margin-bottom:2px;">{{ msg.auteur.get_short_name }}</small>
+                                <div class="chat_bubble chat_bubble--other">
+                                    {{ msg.contenu }}
+                                    <div class="chat_meta">{{ msg.created_at|date:"d/m H:i" }}</div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <div style="text-align:center; color:var(--color-text-muted); font-size:var(--text-sm); padding:var(--space-6);">
+                            <i class="fas fa-comment-dots d-block mb-2" style="font-size:24px;"></i>
+                            Envoyez votre premier message pour démarrer les échanges.
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if demande.statut in 'ACCEPTEE,EN_COURS' %}
+                    <!-- Formulaire message -->
+                    <form method="post" action="{% url 'orientation:envoyer-message' demande.pk %}">
+                        {% csrf_token %}
+                        <div class="d-flex" style="gap:var(--space-2);">
+                            <textarea name="contenu" class="input_field" rows="2" placeholder="Votre message…" style="flex:1; resize:vertical;" required></textarea>
+                            <button type="submit" class="comment_button" style="align-self:flex-end;">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    <!-- Évaluation (étudiant uniquement après session active) -->
+                    {% if request.user.is_student and demande.etudiant == request.user and demande.statut in 'EN_COURS,ACCEPTEE' and not demande.note_conseiller %}
+                    <div class="mt-3 pt-3" style="border-top:1px solid var(--color-border-light);">
+                        <button class="btn_ghost btn_sm" onclick="document.getElementById('eval-modal').style.display='flex'" style="width:100%;">
+                            <i class="fas fa-star mr-1"></i>Évaluer et clôturer la session
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ── RENDEZ-VOUS ─────────────────────────────── -->
+{% if demande.statut in 'ACCEPTEE,EN_COURS' %}
+<div class="page_section" style="padding-top:0; padding-bottom:var(--space-10);">
+    <div class="container">
+        <div class="detail_container">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin:0;">
+                    <i class="fas fa-calendar-check mr-2" style="color:var(--color-primary);"></i>Rendez-vous
+                </h2>
+                <button class="btn_ghost btn_sm" onclick="document.getElementById('rdv-form-panel').classList.toggle('d-none')">
+                    <i class="fas fa-plus mr-1"></i>Proposer un créneau
+                </button>
+            </div>
+
+            <!-- Formulaire proposition RDV (masqué par défaut) -->
+            <div id="rdv-form-panel" class="d-none mb-4 p-4" style="background:var(--color-bg-warm); border-radius:var(--radius-md); border:1px solid var(--color-border-light);">
+                <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">Proposer un rendez-vous</h3>
+                <form method="post" action="{% url 'orientation:rdv-proposer' demande.pk %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form_label">Date et heure <span style="color:var(--color-danger);">*</span></label>
+                            <input type="datetime-local" name="date_rdv" class="input_field" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form_label">Durée</label>
+                            <select name="duree_minutes" class="input_field">
+                                <option value="15">15 min</option>
+                                <option value="30" selected>30 min</option>
+                                <option value="45">45 min</option>
+                                <option value="60">1 heure</option>
+                                <option value="90">1 h 30</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form_label">Format</label>
+                            <select name="format" class="input_field" id="rdv-format-sel" onchange="toggleRdvFields()">
+                                <option value="VISIO">Visioconférence</option>
+                                <option value="PRESENTIEL">Présentiel</option>
+                                <option value="TELEPHONE">Téléphone</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3" id="rdv-field-lien">
+                            <label class="form_label">Lien visio</label>
+                            <input type="url" name="lien_visio" class="input_field" placeholder="https://meet.google.com/…">
+                        </div>
+                        <div class="col-md-6 mb-3 d-none" id="rdv-field-adresse">
+                            <label class="form_label">Adresse</label>
+                            <input type="text" name="adresse" class="input_field" placeholder="Lieu de la rencontre">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form_label">Ordre du jour (optionnel)</label>
+                            <textarea name="notes" class="input_field" rows="2" placeholder="Points à aborder…"></textarea>
+                        </div>
+                    </div>
+                    <div class="d-flex" style="gap:var(--space-3);">
+                        <button type="submit" class="comment_button">
+                            <i class="fas fa-paper-plane mr-1"></i>Envoyer la proposition
+                        </button>
+                        <button type="button" class="btn_ghost" onclick="document.getElementById('rdv-form-panel').classList.add('d-none')">Annuler</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Liste des RDV de cette session -->
+            {% if rendez_vous_actifs %}
+            <div class="row">
+                {% for rdv in rendez_vous_actifs %}
+                <div class="col-md-6 mb-3">
+                    <div class="p-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-md); border-left:3px solid {% if rdv.statut == 'CONFIRME' %}var(--color-success){% elif rdv.statut == 'TERMINE' %}var(--color-text-muted){% else %}var(--color-primary){% endif %};">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div style="font-weight:var(--weight-bold); font-size:var(--text-sm);">
+                                {{ rdv.date_rdv|date:"d/m/Y à H:i" }}
+                            </div>
+                            <span class="tag_badge {% if rdv.statut == 'CONFIRME' %}tag_badge--success{% elif rdv.statut == 'TERMINE' %}tag_badge--primary{% else %}tag_badge--info{% endif %}" style="font-size:10px;">
+                                {{ rdv.get_statut_display }}
+                            </span>
+                        </div>
+                        <div style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                            <i class="fas fa-{% if rdv.format == 'VISIO' %}video{% elif rdv.format == 'TELEPHONE' %}phone{% else %}map-marker-alt{% endif %} mr-1"></i>
+                            {{ rdv.get_format_display }} · {{ rdv.duree_minutes }} min
+                        </div>
+                        {% if rdv.format == 'VISIO' and rdv.lien_visio and rdv.statut == 'CONFIRME' %}
+                        <a href="{{ rdv.lien_visio }}" target="_blank" rel="noopener" class="comment_button btn_sm mb-2 d-inline-flex">
+                            <i class="fas fa-video mr-1"></i>Rejoindre
+                        </a>
+                        {% endif %}
+                        <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                            {% if rdv.statut == 'PROPOSE' and rdv.propose_par != request.user %}
+                            <form method="post" action="{% url 'orientation:rdv-confirmer' rdv.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="comment_button btn_sm"><i class="fas fa-check mr-1"></i>Confirmer</button>
+                            </form>
+                            {% endif %}
+                            {% if rdv.statut in 'PROPOSE,CONFIRME' %}
+                            <form method="post" action="{% url 'orientation:rdv-annuler' rdv.pk %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn_ghost btn_sm" style="color:var(--color-danger); border-color:var(--color-danger);">
+                                    <i class="fas fa-times mr-1"></i>Annuler
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted" style="font-size:var(--text-sm);">Aucun rendez-vous planifié. Proposez un créneau ci-dessus.</p>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Modal évaluation -->
+<div id="eval-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+    <div style="background:var(--color-bg-card); border-radius:var(--radius-lg); padding:var(--space-6); max-width:440px; width:90%; box-shadow:var(--shadow-xl);">
+        <h3 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">
+            <i class="fas fa-star mr-2" style="color:var(--color-accent);"></i>Évaluer le conseiller
+        </h3>
+        <form method="post" action="{% url 'orientation:evaluer-conseiller' demande.pk %}">
+            {% csrf_token %}
+            <div class="mb-4 text-center">
+                <div class="star_picker" id="star-picker" style="justify-content:center;">
+                    <span data-val="1" onclick="setNote(1)">★</span>
+                    <span data-val="2" onclick="setNote(2)">★</span>
+                    <span data-val="3" onclick="setNote(3)">★</span>
+                    <span data-val="4" onclick="setNote(4)">★</span>
+                    <span data-val="5" onclick="setNote(5)">★</span>
+                </div>
+                <input type="hidden" name="note" id="note-input" value="0" required>
+                <p id="note-label" style="font-size:var(--text-sm); color:var(--color-text-muted); margin-top:var(--space-2);">Cliquez sur une étoile</p>
+            </div>
+            <div class="mb-4">
+                <label class="form_label">Commentaire (optionnel)</label>
+                <textarea name="commentaire" class="input_field" rows="3" placeholder="Partagez votre expérience…"></textarea>
+            </div>
+            <div class="d-flex" style="gap:var(--space-3);">
+                <button type="submit" class="comment_button" id="submit-eval">
+                    <i class="fas fa-check mr-1"></i>Valider et clôturer
+                </button>
+                <button type="button" class="btn_ghost" onclick="document.getElementById('eval-modal').style.display='none'">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Bascule champs RDV selon le format
+function toggleRdvFields() {
+    const fmt = document.getElementById('rdv-format-sel')?.value;
+    document.getElementById('rdv-field-lien')?.classList.toggle('d-none', fmt !== 'VISIO');
+    document.getElementById('rdv-field-adresse')?.classList.toggle('d-none', fmt !== 'PRESENTIEL');
+}
+
+// Auto-scroll chat
+const box = document.getElementById('chat-box');
+if (box) box.scrollTop = box.scrollHeight;
+
+// Star rating
+const labels = ['', 'Insuffisant', 'Passable', 'Bien', 'Très bien', 'Excellent'];
+function setNote(val) {
+    document.getElementById('note-input').value = val;
+    document.getElementById('note-label').textContent = labels[val] || '';
+    document.querySelectorAll('#star-picker span').forEach(s => {
+        s.classList.toggle('active', parseInt(s.dataset.val) <= val);
+    });
+}
+</script>
+{% endblock %}

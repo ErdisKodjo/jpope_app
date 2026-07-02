@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ classement.etablissement.nom }} — Classement {{ classement.annee }}{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>{{ classement.etablissement.nom }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'ranking:classement-list' %}">Classements</a></li>
+                    <li class="breadcrumb-item active">{{ classement.etablissement.nom|truncatechars:30 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Contenu principal -->
+            <div class="col-lg-8">
+
+                <!-- Bannière rang + score -->
+                <div class="detail_container mb-4" style="background:linear-gradient(135deg, var(--color-deep) 0%, var(--color-primary) 100%); color:white; text-align:center; padding:var(--space-8);">
+                    <div style="font-size:var(--text-xs); text-transform:uppercase; font-weight:700; opacity:0.7; margin-bottom:var(--space-2);">Classement national {{ classement.annee }}</div>
+                    {% if classement.rang_national %}
+                    <div style="font-size:4rem; font-weight:var(--weight-extrabold); line-height:1; margin-bottom:var(--space-2);">
+                        {% if classement.rang_national == 1 %}🥇
+                        {% elif classement.rang_national == 2 %}🥈
+                        {% elif classement.rang_national == 3 %}🥉
+                        {% else %}#{{ classement.rang_national }}{% endif %}
+                    </div>
+                    <div style="font-size:var(--text-md); opacity:0.85; margin-bottom:var(--space-4);">rang national</div>
+                    {% endif %}
+                    <div style="display:inline-block; background:rgba(255,255,255,0.15); border-radius:var(--radius-lg); padding:var(--space-3) var(--space-6);">
+                        <span style="font-size:2rem; font-weight:var(--weight-extrabold);">{{ classement.score_final|floatformat:1 }}</span>
+                        <span style="font-size:var(--text-md); opacity:0.7;">/100</span>
+                    </div>
+                </div>
+
+                <!-- Scores par critère -->
+                {% if classement.criteres_principaux %}
+                <div class="detail_container mb-4">
+                    <h2 class="detail_section_title">Scores par critère</h2>
+                    {% for critere, score in classement.criteres_principaux %}
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span style="font-size:var(--text-sm); font-weight:var(--weight-semibold); text-transform:capitalize;">{{ critere|cut:"_" }}</span>
+                            <span style="font-size:var(--text-sm); font-weight:var(--weight-bold); color:{% if score >= 80 %}var(--color-success){% elif score >= 60 %}var(--color-primary){% else %}var(--color-text-muted){% endif %};">{{ score|floatformat:0 }}/100</span>
+                        </div>
+                        <div class="progress_bar_container">
+                            <div class="progress_bar_fill" style="width:{{ score }}%; {% if score >= 80 %}background:var(--color-success);{% elif score >= 60 %}background:var(--color-primary);{% else %}background:var(--color-text-muted);{% endif %}"></div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Méthodologie -->
+                {% if classement.methodology %}
+                <div class="detail_container mb-4">
+                    <h2 class="detail_section_title">Méthodologie</h2>
+                    <p style="font-size:var(--text-base); line-height:var(--leading-relaxed); color:var(--color-text);">{{ classement.methodology|linebreaksbr }}</p>
+                </div>
+                {% endif %}
+
+                <!-- Historique -->
+                {% if historique %}
+                <div class="detail_container mb-4">
+                    <h2 class="detail_section_title">Historique des classements</h2>
+                    <div class="row text-center">
+                        {% for h in historique %}
+                        <div class="col-4 col-md-3 mb-3">
+                            <div style="padding:var(--space-3); background:var(--color-bg-subtle); border-radius:var(--radius-md);">
+                                <div style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); color:var(--color-primary);">
+                                    {% if h.rang_national %}#{{ h.rang_national }}{% else %}—{% endif %}
+                                </div>
+                                <div style="font-size:10px; color:var(--color-text-muted); font-weight:700;">{{ h.annee }}</div>
+                                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">{{ h.score_final|floatformat:1 }}/100</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">Infos établissement</h3>
+                    <div class="d-flex flex-column" style="gap:var(--space-2);">
+                        <small class="text-muted"><i class="fas fa-university mr-2" style="color:var(--color-primary);"></i>{{ classement.etablissement.nom }}</small>
+                        <small class="text-muted"><i class="fas fa-map-marker-alt mr-2" style="color:var(--color-primary);"></i>{{ classement.etablissement.ville }}, {{ classement.etablissement.pays }}</small>
+                        {% if classement.rang_regional %}
+                        <small class="text-muted"><i class="fas fa-globe-africa mr-2" style="color:var(--color-accent);"></i>Rang régional : #{{ classement.rang_regional }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="mt-3">
+                        <a href="{% url 'catalog:etablissement-detail' classement.etablissement.slug %}" class="comment_button w-100 btn_sm">
+                            <i class="fas fa-external-link-alt mr-2"></i>Voir l'établissement
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{% url 'ranking:classement-list' %}" class="btn_ghost w-100 mb-2">
+                    <i class="fas fa-list mr-2"></i>Tous les classements
+                </a>
+                <a href="{% url 'ranking:top-national' %}" class="btn_ghost w-100">
+                    <i class="fas fa-trophy mr-2"></i>Top 20 national
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

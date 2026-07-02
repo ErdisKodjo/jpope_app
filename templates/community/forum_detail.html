@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ forum.nom }} — Communauté AvenSU{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>{{ forum.nom }}</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'community:forum-list' %}">Communauté</a></li>
+                    <li class="breadcrumb-item active">{{ forum.nom|truncatechars:40 }}</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Threads -->
+            <div class="col-lg-8">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div>
+                        <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">Discussions</h2>
+                        <small class="text-muted">{{ nb_threads }} discussion{{ nb_threads|pluralize }} · {{ forum.nombre_messages }} message{{ forum.nombre_messages|pluralize }}</small>
+                    </div>
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'community:thread-create' forum.slug %}" class="comment_button btn_sm">
+                        <i class="fas fa-plus mr-2"></i>Nouveau sujet
+                    </a>
+                    {% endif %}
+                </div>
+
+                {% if threads %}
+                {% for thread in threads %}
+                <div class="card unified_card mb-3" style="border-left:4px solid {% if thread.is_epingle %}var(--color-accent){% elif thread.est_resolu %}var(--color-success){% else %}var(--color-primary){% endif %};">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="flex-grow-1 mr-3">
+                                <div class="d-flex align-items-center mb-1" style="gap:var(--space-2);">
+                                    {% if thread.is_epingle %}
+                                    <span class="tag_badge" style="background:var(--color-accent); color:white; font-size:10px;"><i class="fas fa-thumbtack mr-1"></i>Épinglé</span>
+                                    {% endif %}
+                                    {% if thread.est_resolu %}
+                                    <span class="tag_badge tag_badge--success" style="font-size:10px;"><i class="fas fa-check-circle mr-1"></i>Résolu</span>
+                                    {% endif %}
+                                </div>
+                                <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                                    <a href="{% url 'community:thread-detail' thread.pk %}" style="color:var(--color-dark); text-decoration:none;">{{ thread.titre }}</a>
+                                </h3>
+                                <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2);">{{ thread.contenu|truncatewords:20 }}</p>
+                                <div class="d-flex align-items-center" style="gap:var(--space-4);">
+                                    <small class="text-muted" style="font-size:11px;">
+                                        <i class="fas fa-user mr-1"></i>{{ thread.auteur.get_full_name|default:thread.auteur.email }}
+                                    </small>
+                                    <small class="text-muted" style="font-size:11px;">
+                                        <i class="fas fa-clock mr-1"></i>{{ thread.created_at|timesince }} ago
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="text-center" style="flex-shrink:0; min-width:60px;">
+                                <div style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); color:var(--color-primary);">{{ thread.nombre_reponses }}</div>
+                                <div style="font-size:10px; color:var(--color-text-muted); text-transform:uppercase;">réponse{{ thread.nombre_reponses|pluralize }}</div>
+                                <div style="font-size:10px; color:var(--color-text-muted);">{{ thread.nombre_vues }} vues</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                {% else %}
+                <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+                    <i class="fas fa-comments empty_state_icon"></i>
+                    <h4>Aucune discussion pour l'instant</h4>
+                    <p>Soyez le premier à lancer un sujet dans ce forum !</p>
+                    {% if request.user.is_authenticated %}
+                    <a href="{% url 'community:thread-create' forum.slug %}" class="comment_button">
+                        <i class="fas fa-plus mr-2"></i>Créer une discussion
+                    </a>
+                    {% else %}
+                    <a href="{% url 'accounts:login' %}" class="comment_button">
+                        <i class="fas fa-sign-in-alt mr-2"></i>Se connecter pour participer
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">À propos de ce forum</h3>
+                    {% if forum.description %}
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted);">{{ forum.description }}</p>
+                    {% endif %}
+                    <div class="d-flex flex-column" style="gap:var(--space-2); margin-top:var(--space-3);">
+                        <small class="text-muted"><i class="fas fa-folder mr-2" style="color:var(--color-primary);"></i>{{ nb_threads }} discussion{{ nb_threads|pluralize }}</small>
+                        <small class="text-muted"><i class="fas fa-comment mr-2" style="color:var(--color-primary);"></i>{{ forum.nombre_messages }} message{{ forum.nombre_messages|pluralize }}</small>
+                        <small class="text-muted"><i class="fas fa-users mr-2" style="color:var(--color-primary);"></i>{{ forum.nombre_abonnes }} abonné{{ forum.nombre_abonnes|pluralize }}</small>
+                    </div>
+                </div>
+
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'community:thread-create' forum.slug %}" class="comment_button w-100 mb-3">
+                    <i class="fas fa-plus mr-2"></i>Nouveau sujet
+                </a>
+                {% endif %}
+                <a href="{% url 'community:forum-list' %}" class="btn_ghost w-100">
+                    <i class="fas fa-arrow-left mr-2"></i>Tous les forums
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

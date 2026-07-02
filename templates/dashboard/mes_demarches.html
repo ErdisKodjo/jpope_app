@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes démarches — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap" style="gap:var(--space-3);">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                    <i class="fas fa-tasks mr-2" style="color:var(--color-primary);"></i>Mes démarches
+                </h1>
+                {% if nb_retard > 0 %}
+                <p style="margin:4px 0 0;">
+                    <span class="tag_badge" style="background:#fff5f5; color:var(--color-danger);">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>{{ nb_retard }} en retard
+                    </span>
+                </p>
+                {% endif %}
+            </div>
+            <a href="{% url 'dashboard:demarche-create' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Nouvelle démarche
+            </a>
+        </div>
+
+        <!-- Filtres statut -->
+        <div class="filter_form_container mb-4">
+            <div class="d-flex flex-wrap" style="gap:var(--space-2);">
+                <a href="?" class="tag_badge {% if not statut_filtre %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">Toutes</a>
+                {% for val, label in statuts %}
+                <a href="?statut={{ val }}" class="tag_badge {% if statut_filtre == val %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">{{ label }}</a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if demarches %}
+        <div class="row">
+            {% for d in demarches %}
+            <div class="col-lg-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100" style="border-left:4px solid
+                    {% if d.est_en_retard %}var(--color-danger)
+                    {% elif d.statut == 'COMPLETEE' %}var(--color-success)
+                    {% elif d.statut == 'EN_COURS' %}var(--color-primary)
+                    {% else %}var(--color-border){% endif %};">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                            <div>
+                                <span class="tag_badge
+                                    {% if d.statut == 'COMPLETEE' %}tag_badge--success
+                                    {% elif d.statut == 'EN_COURS' %}tag_badge--primary
+                                    {% elif d.est_en_retard %}{% endif %}"
+                                    {% if d.est_en_retard %}style="background:#fff5f5; color:var(--color-danger);"{% endif %}>
+                                    {% if d.est_en_retard %}<i class="fas fa-exclamation-triangle mr-1"></i>EN RETARD
+                                    {% else %}{{ d.get_statut_display }}{% endif %}
+                                </span>
+                                <span class="tag_badge ml-1" style="font-size:10px;">{{ d.get_type_display }}</span>
+                            </div>
+                            {% if d.date_echeance %}
+                            <small class="text-muted" style="font-size:11px; white-space:nowrap;">
+                                <i class="fas fa-calendar mr-1"></i>{{ d.date_echeance|date:"d/m/Y" }}
+                                {% if d.jours_restants is not None and d.jours_restants >= 0 %}
+                                <span class="tag_badge ml-1" style="font-size:10px; {% if d.jours_restants <= 3 %}background:#fff5f5; color:var(--color-danger);{% endif %}">J-{{ d.jours_restants }}</span>
+                                {% endif %}
+                            </small>
+                            {% endif %}
+                        </div>
+
+                        <h3 style="font-size:var(--text-sm); font-weight:var(--weight-bold); margin-bottom:4px;">{{ d.titre }}</h3>
+
+                        {% if d.voeu %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                            <i class="fas fa-graduation-cap mr-1"></i>{{ d.voeu.formation.nom }}
+                        </p>
+                        {% elif d.formation %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                            <i class="fas fa-graduation-cap mr-1"></i>{{ d.formation.nom }}
+                        </p>
+                        {% endif %}
+
+                        <!-- Barre de progression -->
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small style="font-size:11px; font-weight:700;">Progression</small>
+                                <small style="font-size:11px; color:var(--color-primary); font-weight:700;">{{ d.progression }}%</small>
+                            </div>
+                            <div class="progress_bar_container">
+                                <div class="progress_bar_fill" style="width:{{ d.progression }}%;{% if d.statut == 'COMPLETEE' %}background:var(--color-success);{% endif %}"></div>
+                            </div>
+                        </div>
+
+                        {% if d.cout_estime > 0 %}
+                        <small class="text-muted" style="font-size:11px;">
+                            <i class="fas fa-money-bill-wave mr-1"></i>{{ d.cout_estime|floatformat:0 }} FCFA estimés
+                        </small>
+                        {% endif %}
+                    </div>
+
+                    <div class="unified_card_footer">
+                        <a href="{% url 'dashboard:demarche-update' d.pk %}" class="comment_button btn_sm w-100 text-center">
+                            <i class="fas fa-edit mr-1"></i>Mettre à jour
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if statut_filtre %}&statut={{ statut_filtre }}{% endif %}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}{% if statut_filtre %}&statut={{ statut_filtre }}{% endif %}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if statut_filtre %}&statut={{ statut_filtre }}{% endif %}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-tasks empty_state_icon"></i>
+            <h4>Aucune démarche</h4>
+            <p>Créez des démarches pour suivre vos étapes administratives de candidature.</p>
+            <a href="{% url 'dashboard:demarche-create' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Créer une démarche
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

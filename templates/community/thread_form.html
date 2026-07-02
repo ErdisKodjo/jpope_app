@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Nouvelle discussion — Communauté AvenSU{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-7">
+                <div class="detail_container">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h1 style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); margin:0;">
+                            <i class="fas fa-pen mr-2" style="color:var(--color-primary);"></i>Nouvelle discussion
+                        </h1>
+                        {% if forum %}
+                        <a href="{% url 'community:forum-detail' forum.slug %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                        {% else %}
+                        <a href="{% url 'community:forum-list' %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-arrow-left mr-1"></i>Retour
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    {% if forum %}
+                    <div class="mb-4 p-3" style="background:var(--color-primary-light); border-radius:var(--radius-sm);">
+                        <small class="text-muted d-block" style="font-size:11px; text-transform:uppercase; font-weight:700;">Forum</small>
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ forum.nom }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {% if forum %}
+                        <input type="hidden" name="forum_slug" value="{{ forum.slug }}">
+                        {% else %}
+                        <div class="mb-4">
+                            <label class="form_label">Forum <span style="color:var(--color-danger);">*</span></label>
+                            <select name="forum_slug" class="input_field" style="height:42px; appearance:auto;" required>
+                                <option value="">— Choisir un forum —</option>
+                                {% for f in forums %}
+                                <option value="{{ f.slug }}">{{ f.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <div class="mb-4">
+                            <label class="form_label">Titre <span style="color:var(--color-danger);">*</span></label>
+                            {{ form.titre }}
+                            {% if form.titre.errors %}<div class="form_error">{{ form.titre.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="mb-5">
+                            <label class="form_label">Contenu <span style="color:var(--color-danger);">*</span></label>
+                            {{ form.contenu }}
+                            {% if form.contenu.errors %}<div class="form_error">{{ form.contenu.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="d-flex" style="gap:var(--space-3);">
+                            <button type="submit" class="comment_button">
+                                <i class="fas fa-paper-plane mr-2"></i>Publier la discussion
+                            </button>
+                            {% if forum %}
+                            <a href="{% url 'community:forum-detail' forum.slug %}" class="btn_ghost">Annuler</a>
+                            {% else %}
+                            <a href="{% url 'community:forum-list' %}" class="btn_ghost">Annuler</a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

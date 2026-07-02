@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes demandes d'accompagnement — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Mes accompagnements</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Mes accompagnements</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">
+                <i class="fas fa-hands-helping mr-2" style="color:var(--color-primary);"></i>
+                Mes demandes d'accompagnement
+            </h2>
+            <a href="{% url 'orientation:accompagnement-create' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Nouvelle demande
+            </a>
+        </div>
+
+        {% if demandes %}
+        <div class="row">
+            {% for demande in demandes %}
+            <div class="col-lg-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <span class="tag_badge
+                                {% if demande.statut == 'EN_ATTENTE' %}tag_badge--info
+                                {% elif demande.statut == 'ACCEPTEE' or demande.statut == 'EN_COURS' %}tag_badge--success
+                                {% elif demande.statut == 'TERMINEE' %}tag_badge--primary
+                                {% else %}{% endif %}">
+                                {{ demande.get_statut_display }}
+                            </span>
+                            <small class="text-muted">{{ demande.date_demande|date:"d/m/Y" }}</small>
+                        </div>
+
+                        <p class="unified_card_text" style="font-size:var(--text-sm);">
+                            {{ demande.motif|truncatewords:25 }}
+                        </p>
+
+                        {% if demande.conseiller %}
+                        <div class="d-flex align-items-center mt-2" style="gap:var(--space-2);">
+                            <i class="fas fa-user-tie" style="color:var(--color-primary); font-size:13px;"></i>
+                            <span style="font-size:var(--text-sm); font-weight:var(--weight-semibold);">
+                                {{ demande.conseiller.get_full_name }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-top:var(--space-2); margin-bottom:0;">
+                            <i class="fas fa-clock mr-1"></i>En attente d'un conseiller disponible
+                        </p>
+                        {% endif %}
+
+                        {% if demande.nb_messages %}
+                        <div class="mt-2">
+                            <span class="tag_badge"><i class="fas fa-comment mr-1"></i>{{ demande.nb_messages }} message{{ demande.nb_messages|pluralize }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="unified_card_footer">
+                        <a href="{% url 'orientation:demande-detail' demande.pk %}" class="comment_button btn_sm w-100 text-center">
+                            <i class="fas fa-eye mr-1"></i>Voir le détail
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-hands-helping empty_state_icon"></i>
+            <h4>Aucune demande d'accompagnement</h4>
+            <p>Vous n'avez pas encore demandé d'accompagnement. Un conseiller peut vous aider à interpréter vos recommandations.</p>
+            <a href="{% url 'orientation:accompagnement-create' %}" class="comment_button">
+                <i class="fas fa-plus mr-2"></i>Faire une demande
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

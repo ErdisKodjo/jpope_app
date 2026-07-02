@@ -35,6 +35,7 @@ urlpatterns = [
     path("profile/", views.ProfileView.as_view(), name="profile"),
     path("profile/edit/", views.ProfileEditView.as_view(), name="profile_edit"),
     path("profile/student/", views.StudentProfileEditView.as_view(), name="student_profile_edit"),
+    path("profile/notes/", views.NotesEtudiantView.as_view(), name="notes_etudiant"),
 
     # Vérification de compte (comptes non-étudiants en attente)
     path("verification-pending/", views.VerificationPendingView.as_view(), name="verification_pending"),

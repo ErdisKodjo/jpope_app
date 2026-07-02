@@ -47,6 +47,8 @@
 
 /* 4. Hero boxes → extension sombre du hero */
 .hero_boxes {
+  height: auto !important;          /* écrase height:0px de main_styles.css */
+  overflow: visible !important;
   background: linear-gradient(180deg, rgba(11,30,46,1) 0%, rgba(9,24,36,1) 100%);
 }
 .hero_box {
@@ -67,6 +69,10 @@
 }
 .hero_box_icon {
   color: var(--safran-400) !important;
+  background: rgba(255,255,255,0.07) !important;
+}
+.hero_box:hover {
+  background: rgba(255,255,255,0.05) !important;
 }
 
 /* 5. Section titles : lettre-espacement plus serré, taille légèrement augmentée */
@@ -95,6 +101,12 @@
   font-size: var(--text-md) !important;
   letter-spacing: -0.01em;
   line-height: 1.35;
+}
+
+/* 8. Correctif hauteur slider — main_styles.css déclare height:100%
+   qui s'effondre à 0 sans parent de hauteur définie ; on force 100vh */
+.hero_slider_container {
+  height: 100vh;
 }
 </style>
 {% endblock %}
@@ -247,43 +259,43 @@
             <p>Tout ce dont vous avez besoin pour réussir votre orientation</p>
         </div>
         <div class="row">
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service_card">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="service_card w-100">
                     <div class="service_card_icon"><i class="fas fa-book-open"></i></div>
                     <h3>Catalogue complet</h3>
                     <p>Accédez à des centaines de formations et établissements référencés.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service_card">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="service_card w-100">
                     <div class="service_card_icon"><i class="fas fa-brain"></i></div>
                     <h3>Test RIASEC</h3>
                     <p>Identifiez vos points forts et recevez des recommandations personnalisées.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service_card">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="service_card w-100">
                     <div class="service_card_icon"><i class="fas fa-comments"></i></div>
                     <h3>Forum communauté</h3>
                     <p>Échangez avec d'autres étudiants, conseillers et représentants d'établissements.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service_card">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="service_card w-100">
                     <div class="service_card_icon"><i class="fas fa-user-tie"></i></div>
                     <h3>Experts conseillers</h3>
                     <p>Des professionnels de l'orientation à votre écoute pour vous guider.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service_card">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="service_card w-100">
                     <div class="service_card_icon"><i class="fas fa-robot"></i></div>
                     <h3>Coach IA</h3>
                     <p>Notre assistant intelligent répond à vos questions d'orientation 24h/24.</p>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="service_card">
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="service_card w-100">
                     <div class="service_card_icon"><i class="fas fa-tasks"></i></div>
                     <h3>Suivi candidatures</h3>
                     <p>Gérez vos démarches d'inscription avec notre tableau de bord personnalisé.</p>

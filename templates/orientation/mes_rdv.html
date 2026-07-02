@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes rendez-vous — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1><i class="fas fa-calendar-check mr-2"></i>Mes rendez-vous</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard:home' %}">Tableau de bord</a></li>
+                    <li class="breadcrumb-item active">Mes rendez-vous</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- À venir -->
+        <h2 style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-5);">
+            <i class="fas fa-clock mr-2" style="color:var(--color-primary);"></i>À venir
+        </h2>
+
+        {% if rdvs_a_venir %}
+        <div class="row mb-5">
+            {% for rdv in rdvs_a_venir %}
+            {% with demande=rdv.demande %}
+            <div class="col-lg-6 mb-4">
+                <div class="detail_container" style="border-left:4px solid {% if rdv.statut == 'CONFIRME' %}var(--color-success){% else %}var(--color-primary){% endif %};">
+                    <div class="d-flex align-items-start justify-content-between mb-3">
+                        <div>
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-primary); line-height:1;">
+                                {{ rdv.date_rdv|date:"d" }}
+                            </div>
+                            <div style="font-size:var(--text-sm); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+                                {{ rdv.date_rdv|date:"M Y" }}
+                            </div>
+                        </div>
+                        <span class="tag_badge {% if rdv.statut == 'CONFIRME' %}tag_badge--success{% else %}tag_badge--info{% endif %}">
+                            {{ rdv.get_statut_display }}
+                        </span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div style="font-size:var(--text-lg); font-weight:var(--weight-bold);">{{ rdv.date_rdv|date:"H:i" }} — {{ rdv.duree_minutes }} min</div>
+                        <div style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                            <i class="fas fa-{% if rdv.format == 'VISIO' %}video{% elif rdv.format == 'TELEPHONE' %}phone{% else %}map-marker-alt{% endif %} mr-1"></i>
+                            {{ rdv.get_format_display }}
+                        </div>
+                    </div>
+
+                    {% if rdv.format == 'VISIO' and rdv.lien_visio and rdv.statut == 'CONFIRME' %}
+                    <a href="{{ rdv.lien_visio }}" target="_blank" rel="noopener" class="comment_button btn_sm mb-3 d-inline-flex align-items-center">
+                        <i class="fas fa-video mr-2"></i>Rejoindre la visio
+                    </a>
+                    {% elif rdv.format == 'PRESENTIEL' and rdv.adresse %}
+                    <div class="mb-3" style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                        <i class="fas fa-map-marker-alt mr-1"></i>{{ rdv.adresse }}
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3" style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                        <i class="fas fa-user mr-1"></i>
+                        Avec {% if demande.conseiller == request.user %}{{ demande.etudiant.get_full_name }}{% else %}{{ demande.conseiller.get_full_name }}{% endif %}
+                    </div>
+
+                    {% if rdv.notes %}
+                    <div class="mb-3 p-2" style="background:var(--color-bg-warm); border-radius:var(--radius-sm); font-size:var(--text-xs); color:var(--color-text-muted);">
+                        <i class="fas fa-clipboard-list mr-1"></i>{{ rdv.notes }}
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                        {% if rdv.statut == 'PROPOSE' and rdv.propose_par != request.user %}
+                        <form method="post" action="{% url 'orientation:rdv-confirmer' rdv.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="comment_button btn_sm">
+                                <i class="fas fa-check mr-1"></i>Confirmer
+                            </button>
+                        </form>
+                        {% endif %}
+                        <form method="post" action="{% url 'orientation:rdv-annuler' rdv.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn_ghost btn_sm" style="color:var(--color-danger); border-color:var(--color-danger);">
+                                <i class="fas fa-times mr-1"></i>Annuler
+                            </button>
+                        </form>
+                        <a href="{% url 'orientation:demande-detail' demande.pk %}" class="btn_ghost btn_sm">
+                            <i class="fas fa-comments mr-1"></i>Session
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="detail_container text-center mb-5" style="padding:var(--space-8);">
+            <i class="fas fa-calendar-times fa-2x text-muted mb-3 d-block" style="opacity:0.3;"></i>
+            <p class="text-muted">Aucun rendez-vous à venir.<br>
+            Proposez-en un depuis une session d'accompagnement active.</p>
+            <a href="{% url 'orientation:mes-demandes' %}" class="btn_ghost mt-3">Mes accompagnements</a>
+        </div>
+        {% endif %}
+
+        <!-- Passés -->
+        {% if rdvs_passes %}
+        <h2 style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-5);">
+            <i class="fas fa-history mr-2" style="color:var(--color-text-muted);"></i>Passés
+        </h2>
+        <div class="row">
+            {% for rdv in rdvs_passes %}
+            {% with demande=rdv.demande %}
+            <div class="col-lg-6 mb-3">
+                <div class="d-flex align-items-center p-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-md); gap:var(--space-3);">
+                    <div style="text-align:center; min-width:48px;">
+                        <div style="font-size:var(--text-lg); font-weight:var(--weight-extrabold); color:var(--color-text-muted);">{{ rdv.date_rdv|date:"d" }}</div>
+                        <div style="font-size:10px; color:var(--color-text-muted);">{{ rdv.date_rdv|date:"M" }}</div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div style="font-size:var(--text-sm); font-weight:var(--weight-semibold);">
+                            {{ rdv.date_rdv|date:"H:i" }} · {{ rdv.get_format_display }}
+                        </div>
+                        <div style="font-size:var(--text-xs); color:var(--color-text-muted);">
+                            Avec {% if demande.conseiller == request.user %}{{ demande.etudiant.get_full_name }}{% else %}{{ demande.conseiller.get_full_name|default:"—" }}{% endif %}
+                        </div>
+                    </div>
+                    <span class="tag_badge" style="font-size:10px; flex-shrink:0;">{{ rdv.get_statut_display }}</span>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

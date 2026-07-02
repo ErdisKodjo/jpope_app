@@ -44,6 +44,9 @@
                     <a href="{% url 'accounts:student_profile_edit' %}" class="admin_sidebar_item">
                         <i class="fas fa-graduation-cap"></i>Profil étudiant
                     </a>
+                    <a href="{% url 'accounts:notes_etudiant' %}" class="admin_sidebar_item">
+                        <i class="fas fa-book-open"></i>Mes notes académiques
+                    </a>
                     {% endif %}
                     <a href="{% url 'orientation:resultats' %}" class="admin_sidebar_item">
                         <i class="fas fa-chart-bar"></i>Mes résultats
@@ -51,6 +54,19 @@
                     <a href="{% url 'orientation:recommandations' %}" class="admin_sidebar_item">
                         <i class="fas fa-lightbulb"></i>Mes recommandations
                     </a>
+                    {% if user.is_student %}
+                    <a href="{% url 'orientation:mes-demandes' %}" class="admin_sidebar_item">
+                        <i class="fas fa-hands-helping"></i>Mes accompagnements
+                    </a>
+                    {% endif %}
+                    {% if user.role == 'COUNSELOR' %}
+                    <a href="{% url 'orientation:conseiller-demandes' %}" class="admin_sidebar_item">
+                        <i class="fas fa-hands-helping"></i>Mes sessions
+                    </a>
+                    <a href="{% url 'orientation:mes-questions-proposees' %}" class="admin_sidebar_item">
+                        <i class="fas fa-clipboard-list"></i>Mes propositions
+                    </a>
+                    {% endif %}
                     <a href="#" class="admin_sidebar_item"
                        style="border-left-color:var(--color-danger);"
                        onclick="document.getElementById('logout-form').submit(); return false;">
@@ -142,6 +158,58 @@
                 </div>
                 {% endif %}
                 {% endwith %}
+                {% endif %}
+
+                <!-- Notes académiques (étudiants) -->
+                {% if user.is_student %}
+                <div class="detail_container mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h2 class="profile_section_title" style="margin-bottom:0; border:none; padding:0;">
+                            <i class="fas fa-book-open mr-2" style="color:var(--color-primary);"></i>Notes académiques
+                        </h2>
+                        <a href="{% url 'accounts:notes_etudiant' %}" class="comment_button btn_sm">
+                            <i class="fas fa-edit mr-1"></i>Saisir mes notes
+                        </a>
+                    </div>
+                    {% with notes=user.notes %}
+                    {% if notes and notes.notes_renseignees > 0 %}
+                    <div class="row">
+                        {% if notes.score_scientifique is not None %}
+                        <div class="col-md-4 mb-3 text-center">
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-primary);">{{ notes.score_scientifique }}<small style="font-size:var(--text-sm); color:var(--color-text-muted);">/20</small></div>
+                            <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold);"><i class="fas fa-flask mr-1"></i>Sciences</div>
+                        </div>
+                        {% endif %}
+                        {% if notes.score_litteraire is not None %}
+                        <div class="col-md-4 mb-3 text-center">
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:var(--color-accent);">{{ notes.score_litteraire }}<small style="font-size:var(--text-sm); color:var(--color-text-muted);">/20</small></div>
+                            <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold);"><i class="fas fa-book mr-1"></i>Lettres</div>
+                        </div>
+                        {% endif %}
+                        {% if notes.score_commercial is not None %}
+                        <div class="col-md-4 mb-3 text-center">
+                            <div style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); color:#28a745;">{{ notes.score_commercial }}<small style="font-size:var(--text-sm); color:var(--color-text-muted);">/20</small></div>
+                            <div style="font-size:var(--text-xs); color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.5px; font-weight:var(--weight-bold);"><i class="fas fa-chart-bar mr-1"></i>Économie</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div style="margin-top:var(--space-2); font-size:var(--text-sm); color:var(--color-text-muted);">
+                        <i class="fas fa-check-circle mr-1" style="color:var(--color-success);"></i>
+                        {{ notes.notes_renseignees }} matière{{ notes.notes_renseignees|pluralize }} renseignée{{ notes.notes_renseignees|pluralize }}
+                        — profil complété à <strong>{{ notes.completude_pct }}%</strong>
+                    </div>
+                    {% else %}
+                    <div class="empty_state" style="padding:var(--space-6) var(--space-4);">
+                        <i class="fas fa-book-open empty_state_icon" style="font-size:32px;"></i>
+                        <h4>Notes non renseignées</h4>
+                        <p>Ajoutez vos notes pour affiner vos recommandations de formations.</p>
+                        <a href="{% url 'accounts:notes_etudiant' %}" class="comment_button">
+                            <i class="fas fa-plus mr-2"></i>Saisir mes notes
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                </div>
                 {% endif %}
 
             </div>

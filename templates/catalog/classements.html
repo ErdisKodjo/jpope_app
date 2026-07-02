@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classements — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1><i class="fas fa-trophy mr-2" style="color:#FFD700;"></i>Classements</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Classements</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Top établissements (catalogue) -->
+            <div class="col-lg-6 mb-5">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">
+                        <i class="fas fa-university mr-2" style="color:var(--color-primary);"></i>Top établissements
+                    </h2>
+                    <a href="{% url 'ranking:classement-list' %}" class="btn_ghost btn_sm">Voir le palmarès complet</a>
+                </div>
+
+                {% if etablissements_top %}
+                {% for e in etablissements_top %}
+                <div class="d-flex align-items-center mb-3 p-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-md); border-left:3px solid {% if forloop.counter == 1 %}#FFD700{% elif forloop.counter == 2 %}#C0C0C0{% elif forloop.counter == 3 %}#CD7F32{% else %}var(--color-border-light){% endif %};">
+                    <div style="width:32px; font-size:{% if forloop.counter <= 3 %}1.2rem{% else %}var(--text-base){% endif %}; font-weight:var(--weight-extrabold); color:var(--color-text-muted); text-align:center; flex-shrink:0; margin-right:var(--space-3);">
+                        {% if forloop.counter == 1 %}🥇{% elif forloop.counter == 2 %}🥈{% elif forloop.counter == 3 %}🥉{% else %}{{ e.classement_national }}{% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">
+                            <a href="{% url 'catalog:etablissement-detail' e.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ e.nom }}</a>
+                        </div>
+                        <small class="text-muted" style="font-size:11px;"><i class="fas fa-map-marker-alt mr-1"></i>{{ e.ville }}, {{ e.pays }}</small>
+                    </div>
+                    <div style="font-size:var(--text-base); font-weight:var(--weight-extrabold); color:var(--color-primary); flex-shrink:0;">
+                        {{ e.score_qualite_global|floatformat:1 }}<span style="font-size:10px; color:var(--color-text-muted);">/100</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucun classement disponible.</p>
+                {% endif %}
+            </div>
+
+            <!-- Top formations (catalogue) -->
+            <div class="col-lg-6 mb-5">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">
+                        <i class="fas fa-graduation-cap mr-2" style="color:var(--color-accent);"></i>Top formations
+                    </h2>
+                    <a href="{% url 'catalog:formation-list' %}" class="btn_ghost btn_sm">Voir toutes</a>
+                </div>
+
+                {% if formations_top %}
+                {% for f in formations_top %}
+                <div class="d-flex align-items-center mb-3 p-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-md);">
+                    <div style="width:28px; font-size:var(--text-sm); font-weight:var(--weight-extrabold); color:var(--color-text-muted); text-align:center; flex-shrink:0; margin-right:var(--space-3);">
+                        {{ forloop.counter }}
+                    </div>
+                    <div class="flex-grow-1">
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">
+                            <a href="{% url 'catalog:formation-detail' f.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ f.nom }}</a>
+                        </div>
+                        <small class="text-muted" style="font-size:11px;"><i class="fas fa-university mr-1"></i>{{ f.etablissement.nom }}</small>
+                    </div>
+                    <div style="flex-shrink:0; text-align:right;">
+                        <span class="tag_badge" style="font-size:10px;">{{ f.get_niveau_display }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucune formation disponible.</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <!-- CTA vers ranking app -->
+        <div class="detail_container text-center" style="background:linear-gradient(135deg, var(--color-deep) 0%, var(--color-primary) 100%); color:white; margin-top:var(--space-4);">
+            <i class="fas fa-trophy" style="font-size:2.5rem; color:#FFD700; margin-bottom:var(--space-4); display:block;"></i>
+            <h3 style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); margin-bottom:var(--space-2);">Palmarès officiel AvenSU</h3>
+            <p style="color:rgba(255,255,255,0.8); margin-bottom:var(--space-5);">Consultez le classement national complet avec scores détaillés par critère et historique annuel.</p>
+            <div class="d-flex justify-content-center" style="gap:var(--space-3); flex-wrap:wrap;">
+                <a href="{% url 'ranking:classement-list' %}" class="comment_button" style="background:white; color:var(--color-primary); border-color:white;">
+                    <i class="fas fa-list-ol mr-2"></i>Classement complet
+                </a>
+                <a href="{% url 'ranking:top-national' %}" class="btn_ghost" style="color:white; border-color:rgba(255,255,255,0.5);">
+                    <i class="fas fa-trophy mr-2"></i>Top 20 national
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

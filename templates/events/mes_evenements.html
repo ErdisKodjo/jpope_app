@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mes événements — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap" style="gap:var(--space-3);">
+            <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                <i class="fas fa-calendar-check mr-2" style="color:var(--color-primary);"></i>Mes événements
+            </h1>
+            <a href="{% url 'events:event-list' %}" class="btn_ghost btn_sm">
+                <i class="fas fa-calendar-alt mr-2"></i>Tous les événements
+            </a>
+        </div>
+
+        {% if inscriptions %}
+        <div class="row">
+            {% for inscription in inscriptions %}
+            <div class="col-lg-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100"
+                     style="border-left:4px solid {% if inscription.evenement.est_passe %}var(--color-text-muted){% elif inscription.evenement.est_en_cours %}var(--color-success){% else %}var(--color-primary){% endif %};">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-start justify-content-between mb-2">
+                            <span class="tag_badge
+                                {% if inscription.evenement.est_passe %}
+                                {% elif inscription.evenement.est_en_cours %}tag_badge--success
+                                {% else %}tag_badge--primary{% endif %}"
+                                style="{% if inscription.evenement.est_passe %}background:var(--color-bg-subtle); color:var(--color-text-muted);{% endif %}">
+                                {% if inscription.evenement.est_en_cours %}<i class="fas fa-circle mr-1" style="font-size:8px;"></i>En cours
+                                {% elif inscription.evenement.est_passe %}Passé
+                                {% elif inscription.evenement.jours_avant == 0 %}Aujourd'hui
+                                {% elif inscription.evenement.jours_avant == 1 %}Demain
+                                {% else %}J-{{ inscription.evenement.jours_avant }}{% endif %}
+                            </span>
+                            <span class="tag_badge" style="font-size:10px;">{{ inscription.evenement.get_type_display }}</span>
+                        </div>
+
+                        <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                            <a href="{% url 'events:event-detail' inscription.evenement.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ inscription.evenement.titre }}</a>
+                        </h3>
+
+                        <div class="d-flex flex-column" style="gap:var(--space-1); margin-top:var(--space-2);">
+                            <small class="text-muted" style="font-size:11px;">
+                                <i class="fas fa-calendar-day mr-1"></i>{{ inscription.evenement.date_debut|date:"d/m/Y à H:i" }}
+                                {% if inscription.evenement.date_fin %} → {{ inscription.evenement.date_fin|date:"H:i" }}{% endif %}
+                            </small>
+                            {% if inscription.evenement.lieu_nom %}
+                            <small class="text-muted" style="font-size:11px;">
+                                <i class="fas fa-map-marker-alt mr-1"></i>{{ inscription.evenement.lieu_nom }}{% if inscription.evenement.ville %}, {{ inscription.evenement.ville }}{% endif %}
+                            </small>
+                            {% elif inscription.evenement.format == 'EN_LIGNE' %}
+                            <small class="text-muted" style="font-size:11px;">
+                                <i class="fas fa-video mr-1"></i>En ligne
+                            </small>
+                            {% endif %}
+                            <small class="text-muted" style="font-size:11px;">
+                                <i class="fas fa-ticket-alt mr-1"></i>Inscrit le {{ inscription.date_inscription|date:"d/m/Y" }}
+                            </small>
+                        </div>
+
+                        {% if not inscription.evenement.est_passe and inscription.evenement.lien_visio %}
+                        <div class="mt-3">
+                            <a href="{{ inscription.evenement.lien_visio }}" target="_blank" rel="noopener" class="btn_ghost btn_sm" style="color:var(--color-success); border-color:var(--color-success);">
+                                <i class="fas fa-video mr-1"></i>Rejoindre en ligne
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="unified_card_footer d-flex" style="gap:var(--space-2);">
+                        <a href="{% url 'events:event-detail' inscription.evenement.slug %}" class="comment_button btn_sm flex-grow-1 text-center">
+                            <i class="fas fa-info-circle mr-1"></i>Détails
+                        </a>
+                        {% if not inscription.evenement.est_passe %}
+                        <form method="post" action="{% url 'events:event-cancel' inscription.evenement.slug %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn_ghost btn_sm" style="color:var(--color-danger); border-color:var(--color-danger);"
+                                    onclick="return confirm('Annuler votre inscription ?')">
+                                <i class="fas fa-times mr-1"></i>Annuler
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-calendar-times empty_state_icon"></i>
+            <h4>Aucune inscription à un événement</h4>
+            <p>Découvrez les salons d'orientation, journées portes ouvertes et conférences à venir.</p>
+            <a href="{% url 'events:event-list' %}" class="comment_button">
+                <i class="fas fa-calendar-alt mr-2"></i>Voir les événements
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

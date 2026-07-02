@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ domaine.nom }} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header" style="border-bottom:4px solid {{ domaine.couleur }};">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <div class="d-flex align-items-center" style="gap:var(--space-4);">
+                <div style="width:60px; height:60px; border-radius:var(--radius-lg); background:{{ domaine.couleur }}30; display:flex; align-items:center; justify-content:center; font-size:2rem; flex-shrink:0;">
+                    {% if domaine.icon %}{{ domaine.icon }}{% else %}<i class="fas fa-graduation-cap" style="color:{{ domaine.couleur }};"></i>{% endif %}
+                </div>
+                <div>
+                    <h1>{{ domaine.nom }}</h1>
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'catalog:domaine-list' %}">Domaines</a></li>
+                            <li class="breadcrumb-item active">{{ domaine.nom }}</li>
+                        </ol>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        {% if domaine.description %}
+        <div class="row mb-5">
+            <div class="col-lg-8">
+                <p style="font-size:var(--text-lg); color:var(--color-text); line-height:var(--leading-relaxed);">{{ domaine.description }}</p>
+            </div>
+            <div class="col-lg-4 mt-3 mt-lg-0">
+                <div class="admin_card text-center">
+                    <div class="stat_number" style="color:{{ domaine.couleur }};">{{ domaine.nombre_formations }}</div>
+                    <div class="stat_item_label">Formation{{ domaine.nombre_formations|pluralize }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+
+            <!-- Formations -->
+            <div class="col-lg-7 mb-5">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">
+                        <i class="fas fa-graduation-cap mr-2" style="color:{{ domaine.couleur }};"></i>Formations
+                    </h2>
+                    <a href="{% url 'catalog:formation-list' %}?domaine={{ domaine.slug }}" class="btn_ghost btn_sm">Voir toutes</a>
+                </div>
+
+                {% if formations %}
+                {% for f in formations %}
+                <div class="card unified_card mb-3" style="border-left:3px solid {{ domaine.couleur }};">
+                    <div class="unified_card_body">
+                        <div class="d-flex align-items-start justify-content-between">
+                            <div class="flex-grow-1 mr-3">
+                                <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                                    <a href="{% url 'catalog:formation-detail' f.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ f.nom }}</a>
+                                </h3>
+                                <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                                    <i class="fas fa-university mr-1"></i>{{ f.etablissement.nom }}
+                                </p>
+                                <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                                    <span class="tag_badge" style="font-size:10px;">{{ f.get_niveau_display }}</span>
+                                    <span class="tag_badge" style="font-size:10px;">{{ f.duree_annees }} an{{ f.duree_annees|pluralize }}</span>
+                                </div>
+                            </div>
+                            <div class="text-right" style="flex-shrink:0;">
+                                <div style="font-size:var(--text-sm); font-weight:var(--weight-bold); color:{{ domaine.couleur }};">{{ f.cout_annuel|floatformat:0 }}</div>
+                                <div style="font-size:10px; color:var(--color-text-muted);">FCFA/an</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucune formation disponible pour ce domaine.</p>
+                {% endif %}
+            </div>
+
+            <!-- Métiers -->
+            <div class="col-lg-5 mb-5">
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">
+                        <i class="fas fa-briefcase mr-2" style="color:{{ domaine.couleur }};"></i>Métiers
+                    </h2>
+                    <a href="{% url 'catalog:metier-list' %}?domaine={{ domaine.slug }}" class="btn_ghost btn_sm">Voir tous</a>
+                </div>
+
+                {% if metiers %}
+                {% for m in metiers %}
+                <div class="d-flex align-items-center justify-content-between mb-3 p-3" style="background:var(--color-bg-subtle); border-radius:var(--radius-md);">
+                    <div>
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">
+                            <a href="{% url 'catalog:metier-detail' m.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ m.nom }}</a>
+                        </div>
+                        <small class="text-muted" style="font-size:11px;">{{ m.revenu_moyen_formate|default:"N/A" }}</small>
+                    </div>
+                    <span class="tag_badge" style="font-size:10px; flex-shrink:0; margin-left:var(--space-2);">{{ m.get_demande_marche_display|default:"—" }}</span>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">Aucun métier disponible pour ce domaine.</p>
+                {% endif %}
+
+                <div class="mt-4">
+                    <a href="{% url 'catalog:domaine-list' %}" class="btn_ghost w-100">
+                        <i class="fas fa-arrow-left mr-2"></i>Tous les domaines
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

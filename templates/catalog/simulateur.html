@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Simulateur de coût — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1><i class="fas fa-calculator mr-2"></i>Simulateur de coût</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'catalog:formation-list' %}">Formations</a></li>
+                    <li class="breadcrumb-item active">Simulateur</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+
+                <div class="detail_container mb-4">
+                    <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-5);">
+                        <i class="fas fa-sliders-h mr-2" style="color:var(--color-primary);"></i>Estimez le coût total de votre formation
+                    </h2>
+
+                    <!-- Sélection formation -->
+                    <div class="mb-4">
+                        <label class="form_label">Formation <span style="color:var(--color-danger);">*</span></label>
+                        <select id="formationSelect" class="input_field" style="height:42px; appearance:auto;" onchange="onFormationChange()">
+                            <option value="">— Choisir une formation —</option>
+                            {% for f in formations %}
+                            <option value="{{ f.pk }}"
+                                    data-cout="{{ f.cout_annuel }}"
+                                    data-duree="{{ f.duree_annees }}"
+                                    data-nom="{{ f.nom }}"
+                                    data-etab="{{ f.etablissement.nom }}"
+                                    data-niveau="{{ f.get_niveau_display }}"
+                                    data-bourses="{{ f.bourses_disponibles|yesno:'1,0' }}"
+                                    data-slug="{{ f.slug }}">
+                                {{ f.nom }} — {{ f.etablissement.nom }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Info formation sélectionnée -->
+                    <div id="formationInfo" style="display:none;" class="mb-4 p-3" style="background:var(--color-primary-bg); border-radius:var(--radius-md);">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); color:var(--color-primary);" id="infoCout">—</div>
+                                <div style="font-size:11px; color:var(--color-text-muted);">FCFA/an</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); color:var(--color-accent);" id="infoDuree">—</div>
+                                <div style="font-size:11px; color:var(--color-text-muted);">an(s) de durée</div>
+                            </div>
+                            <div class="col-4">
+                                <div style="font-size:var(--text-xl); font-weight:var(--weight-extrabold); color:var(--color-success);" id="infoBourses">—</div>
+                                <div style="font-size:11px; color:var(--color-text-muted);">bourse dispo.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paramètres supplémentaires -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form_label">Frais de logement mensuels (FCFA)</label>
+                            <input type="number" id="fraisLogement" class="input_field" placeholder="Ex: 50000" min="0" step="5000" oninput="calculer()">
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form_label">Frais de transport mensuels (FCFA)</label>
+                            <input type="number" id="fraisTransport" class="input_field" placeholder="Ex: 15000" min="0" step="1000" oninput="calculer()">
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form_label">Frais de nourriture mensuels (FCFA)</label>
+                            <input type="number" id="fraisNourriture" class="input_field" placeholder="Ex: 30000" min="0" step="5000" oninput="calculer()">
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <label class="form_label">Autres frais annuels (FCFA)</label>
+                            <input type="number" id="fraisAutres" class="input_field" placeholder="Ex: 100000" min="0" step="10000" oninput="calculer()">
+                        </div>
+                    </div>
+
+                    <button onclick="calculer()" class="comment_button w-100">
+                        <i class="fas fa-calculator mr-2"></i>Calculer le coût total
+                    </button>
+                </div>
+
+                <!-- Résultat -->
+                <div id="resultat" style="display:none;" class="detail_container" style="background:linear-gradient(135deg, var(--color-primary-bg) 0%, var(--color-bg-card) 100%);">
+                    <h3 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-5);">
+                        <i class="fas fa-chart-pie mr-2" style="color:var(--color-primary);"></i>Estimation pour <span id="resuNom"></span>
+                    </h3>
+
+                    <!-- Détail par poste -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid var(--color-border-light);">
+                            <span style="font-size:var(--text-sm);">Frais de scolarité</span>
+                            <strong id="resuScolarite" style="color:var(--color-primary);"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid var(--color-border-light);">
+                            <span style="font-size:var(--text-sm);">Logement (sur la durée)</span>
+                            <strong id="resuLogement" style="color:var(--color-text-muted);"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid var(--color-border-light);">
+                            <span style="font-size:var(--text-sm);">Transport (sur la durée)</span>
+                            <strong id="resuTransport" style="color:var(--color-text-muted);"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid var(--color-border-light);">
+                            <span style="font-size:var(--text-sm);">Nourriture (sur la durée)</span>
+                            <strong id="resuNourriture" style="color:var(--color-text-muted);"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2" style="border-bottom:1px solid var(--color-border-light);">
+                            <span style="font-size:var(--text-sm);">Autres frais</span>
+                            <strong id="resuAutres" style="color:var(--color-text-muted);"></strong>
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="text-center p-4" style="background:var(--color-primary); border-radius:var(--radius-lg);">
+                        <div style="font-size:var(--text-xs); text-transform:uppercase; font-weight:700; color:rgba(255,255,255,0.7); margin-bottom:var(--space-1);">Coût total estimé sur <span id="resuDuree"></span></div>
+                        <div id="resuTotal" style="font-size:2.5rem; font-weight:var(--weight-extrabold); color:white; line-height:1;"></div>
+                        <div style="font-size:var(--text-sm); color:rgba(255,255,255,0.7); margin-top:var(--space-1);">FCFA</div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a id="resuLien" href="#" class="btn_ghost btn_sm">
+                            <i class="fas fa-graduation-cap mr-1"></i>Voir la fiche formation
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    let cout = 0, duree = 0, slug = "";
+
+    window.onFormationChange = function () {
+        const sel = document.getElementById("formationSelect");
+        const opt = sel.options[sel.selectedIndex];
+        if (!sel.value) {
+            document.getElementById("formationInfo").style.display = "none";
+            document.getElementById("resultat").style.display = "none";
+            return;
+        }
+        cout = parseInt(opt.dataset.cout) || 0;
+        duree = parseInt(opt.dataset.duree) || 1;
+        slug = opt.dataset.slug;
+
+        document.getElementById("infoCout").textContent = cout.toLocaleString("fr-FR");
+        document.getElementById("infoDuree").textContent = duree;
+        document.getElementById("infoBourses").textContent = opt.dataset.bourses === "1" ? "Oui ✓" : "Non";
+        document.getElementById("formationInfo").style.display = "";
+        calculer();
+    };
+
+    window.calculer = function () {
+        if (!cout || !duree) return;
+
+        const sel = document.getElementById("formationSelect");
+        if (!sel.value) return;
+
+        const logement = (parseInt(document.getElementById("fraisLogement").value) || 0) * 12 * duree;
+        const transport = (parseInt(document.getElementById("fraisTransport").value) || 0) * 12 * duree;
+        const nourriture = (parseInt(document.getElementById("fraisNourriture").value) || 0) * 12 * duree;
+        const autres = (parseInt(document.getElementById("fraisAutres").value) || 0) * duree;
+        const scolarite = cout * duree;
+        const total = scolarite + logement + transport + nourriture + autres;
+
+        const fmt = function (n) { return n.toLocaleString("fr-FR"); };
+        const opt = sel.options[sel.selectedIndex];
+
+        document.getElementById("resuNom").textContent = opt.dataset.nom;
+        document.getElementById("resuDuree").textContent = duree + " an" + (duree > 1 ? "s" : "");
+        document.getElementById("resuScolarite").textContent = fmt(scolarite) + " FCFA";
+        document.getElementById("resuLogement").textContent = fmt(logement) + " FCFA";
+        document.getElementById("resuTransport").textContent = fmt(transport) + " FCFA";
+        document.getElementById("resuNourriture").textContent = fmt(nourriture) + " FCFA";
+        document.getElementById("resuAutres").textContent = fmt(autres) + " FCFA";
+        document.getElementById("resuTotal").textContent = fmt(total);
+        document.getElementById("resuLien").href = "/catalogue/formations/" + slug + "/";
+        document.getElementById("resultat").style.display = "";
+    };
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Questions proposées — Admin — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_section">
+    <div class="container">
+
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div>
+                <h1 style="font-size:var(--text-2xl); font-weight:var(--weight-extrabold); margin:0;">
+                    <i class="fas fa-clipboard-check mr-2" style="color:var(--color-primary);"></i>Questions proposées par les conseillers
+                </h1>
+                {% if total_en_attente %}
+                <p style="margin:4px 0 0; color:var(--color-text-muted); font-size:var(--text-sm);">
+                    <span class="tag_badge tag_badge--info">{{ total_en_attente }} en attente d'approbation</span>
+                </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Filtres statut -->
+        <div class="filter_form_container mb-4">
+            <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                {% for val, label in statuts %}
+                <a href="?statut={{ val }}" class="tag_badge {% if statut_filtre == val %}tag_badge--primary{% endif %}" style="cursor:pointer; text-decoration:none;">
+                    {{ label }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if questions %}
+        {% for question in questions %}
+        <div class="detail_container mb-4">
+            <div class="row align-items-start">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center mb-3" style="gap:var(--space-3);">
+                        <span class="tag_badge
+                            {% if question.statut == 'EN_ATTENTE' %}tag_badge--info
+                            {% elif question.statut == 'APPROUVEE' %}tag_badge--success
+                            {% else %}{% endif %}">
+                            {{ question.get_statut_display }}
+                        </span>
+                        <span class="tag_badge">{{ question.get_type_display }}</span>
+                        {% if question.test_cible %}
+                        <span class="tag_badge tag_badge--primary">
+                            <i class="fas fa-link mr-1"></i>{{ question.test_cible.nom }}
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">
+                        {{ question.texte }}
+                    </h3>
+
+                    {% if question.explication %}
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                        <strong>Aide :</strong> {{ question.explication }}
+                    </p>
+                    {% endif %}
+
+                    {% if question.dimensions %}
+                    <div class="mb-2">
+                        <small class="text-muted" style="font-size:11px; text-transform:uppercase; font-weight:700;">Dimensions :</small>
+                        <span style="font-size:var(--text-sm); font-family:monospace; background:var(--color-bg-warm); padding:2px 8px; border-radius:4px;">{{ question.dimensions }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if question.justification_proposition %}
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted);">
+                        <strong>Justification :</strong> {{ question.justification_proposition }}
+                    </p>
+                    {% endif %}
+
+                    {% if question.statut == 'REJETEE' and question.motif_rejet %}
+                    <div style="background:var(--color-danger-bg,#fff5f5); border-left:3px solid var(--color-danger); padding:var(--space-2) var(--space-3); border-radius:var(--radius-sm);">
+                        <small style="color:var(--color-danger); font-weight:700;">Motif du rejet :</small>
+                        <p style="margin:0; font-size:var(--text-sm);">{{ question.motif_rejet }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-lg-4">
+                    <div style="background:var(--color-bg-warm); padding:var(--space-3); border-radius:var(--radius-sm); margin-bottom:var(--space-3);">
+                        <small class="text-muted d-block mb-1" style="font-size:10px; text-transform:uppercase; font-weight:700;">Proposé par</small>
+                        <div style="font-weight:var(--weight-semibold); font-size:var(--text-sm);">{{ question.conseiller.get_full_name }}</div>
+                        <small class="text-muted">{{ question.date_soumission|date:"d/m/Y à H:i" }}</small>
+
+                        {% if question.traite_par %}
+                        <hr style="margin:var(--space-2) 0;">
+                        <small class="text-muted d-block mb-1" style="font-size:10px; text-transform:uppercase; font-weight:700;">Traité par</small>
+                        <div style="font-size:var(--text-sm);">{{ question.traite_par.get_full_name }}</div>
+                        <small class="text-muted">{{ question.date_traitement|date:"d/m/Y" }}</small>
+                        {% endif %}
+                    </div>
+
+                    {% if question.statut == 'EN_ATTENTE' %}
+                    <div class="d-flex flex-column" style="gap:var(--space-2);">
+                        <form method="post" action="{% url 'orientation:admin-approuver-question' question.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="comment_button w-100" style="background:var(--color-success); border-color:var(--color-success);">
+                                <i class="fas fa-check mr-2"></i>Approuver et intégrer
+                            </button>
+                        </form>
+
+                        <button type="button" class="btn_ghost w-100" style="color:var(--color-danger); border-color:var(--color-danger);"
+                            onclick="document.getElementById('reject-modal-{{ question.pk }}').style.display='flex'">
+                            <i class="fas fa-times mr-2"></i>Rejeter
+                        </button>
+                    </div>
+                    {% elif question.statut == 'APPROUVEE' and question.question_creee %}
+                    <div style="background:var(--color-primary-light); padding:var(--space-3); border-radius:var(--radius-sm); text-align:center;">
+                        <i class="fas fa-check-circle" style="color:var(--color-primary); font-size:20px;"></i>
+                        <div style="font-size:var(--text-xs); color:var(--color-primary); font-weight:700; margin-top:4px;">
+                            Intégrée : {{ question.question_creee.test.nom }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal rejet -->
+        {% if question.statut == 'EN_ATTENTE' %}
+        <div id="reject-modal-{{ question.pk }}" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center;">
+            <div style="background:var(--color-bg-card); border-radius:var(--radius-lg); padding:var(--space-6); max-width:480px; width:90%;">
+                <h3 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin-bottom:var(--space-4);">Rejeter la question</h3>
+                <form method="post" action="{% url 'orientation:admin-rejeter-question' question.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form_label">Motif du rejet <span style="color:var(--color-danger);">*</span></label>
+                        {{ form_rejeter.motif_rejet }}
+                    </div>
+                    <div class="d-flex" style="gap:var(--space-3);">
+                        <button type="submit" class="comment_button" style="background:var(--color-danger); border-color:var(--color-danger);">
+                            <i class="fas fa-times mr-1"></i>Confirmer le rejet
+                        </button>
+                        <button type="button" class="btn_ghost" onclick="document.getElementById('reject-modal-{{ question.pk }}').style.display='none'">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+
+        {% endfor %}
+
+        {% if is_paginated %}
+        <div class="pagination_container mt-4">
+            <nav><ul class="pagination">
+                {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&statut={{ statut_filtre }}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&statut={{ statut_filtre }}">{{ num }}</a></li>{% endfor %}
+                {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&statut={{ statut_filtre }}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+            </ul></nav>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-clipboard-check empty_state_icon"></i>
+            <h4>Aucune question {{ statut_filtre|lower }}</h4>
+            <p>Aucune question ne correspond au filtre sélectionné.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

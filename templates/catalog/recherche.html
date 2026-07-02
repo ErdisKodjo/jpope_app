@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if q %}Résultats pour "{{ q }}"{% else %}Recherche{% endif %} — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Recherche</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Recherche</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- Barre de recherche -->
+        <div class="filter_form_container mb-5">
+            <form method="get" class="d-flex align-items-center" style="gap:var(--space-3);">
+                <div class="flex-grow-1" style="position:relative;">
+                    <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-size:var(--text-sm);"></i>
+                    <input type="text" name="q" value="{{ q }}" class="input_field"
+                           style="padding-left:42px; height:48px; font-size:var(--text-base);"
+                           placeholder="Rechercher une formation, un établissement, un métier..."
+                           autofocus>
+                </div>
+                <button type="submit" class="comment_button" style="height:48px; white-space:nowrap;">
+                    <i class="fas fa-search mr-2"></i>Rechercher
+                </button>
+            </form>
+        </div>
+
+        {% if q %}
+        {% if nb_total %}
+        <p class="text-muted mb-4" style="font-size:var(--text-sm);">
+            <strong>{{ nb_total }}</strong> résultat{{ nb_total|pluralize }} pour « <strong>{{ q }}</strong> »
+        </p>
+
+        <!-- Formations -->
+        {% if formations %}
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin:0;">
+                    <i class="fas fa-graduation-cap mr-2" style="color:var(--color-primary);"></i>Formations ({{ formations|length }})
+                </h2>
+                <a href="{% url 'catalog:formation-list' %}?q={{ q }}" class="btn_ghost btn_sm">Voir toutes</a>
+            </div>
+            <div class="row">
+                {% for f in formations %}
+                <div class="col-lg-6 mb-3">
+                    <div class="card unified_card h-100">
+                        <div class="unified_card_body">
+                            <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                                <a href="{% url 'catalog:formation-detail' f.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ f.nom }}</a>
+                            </h3>
+                            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">
+                                <i class="fas fa-university mr-1"></i>{{ f.etablissement.nom }}
+                                {% if f.domaine %} · {{ f.domaine.nom }}{% endif %}
+                            </p>
+                            <div class="d-flex" style="gap:var(--space-2); flex-wrap:wrap;">
+                                <span class="tag_badge" style="font-size:10px;">{{ f.get_niveau_display }}</span>
+                                <span class="tag_badge" style="font-size:10px;">{{ f.duree_annees }} an{{ f.duree_annees|pluralize }}</span>
+                                <span class="tag_badge" style="font-size:10px; color:var(--color-primary);">{{ f.cout_annuel|floatformat:0 }} FCFA/an</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Établissements -->
+        {% if etablissements %}
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin:0;">
+                    <i class="fas fa-university mr-2" style="color:var(--color-accent);"></i>Établissements ({{ etablissements|length }})
+                </h2>
+                <a href="{% url 'catalog:etablissement-list' %}?q={{ q }}" class="btn_ghost btn_sm">Voir tous</a>
+            </div>
+            <div class="row">
+                {% for e in etablissements %}
+                <div class="col-lg-4 mb-3">
+                    <div class="card unified_card h-100">
+                        <div class="unified_card_body">
+                            <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                                <a href="{% url 'catalog:etablissement-detail' e.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ e.nom }}</a>
+                            </h3>
+                            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0;">
+                                <i class="fas fa-map-marker-alt mr-1"></i>{{ e.ville }}, {{ e.pays }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Métiers -->
+        {% if metiers %}
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin:0;">
+                    <i class="fas fa-briefcase mr-2" style="color:var(--color-success);"></i>Métiers ({{ metiers|length }})
+                </h2>
+                <a href="{% url 'catalog:metier-list' %}?q={{ q }}" class="btn_ghost btn_sm">Voir tous</a>
+            </div>
+            <div class="row">
+                {% for m in metiers %}
+                <div class="col-lg-4 mb-3">
+                    <div class="card unified_card h-100">
+                        <div class="unified_card_body">
+                            <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                                <a href="{% url 'catalog:metier-detail' m.slug %}" style="color:var(--color-dark); text-decoration:none;">{{ m.nom }}</a>
+                            </h3>
+                            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin:0;">
+                                {% if m.domaine %}<i class="fas fa-tag mr-1"></i>{{ m.domaine.nom }}{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Discussions communauté -->
+        {% if threads %}
+        <div class="mb-5">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 style="font-size:var(--text-lg); font-weight:var(--weight-bold); margin:0;">
+                    <i class="fas fa-comments mr-2" style="color:var(--color-info);"></i>Discussions ({{ threads|length }})
+                </h2>
+                <a href="{% url 'community:forum-list' %}" class="btn_ghost btn_sm">Voir la communauté</a>
+            </div>
+            <div class="row">
+                {% for t in threads %}
+                <div class="col-lg-6 mb-3">
+                    <div class="card unified_card h-100">
+                        <div class="unified_card_body">
+                            <h3 style="font-size:var(--text-base); font-weight:var(--weight-bold); margin-bottom:4px;">
+                                <a href="{% url 'community:thread-detail' t.pk %}" style="color:var(--color-dark); text-decoration:none;">{{ t.titre }}</a>
+                            </h3>
+                            <p style="font-size:var(--text-xs); color:var(--color-text-muted); margin-bottom:var(--space-2);">{{ t.contenu|truncatewords:15 }}</p>
+                            <small class="text-muted" style="font-size:11px;">
+                                <i class="fas fa-folder mr-1"></i>{{ t.forum.nom }}
+                                · {{ t.nombre_reponses }} réponse{{ t.nombre_reponses|pluralize }}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-search empty_state_icon text-muted"></i>
+            <h4>Aucun résultat pour « {{ q }} »</h4>
+            <p>Essayez des termes différents ou explorez le catalogue.</p>
+            <a href="{% url 'catalog:formation-list' %}" class="comment_button">
+                <i class="fas fa-graduation-cap mr-2"></i>Explorer les formations
+            </a>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-search fa-3x text-muted mb-4 d-block" style="opacity:0.3;"></i>
+            <h4 class="text-muted">Entrez un terme de recherche</h4>
+            <p class="text-muted">Recherchez parmi les formations, établissements, métiers et discussions.</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

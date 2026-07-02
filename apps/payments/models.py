@@ -560,3 +560,87 @@ class Facture(models.Model):
             import secrets
             self.numero = f"FAC-{today}-{secrets.token_hex(4).upper()}"
         super().save(*args, **kwargs)
+
+
+# ──────────────────────────────────────────────
+# Ristourne conseiller
+# ──────────────────────────────────────────────
+
+class StatutRistourne(models.TextChoices):
+    EN_ATTENTE = "EN_ATTENTE", _("En attente de paiement")
+    PAYEE = "PAYEE", _("Payée")
+    ANNULEE = "ANNULEE", _("Annulée")
+
+
+class RistourneConseiller(models.Model):
+    """
+    Commission gagnée par un conseiller suite à un accompagnement évalué.
+    Calculée en fonction du tarif_consultation du CounselorProfile et du taux_ristourne.
+    """
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    conseiller = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.CASCADE,
+        related_name="ristournes",
+        limit_choices_to={"role": "COUNSELOR"},
+        verbose_name=_("conseiller"),
+    )
+    demande_accompagnement = models.OneToOneField(
+        "orientation.DemandeAccompagnement",
+        on_delete=models.CASCADE,
+        related_name="ristourne",
+        verbose_name=_("demande d'accompagnement"),
+    )
+
+    montant = models.DecimalField(
+        _("montant de la ristourne (FCFA)"),
+        max_digits=12,
+        decimal_places=0,
+        validators=[MinValueValidator(0)],
+    )
+    taux_applique = models.FloatField(
+        _("taux appliqué (%)"),
+        default=10.0,
+    )
+    note_etudiant = models.FloatField(
+        _("note donnée par l'étudiant"),
+        null=True,
+        blank=True,
+    )
+
+    statut = models.CharField(
+        _("statut"),
+        max_length=20,
+        choices=StatutRistourne.choices,
+        default=StatutRistourne.EN_ATTENTE,
+        db_index=True,
+    )
+    reference = models.CharField(
+        _("référence"),
+        max_length=50,
+        unique=True,
+        blank=True,
+    )
+    notes_admin = models.TextField(_("notes admin"), blank=True)
+
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_paiement = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("ristourne conseiller")
+        verbose_name_plural = _("ristournes conseillers")
+        ordering = ["-date_creation"]
+        indexes = [
+            models.Index(fields=["conseiller", "statut"]),
+        ]
+
+    def __str__(self):
+        return f"Ristourne {self.reference} — {self.conseiller} — {self.montant} FCFA ({self.get_statut_display()})"
+
+    def save(self, *args, **kwargs):
+        if not self.reference:
+            import secrets
+            today = timezone.now().strftime("%Y%m%d")
+            self.reference = f"RST-{today}-{secrets.token_hex(3).upper()}"
+        super().save(*args, **kwargs)

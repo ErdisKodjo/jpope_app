@@ -7,6 +7,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from .enums import StatutVoeu, PrioriteVoeu
+from ..managers import VoeuManager
 
 class Voeu(models.Model):
     """
@@ -108,6 +109,8 @@ class Voeu(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = VoeuManager()
 
     class Meta:
         verbose_name = _("voeu")

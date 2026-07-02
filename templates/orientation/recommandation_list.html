@@ -94,6 +94,18 @@
                         <i class="fas fa-redo mr-2"></i>Refaire un test
                     </a>
                 </div>
+                {% if request.user.is_authenticated %}
+                <div class="sidebar_section mb-4" style="border-left:3px solid var(--color-accent);">
+                    <h3 class="sidebar_section_title">Besoin d'aide ?</h3>
+                    <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-4);">Un conseiller peut vous aider à interpréter vos recommandations et à choisir votre parcours.</p>
+                    <a href="{% url 'orientation:accompagnement-create' %}" class="comment_button w-100 mb-2" style="background:var(--color-accent); border-color:var(--color-accent);">
+                        <i class="fas fa-hands-helping mr-2"></i>Demander un accompagnement
+                    </a>
+                    <a href="{% url 'orientation:mes-demandes' %}" class="btn_ghost w-100">
+                        <i class="fas fa-list mr-2"></i>Mes demandes
+                    </a>
+                </div>
+                {% endif %}
                 <div class="sidebar_section">
                     <h3 class="sidebar_section_title">Explorer</h3>
                     <a href="{% url 'catalog:formation-list' %}" class="admin_sidebar_item">

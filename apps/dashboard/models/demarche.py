@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from .enums import TypeDemarche, StatutDemarche
+from ..managers import DemarcheManager
 
 class DemarcheInscription(models.Model):
     """
@@ -125,6 +126,8 @@ class DemarcheInscription(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = DemarcheManager()
 
     class Meta:
         verbose_name = _("démarche d'inscription")

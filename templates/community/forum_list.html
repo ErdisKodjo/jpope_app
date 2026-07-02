@@ -30,7 +30,7 @@
                 <div class="d-flex align-items-center justify-content-between mb-4">
                     <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">Forums de discussion</h2>
                     {% if request.user.is_authenticated %}
-                    <a href="#" class="comment_button btn_sm">
+                    <a href="{% url 'community:forum-list' %}" class="comment_button btn_sm">
                         <i class="fas fa-plus mr-2"></i>Nouveau sujet
                     </a>
                     {% endif %}
@@ -44,7 +44,7 @@
                         </div>
                         <div class="flex-grow-1">
                             <h3 style="font-size:var(--text-md); font-weight:var(--weight-bold); margin-bottom:var(--space-2);">
-                                <a href="{% url 'community:forum-detail' forum.pk %}" style="color:var(--color-dark);">{{ forum.nom }}</a>
+                                <a href="{% url 'community:forum-detail' forum.slug %}" style="color:var(--color-dark);">{{ forum.nom }}</a>
                             </h3>
                             <p style="font-size:var(--text-sm); color:var(--color-text-muted); margin-bottom:var(--space-3);">
                                 {{ forum.description|truncatewords:25 }}
@@ -52,9 +52,9 @@
                             <div class="d-flex align-items-center" style="gap:var(--space-4);">
                                 <small class="text-muted">
                                     <i class="fas fa-folder mr-1"></i>
-                                    {% with count=forum.thread_set.count %}{{ count }} discussion{{ count|pluralize }}{% endwith %}
+                                    {{ forum.nombre_threads }} discussion{{ forum.nombre_threads|pluralize }}
                                 </small>
-                                <a href="{% url 'community:forum-detail' forum.pk %}" class="comment_button btn_sm">
+                                <a href="{% url 'community:forum-detail' forum.slug %}" class="comment_button btn_sm">
                                     Voir les discussions
                                 </a>
                             </div>

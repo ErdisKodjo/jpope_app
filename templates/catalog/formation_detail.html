@@ -192,9 +192,19 @@
                             <i class="fas fa-university mr-2"></i>Voir l'établissement
                         </a>
                         {% if request.user.is_authenticated %}
-                        <a href="{% url 'orientation:home' %}" class="btn_ghost w-100">
+                        <a href="{% url 'orientation:home' %}" class="btn_ghost w-100 mb-2">
                             <i class="fas fa-compass mr-2"></i>Tester ma compatibilité
                         </a>
+                        <a href="{% url 'dashboard:voeu-create' %}?formation={{ formation.pk }}" class="comment_button w-100 mb-2"
+                            style="background:var(--color-success); border-color:var(--color-success);">
+                            <i class="fas fa-star mr-2"></i>Ajouter à mes vœux
+                        </a>
+                        <form method="post" action="{% url 'dashboard:favori-toggle' 'FORMATION' formation.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn_ghost w-100" style="color:var(--color-danger); border-color:var(--color-danger);">
+                                <i class="fas fa-heart mr-2"></i>Favori
+                            </button>
+                        </form>
                         {% else %}
                         <a href="{% url 'accounts:register' %}" class="btn_ghost w-100">
                             <i class="fas fa-user-plus mr-2"></i>S'inscrire gratuitement

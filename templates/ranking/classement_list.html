@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Classements des établissements — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1>Classements des établissements</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Classements</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+        <div class="row">
+
+            <!-- Table principale -->
+            <div class="col-lg-9">
+                <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap" style="gap:var(--space-3);">
+                    <div>
+                        <h2 style="font-size:var(--text-xl); font-weight:var(--weight-bold); margin:0;">
+                            Palmarès national {% if annee_selectionnee %}{{ annee_selectionnee }}{% endif %}
+                        </h2>
+                        <small class="text-muted">{{ classements|length }} établissement{{ classements|length|pluralize }} classé{{ classements|length|pluralize }}</small>
+                    </div>
+                    <a href="{% url 'ranking:top-national' %}" class="comment_button btn_sm">
+                        <i class="fas fa-trophy mr-2"></i>Top 20 national
+                    </a>
+                </div>
+
+                {% if classements %}
+                <div class="detail_container" style="padding:0; overflow:hidden;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead>
+                            <tr style="background:var(--color-bg-subtle); border-bottom:2px solid var(--color-border-light);">
+                                <th style="padding:var(--space-3) var(--space-4); font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted); width:60px;">Rang</th>
+                                <th style="padding:var(--space-3) var(--space-4); font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted);">Établissement</th>
+                                <th style="padding:var(--space-3) var(--space-4); font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted); text-align:center;">Score</th>
+                                <th style="padding:var(--space-3) var(--space-4); font-size:var(--text-xs); text-transform:uppercase; font-weight:var(--weight-bold); color:var(--color-text-muted); text-align:center;">Rang rég.</th>
+                                <th style="padding:var(--space-3) var(--space-4); width:40px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in classements %}
+                            <tr style="border-bottom:var(--border-width) solid var(--color-border-light); transition:background var(--transition-base);"
+                                onmouseover="this.style.background='var(--color-primary-bg)'" onmouseout="this.style.background=''">
+                                <td style="padding:var(--space-3) var(--space-4);">
+                                    {% if c.rang_national == 1 %}
+                                    <span style="font-size:1.2rem;">🥇</span>
+                                    {% elif c.rang_national == 2 %}
+                                    <span style="font-size:1.2rem;">🥈</span>
+                                    {% elif c.rang_national == 3 %}
+                                    <span style="font-size:1.2rem;">🥉</span>
+                                    {% else %}
+                                    <span style="font-size:var(--text-base); font-weight:var(--weight-bold); color:{% if c.est_top_10 %}var(--color-primary){% else %}var(--color-text-muted){% endif %};">
+                                        {{ c.rang_national|default:"—" }}
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td style="padding:var(--space-3) var(--space-4);">
+                                    <div style="font-weight:var(--weight-semibold); font-size:var(--text-base);">
+                                        <a href="{% url 'ranking:classement-detail' c.pk %}" style="color:var(--color-dark); text-decoration:none;">{{ c.etablissement.nom }}</a>
+                                    </div>
+                                    <small class="text-muted" style="font-size:11px;">
+                                        <i class="fas fa-map-marker-alt mr-1"></i>{{ c.etablissement.ville }}, {{ c.etablissement.pays }}
+                                    </small>
+                                </td>
+                                <td style="padding:var(--space-3) var(--space-4); text-align:center;">
+                                    <span style="font-size:var(--text-base); font-weight:var(--weight-extrabold); color:{% if c.score_final >= 80 %}var(--color-success){% elif c.score_final >= 60 %}var(--color-primary){% else %}var(--color-text-muted){% endif %};">
+                                        {{ c.score_final|floatformat:1 }}
+                                    </span>
+                                    <span style="font-size:10px; color:var(--color-text-muted);">/100</span>
+                                </td>
+                                <td style="padding:var(--space-3) var(--space-4); text-align:center;">
+                                    <span class="text-muted" style="font-size:var(--text-sm);">{{ c.rang_regional|default:"—" }}</span>
+                                </td>
+                                <td style="padding:var(--space-3) var(--space-4);">
+                                    <a href="{% url 'ranking:classement-detail' c.pk %}" class="btn_ghost btn_sm" style="padding:4px 8px;">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_paginated %}
+                <div class="pagination_container mt-4">
+                    <nav><ul class="pagination">
+                        {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if annee_selectionnee %}&annee={{ annee_selectionnee }}{% endif %}"><i class="fas fa-angle-left"></i></a></li>{% endif %}
+                        {% for num in page_obj.paginator.page_range %}<li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}{% if annee_selectionnee %}&annee={{ annee_selectionnee }}{% endif %}">{{ num }}</a></li>{% endfor %}
+                        {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if annee_selectionnee %}&annee={{ annee_selectionnee }}{% endif %}"><i class="fas fa-angle-right"></i></a></li>{% endif %}
+                    </ul></nav>
+                </div>
+                {% endif %}
+
+                {% else %}
+                <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+                    <i class="fas fa-trophy empty_state_icon text-muted"></i>
+                    <h4>Aucun classement disponible</h4>
+                    <p>Les classements seront publiés prochainement.</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-3 mt-4 mt-lg-0">
+
+                <!-- Filtre année -->
+                <div class="sidebar_section mb-4">
+                    <h3 class="sidebar_section_title">Année</h3>
+                    <div class="d-flex flex-column" style="gap:var(--space-1);">
+                        <a href="?" class="admin_sidebar_item {% if not annee_selectionnee %}active{% endif %}" style="font-size:var(--text-sm);">Dernière année</a>
+                        {% for annee in annees %}
+                        <a href="?annee={{ annee }}" class="admin_sidebar_item {% if annee_selectionnee == annee|stringformat:'s' %}active{% endif %}" style="font-size:var(--text-sm);">{{ annee }}</a>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <a href="{% url 'ranking:top-national' %}" class="comment_button w-100 mb-2">
+                    <i class="fas fa-trophy mr-2"></i>Top 20 national
+                </a>
+                <a href="{% url 'catalog:etablissement-list' %}" class="btn_ghost w-100">
+                    <i class="fas fa-university mr-2"></i>Voir les établissements
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

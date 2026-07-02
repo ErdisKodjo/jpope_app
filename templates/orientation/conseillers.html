@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conseillers d'orientation — AvenSU-Orienta{% endblock %}
+
+{% block content %}
+
+<div class="page_header">
+    <div class="page_header_bg" style="background-image:url({% static 'images/slider_background.jpg' %})"></div>
+    <div class="container">
+        <div class="page_header_content">
+            <h1><i class="fas fa-user-tie mr-2"></i>Conseillers d'orientation</h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'accounts:home' %}">Accueil</a></li>
+                    <li class="breadcrumb-item active">Conseillers</li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<div class="page_section">
+    <div class="container">
+
+        <!-- Barre de recherche -->
+        <div class="filter_form_container mb-5">
+            <form method="get" class="d-flex align-items-center" style="gap:var(--space-3); flex-wrap:wrap;">
+                <div class="flex-grow-1" style="min-width:220px; position:relative;">
+                    <i class="fas fa-search" style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--color-text-muted);"></i>
+                    <input type="text" name="q" value="{{ q }}" class="input_field"
+                           style="padding-left:40px;" placeholder="Nom, spécialité…">
+                </div>
+                <button type="submit" class="comment_button"><i class="fas fa-search mr-2"></i>Rechercher</button>
+                {% if q %}<a href="{% url 'orientation:conseillers' %}" class="btn_ghost">Réinitialiser</a>{% endif %}
+            </form>
+        </div>
+
+        {% if conseillers %}
+        <div class="row">
+            {% for c in conseillers %}
+            {% with cp=c.counselor_profile %}
+            <div class="col-lg-4 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="card unified_card w-100">
+                    <div class="unified_card_body">
+                        <!-- Avatar + nom -->
+                        <div class="d-flex align-items-center mb-3" style="gap:var(--space-3);">
+                            <div style="width:56px; height:56px; border-radius:50%; background:linear-gradient(135deg,var(--color-primary),var(--color-accent)); display:flex; align-items:center; justify-content:center; color:white; font-size:var(--text-xl); font-weight:var(--weight-bold); flex-shrink:0;">
+                                {{ c.first_name|first|upper }}{{ c.last_name|first|upper }}
+                            </div>
+                            <div>
+                                <div style="font-weight:var(--weight-bold); font-size:var(--text-base); color:var(--color-dark);">{{ c.get_full_name }}</div>
+                                <div style="font-size:var(--text-xs); color:var(--color-text-muted);">
+                                    {% if cp.annees_experience %}{{ cp.annees_experience }} an{{ cp.annees_experience|pluralize }} d'expérience{% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Note -->
+                        {% if cp.note_moyenne %}
+                        <div class="mb-2 d-flex align-items-center" style="gap:var(--space-2);">
+                            <span style="color:var(--color-accent); font-size:var(--text-sm); font-weight:var(--weight-bold);">★ {{ cp.note_moyenne|floatformat:1 }}/5</span>
+                            <span style="font-size:var(--text-xs); color:var(--color-text-muted);">({{ cp.nombre_evaluations }} avis)</span>
+                        </div>
+                        {% endif %}
+
+                        <!-- Spécialités -->
+                        {% if cp.specialites %}
+                        <div class="mb-3 d-flex flex-wrap" style="gap:4px;">
+                            {% for s in cp.specialites|slice:":3" %}
+                            <span class="tag_badge" style="font-size:10px;">{{ s }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+
+                        <!-- Stats rapides -->
+                        <div class="d-flex" style="gap:var(--space-4); margin-bottom:var(--space-3);">
+                            <div class="text-center">
+                                <div style="font-size:var(--text-lg); font-weight:var(--weight-extrabold); color:var(--color-primary);">{{ cp.nombre_accompagnements_total }}</div>
+                                <div style="font-size:10px; color:var(--color-text-muted);">Accompagnements</div>
+                            </div>
+                            <div class="text-center">
+                                <div style="font-size:var(--text-lg); font-weight:var(--weight-extrabold); color:{% if cp.is_available %}var(--color-success){% else %}var(--color-danger){% endif %};">
+                                    {% if cp.is_available %}✓{% else %}✗{% endif %}
+                                </div>
+                                <div style="font-size:10px; color:var(--color-text-muted);">{% if cp.is_available %}Disponible{% else %}Indisponible{% endif %}</div>
+                            </div>
+                            {% if cp.tarif_consultation %}
+                            <div class="text-center">
+                                <div style="font-size:var(--text-base); font-weight:var(--weight-extrabold); color:var(--color-accent);">{{ cp.tarif_consultation|floatformat:0 }}</div>
+                                <div style="font-size:10px; color:var(--color-text-muted);">FCFA/séance</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="unified_card_footer">
+                        <a href="{% url 'orientation:conseiller-detail' c.pk %}" class="comment_button btn_sm w-100">
+                            <i class="fas fa-eye mr-1"></i>Voir le profil
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty_state" style="padding:var(--space-12) var(--space-4);">
+            <i class="fas fa-user-tie empty_state_icon"></i>
+            <h4>Aucun conseiller trouvé</h4>
+            <p>{% if q %}Aucun résultat pour « {{ q }} ».{% else %}Les conseillers seront disponibles prochainement.{% endif %}</p>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

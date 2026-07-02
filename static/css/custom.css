@@ -951,6 +951,7 @@ p {
    HERO BOXES (page d'accueil)
    ────────────────────────────────────── */
 .hero_boxes {
+  height: auto;          /* annule height:0px de main_styles.css */
   padding: var(--space-11) 0;
   background: var(--color-bg);
   position: relative;
