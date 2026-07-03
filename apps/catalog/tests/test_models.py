@@ -13,6 +13,75 @@ from apps.catalog.tests.factories import (
 
 
 @pytest.mark.django_db
+class TestDomaine:
+    def test_slug_auto_genere(self):
+        domaine = DomaineFactory(nom="Informatique & Numérique")
+        assert domaine.slug == "informatique-numerique"
+
+    def test_slug_non_ecrase_si_existant(self):
+        domaine = DomaineFactory(nom="Santé", slug="sante-custom")
+        assert domaine.slug == "sante-custom"
+
+    def test_str_retourne_nom(self):
+        domaine = DomaineFactory(nom="Droit")
+        assert str(domaine) == "Droit"
+
+    def test_is_active_par_defaut(self):
+        domaine = DomaineFactory()
+        assert domaine.is_active is True
+
+    def test_domaine_inactif(self):
+        domaine = DomaineFactory(is_active=False)
+        assert domaine.is_active is False
+
+    def test_nom_unique(self):
+        from django.db import IntegrityError
+        DomaineFactory(nom="Gestion")
+        with pytest.raises(IntegrityError):
+            DomaineFactory(nom="Gestion")
+
+    def test_compteurs_par_defaut_zero(self):
+        domaine = DomaineFactory()
+        assert domaine.nombre_formations == 0
+        assert domaine.nombre_metiers == 0
+
+    def test_compteurs_mise_a_jour(self):
+        domaine = DomaineFactory()
+        domaine.nombre_formations = 5
+        domaine.nombre_metiers = 3
+        domaine.save()
+        domaine.refresh_from_db()
+        assert domaine.nombre_formations == 5
+        assert domaine.nombre_metiers == 3
+
+    def test_couleur_par_defaut(self):
+        domaine = DomaineFactory()
+        assert domaine.couleur == "#3B82F6"
+
+    def test_ordering_par_ordre_puis_nom(self):
+        DomaineFactory(nom="Zara", ordre=2)
+        DomaineFactory(nom="Alpha", ordre=1)
+        DomaineFactory(nom="Beta", ordre=1)
+        qs = list(Domaine.objects.filter(is_active=True))
+        noms = [d.nom for d in qs]
+        idx_alpha = noms.index("Alpha")
+        idx_beta = noms.index("Beta")
+        idx_zara = noms.index("Zara")
+        assert idx_alpha < idx_beta < idx_zara
+
+    def test_metiers_lies(self):
+        domaine = DomaineFactory()
+        MetierFactory(domaine=domaine)
+        MetierFactory(domaine=domaine)
+        assert domaine.metiers.count() == 2
+
+    def test_formations_liees(self):
+        domaine = DomaineFactory()
+        FormationFactory(domaine=domaine)
+        assert domaine.formations.count() == 1
+
+
+@pytest.mark.django_db
 class TestMetier:
     def test_score_attractivite_calcule(self):
         metier = MetierFactory(

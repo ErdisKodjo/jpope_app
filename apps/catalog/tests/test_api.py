@@ -35,6 +35,35 @@ class TestDomaineAPI:
         assert response.status_code == status.HTTP_200_OK
         assert response.data["nom"] == "Informatique"
 
+    def test_domaine_inactif_exclu(self, api_client):
+        DomaineFactory(nom="Visible", is_active=True)
+        DomaineFactory(nom="Cache", is_active=False)
+        url = reverse("catalog-api:domaines-list")
+        response = api_client.get(url)
+        noms = [d["nom"] for d in response.data["results"]]
+        assert "Visible" in noms
+        assert "Cache" not in noms
+
+    def test_retrieve_domaine_inexistant_404(self, api_client):
+        url = reverse("catalog-api:domaines-detail", kwargs={"slug": "inexistant"})
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_populaires_retourne_domaines(self, api_client):
+        d1 = DomaineFactory(nombre_formations=10)
+        d2 = DomaineFactory(nombre_formations=5)
+        url = reverse("catalog-api:domaines-populaires")
+        response = api_client.get(url)
+        assert response.status_code == status.HTTP_200_OK
+        assert isinstance(response.data, list)
+
+    def test_populaires_limit(self, api_client):
+        DomaineFactory.create_batch(8)
+        url = reverse("catalog-api:domaines-populaires")
+        response = api_client.get(url, {"limit": 3})
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data) <= 3
+
 
 @pytest.mark.django_db
 class TestMetierAPI:

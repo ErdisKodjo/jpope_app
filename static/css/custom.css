@@ -1382,6 +1382,14 @@ p {
   align-items: center;
   gap: var(--space-3);
   text-decoration: none;
+  padding-left: 0 !important;  /* annule padding-left:76px de main_styles.css */
+  flex-shrink: 0;
+}
+/* Annule padding-right:93px de main_styles.css (ajusté pour le template 1318px) */
+.main_nav_container {
+  padding-right: 0 !important;
+  margin-left: var(--space-4);
+  flex: 1 1 auto;
 }
 .logo_container img {
   height: 40px;
@@ -1476,16 +1484,76 @@ p {
   outline-offset: 2px;
 }
 
+/* ──────────────────────────────────────
+   HEADER — pleine largeur, collé en haut
+   ────────────────────────────────────── */
+.header {
+  width: 100% !important;
+  left: 0 !important;
+  transform: none !important;
+  top: 0 !important;
+  height: 68px !important;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+  padding: 0 var(--space-6);
+  box-sizing: border-box;
+}
+.header.scrolled {
+  top: 0 !important;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+}
+/* Désactive le pseudo-element ombre d'origine (incompatible pleine largeur) */
+.header_content::before,
+.header.scrolled .header_content::before {
+  display: none !important;
+}
+.header_content {
+  width: auto !important;
+  flex: 1 1 auto;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+}
+/* Pousse le contenu sous la navbar fixe */
+.super_container {
+  padding-top: 68px;
+}
+
 /* Header sidebar (zone auth à droite) */
 .header_side {
   background: var(--color-primary);
   min-width: 220px;
+  height: 68px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--space-3);
   padding: 0 var(--space-5);
   flex-shrink: 0;
+}
+/* Neutralise les overrides responsive de responsive.css (conçus pour la largeur fixe 1318px) */
+@media only screen and (max-width: 1380px) {
+  .header { width: 100% !important; }
+  .header_content { width: auto !important; }
+  .main_nav_container { padding-right: 0 !important; }
+  .header_side { width: auto !important; }
+}
+@media only screen and (max-width: 1280px) {
+  .header { width: 100% !important; top: 0 !important; }
+  .header_content { width: auto !important; }
+}
+@media only screen and (max-width: 575px) {
+  .header { height: 60px !important; top: 0 !important; }
+  .header_content { height: 60px; }
+  .header_side { height: 60px; }
+  .super_container { padding-top: 60px; }
+}
+@media only screen and (max-width: 479px) {
+  .header { height: 56px !important; top: 0 !important; }
+  .header_content { height: 56px; }
+  .header_side { height: 56px; }
+  .super_container { padding-top: 56px; }
 }
 @media (max-width: 991px) {
   .header_side { min-width: auto; padding: 0 var(--space-4); }
