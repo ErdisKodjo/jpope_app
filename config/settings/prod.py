@@ -10,6 +10,10 @@ from .base import *  # noqa
 
 DEBUG = False
 
+# Render termine le SSL au load balancer et transmet en HTTP en interne.
+# Sans cela, SECURE_SSL_REDIRECT crée une boucle infinie de redirections.
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Sécurité renforcée
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
