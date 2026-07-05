@@ -4,7 +4,7 @@ Modèle InscriptionEvenement — inscriptions des utilisateurs aux événements.
 import uuid
 from django.db import models
 from django.db.models import F
-from django.db.functions import Greatest
+from django.db.models.functions import Greatest
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
