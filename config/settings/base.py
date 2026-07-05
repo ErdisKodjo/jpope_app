@@ -322,6 +322,8 @@ PAYMENTS = {
     "TMONEY_CALLBACK_URL": os.environ.get("TMONEY_CALLBACK_URL", ""),
     "TMONEY_MOCK_MODE": os.environ.get("TMONEY_MOCK_MODE", "True") == "True",
     "CURRENCY": "XOF",
+    # Secret partagé pour vérifier la signature HMAC des callbacks provider.
+    "WEBHOOK_SECRET": os.environ.get("PAYMENT_WEBHOOK_SECRET", ""),
 }
 
 # ──────────────────────────────────────────────

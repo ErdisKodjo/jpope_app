@@ -197,13 +197,50 @@ class FactureListView(generics.ListAPIView):
 
 
 class PaymentCallbackView(APIView):
-    """Endpoint de callback pour les paiements Mobile Money (Flooz/TMoney)."""
+    """Endpoint de callback pour les paiements Mobile Money (Flooz/TMoney).
+
+    Non authentifié (appelé par le provider), mais protégé par une signature
+    HMAC-SHA256 du corps brut de la requête. Le secret partagé est configuré via
+    ``PAYMENT_WEBHOOK_SECRET``. Sans signature valide, le callback est rejeté :
+    cela empêche un attaquant de confirmer arbitrairement des paiements.
+    """
     permission_classes = [AllowAny]
+
+    # En-têtes acceptés pour la signature (selon le provider).
+    SIGNATURE_HEADERS = (
+        "HTTP_X_WEBHOOK_SIGNATURE",
+        "HTTP_X_SIGNATURE",
+        "HTTP_X_FLOOZ_SIGNATURE",
+        "HTTP_X_TMONEY_SIGNATURE",
+    )
+
+    def _get_signature(self, request):
+        for header in self.SIGNATURE_HEADERS:
+            value = request.META.get(header)
+            if value:
+                return value
+        return ""
 
     def post(self, request):
         import json
+        from apps.payments.services.utils import verify_webhook_signature
+
+        raw_body = request.body if isinstance(request.body, bytes) else b""
+        signature = self._get_signature(request)
+
+        if not verify_webhook_signature(raw_body, signature):
+            logger.warning(
+                "Callback paiement rejeté : signature manquante ou invalide "
+                "(ip=%s)",
+                request.META.get("REMOTE_ADDR", ""),
+            )
+            return Response(
+                {"error": "Signature invalide."},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
         try:
-            data = json.loads(request.body) if isinstance(request.body, bytes) else request.data
+            data = json.loads(raw_body) if raw_body else request.data
         except Exception:
             data = request.data
 
