@@ -8,6 +8,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 from .enums import TypeEtablissement, StatutEtablissement
+from ..managers import EtablissementManager
 
 
 class Etablissement(models.Model):
@@ -243,6 +244,8 @@ class Etablissement(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = EtablissementManager()
 
     class Meta:
         verbose_name = _("établissement")

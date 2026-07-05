@@ -288,6 +288,19 @@ class SubmitTestView(VerifiedAccountMixin, View):
         # Calculer le résultat
         try:
             resultat = ScoringService.calculer_resultat(str(session.id))
+
+            # Generate recommendations
+            from apps.orientation.services.recommendation_engine import RecommendationEngine
+            try:
+                profile = getattr(request.user, "student_profile", None)
+                RecommendationEngine.generer_recommandations(
+                    resultat=resultat,
+                    budget_max=profile.budget_max_annuel if profile else None,
+                    villes_preferees=profile.villes_preferees if profile else None,
+                )
+            except Exception as rec_exc:
+                logger.error(f"Erreur génération recommandations: {rec_exc}")
+
             messages.success(request, "Test terminé ! Voici vos résultats.")
             return redirect("orientation:resultat-detail", pk=resultat.pk)
         except Exception as exc:

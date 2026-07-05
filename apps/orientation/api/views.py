@@ -132,6 +132,17 @@ class SauvegarderReponseView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
+        # Validate that choice_id belongs to this question
+        choice_id = request.data.get("choice_id")
+        if choice_id:
+            try:
+                choice_obj = question.choices.get(id=choice_id, is_active=True)
+            except question.choices.model.DoesNotExist:
+                return Response(
+                    {"error": "Choix invalide pour cette question."},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
         # Créer ou mettre à jour le détail de réponse
         detail, _ = DetailReponse.objects.update_or_create(
             reponse_utilisateur=session,
@@ -342,8 +353,18 @@ class EvolutionProfilView(APIView):
         return Response(stats)
 
 class OrientationStatsView(APIView):
-    """Statistiques globales de l'orientation (admin)."""
-    permission_classes = [IsAuthenticated]
+    """Statistiques globales de l'orientation (admin/conseiller)."""
+    from rest_framework.permissions import IsAdminUser
+
+    def check_permissions(self, request):
+        # Allow admins and counselors (is_staff or has counselor profile)
+        if request.user and (request.user.is_staff or request.user.is_superuser):
+            return
+        profile = getattr(request.user, 'counselor_profile', None)
+        if profile:
+            return
+        from rest_framework.exceptions import PermissionDenied
+        raise PermissionDenied()
 
     def get(self, request):
         return Response(OrientationAnalyticsService.stats_globales())

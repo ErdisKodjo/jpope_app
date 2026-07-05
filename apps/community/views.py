@@ -2,7 +2,8 @@ import logging
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import F, Q
+from django.db.functions import Greatest
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -103,7 +104,7 @@ class ThreadDetailView(DetailView):
 
     def get_object(self, queryset=None):
         obj = get_object_or_404(Thread.objects.select_related("forum", "auteur"), pk=self.kwargs["pk"])
-        Thread.objects.filter(pk=obj.pk).update(nombre_vues=obj.nombre_vues + 1)
+        Thread.objects.filter(pk=obj.pk).update(nombre_vues=F("nombre_vues") + 1)
         return obj
 
     def get_context_data(self, **kwargs):
@@ -144,9 +145,10 @@ class MessageCreateView(LoginRequiredMixin, View):
             thread.dernier_message_at = timezone.now()
             thread.save(update_fields=["nombre_reponses", "dernier_message", "dernier_message_at"])
             forum = thread.forum
-            forum.nombre_messages += 1
-            forum.dernier_message_at = timezone.now()
-            forum.save(update_fields=["nombre_messages", "dernier_message_at"])
+            Forum.objects.filter(pk=forum.pk).update(
+                nombre_messages=F("nombre_messages") + 1,
+                dernier_message_at=timezone.now(),
+            )
             if thread.auteur != request.user:
                 action_url = reverse("community:thread-detail", kwargs={"pk": str(thread.pk)})
                 _notify(
@@ -167,11 +169,13 @@ class LikeMessageView(LoginRequiredMixin, View):
         msg = get_object_or_404(MessageForum, pk=pk)
         like, created = LikeMessageForum.objects.get_or_create(utilisateur=request.user, message=msg)
         if created:
-            msg.nombre_likes += 1
+            MessageForum.objects.filter(pk=msg.pk).update(nombre_likes=F("nombre_likes") + 1)
         else:
             like.delete()
-            msg.nombre_likes = max(0, msg.nombre_likes - 1)
-        msg.save(update_fields=["nombre_likes"])
+            MessageForum.objects.filter(pk=msg.pk).update(
+                nombre_likes=Greatest(F("nombre_likes") - 1, 0)
+            )
+        msg.refresh_from_db()
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"likes": msg.nombre_likes, "liked": created})
         return redirect("community:thread-detail", pk=msg.thread.pk)

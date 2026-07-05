@@ -1,10 +1,14 @@
 """
 Vues API pour le chatbot.
 """
+import logging
+
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+logger = logging.getLogger(__name__)
 
 from apps.chatbot.models import Conversation, Message
 from apps.chatbot.services import ChatbotService
@@ -99,8 +103,9 @@ class MessageSendView(APIView):
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
+            logger.error(f"Erreur traitement message: {e}", exc_info=True)
             return Response(
-                {"error": f"Erreur de traitement : {str(e)}"},
+                {"error": "Erreur de traitement. Veuillez réessayer."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 

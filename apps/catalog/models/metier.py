@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .enums import NiveauEtudeRequis, DemandeMarche
 from .domaine import Domaine
+from ..managers import MetierManager
 
 
 class Metier(models.Model):
@@ -141,6 +142,8 @@ class Metier(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = MetierManager()
 
     class Meta:
         verbose_name = _("métier")

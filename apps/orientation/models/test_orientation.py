@@ -131,7 +131,10 @@ class TestOrientation(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.nom)
+            slug = slugify(self.nom)
+            if TestOrientation.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{slug}-{uuid.uuid4().hex[:8]}"
+            self.slug = slug
         # Mettre à jour le nombre de questions
         if self.pk:
             self.nombre_questions = self.questions.count()

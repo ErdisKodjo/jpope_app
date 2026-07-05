@@ -37,7 +37,8 @@ class AuthService:
         user.save(update_fields=["email_verification_token", "email_verification_token_expires"])
 
         # Construire le lien
-        verification_url = f"{settings.FRONTEND_URL}/verify-email?token={token}"
+        frontend_url = getattr(settings, "FRONTEND_URL", "")
+        verification_url = f"{frontend_url}/verify-email?token={token}" if frontend_url else ""
 
         # Envoyer l'email
         subject = _("Vérifiez votre adresse email — AvenSU-Orienta")
@@ -89,7 +90,8 @@ class AuthService:
         user.email_verification_token_expires = timezone.now() + timedelta(hours=1)
         user.save(update_fields=["email_verification_token", "email_verification_token_expires"])
 
-        reset_url = f"{settings.FRONTEND_URL}/reset-password?token={token}"
+        frontend_url = getattr(settings, "FRONTEND_URL", "")
+        reset_url = f"{frontend_url}/reset-password?token={token}" if frontend_url else ""
 
         subject = _("Réinitialisation de votre mot de passe — AvenSU-Orienta")
         message = render_to_string(

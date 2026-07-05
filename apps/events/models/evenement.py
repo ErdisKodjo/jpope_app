@@ -349,12 +349,11 @@ class Evenement(models.Model):
             self.slug = slug
 
         # Mettre à jour le statut si l'événement est passé
-        if (
-            self.date_fin
-            and self.date_fin < timezone.now()
-            and self.statut not in [StatutEvenement.ANNULE, StatutEvenement.TERMINE]
-        ):
-            self.statut = StatutEvenement.TERMINE
+        now = timezone.now()
+        if self.statut not in [StatutEvenement.ANNULE, StatutEvenement.TERMINE]:
+            end_time = self.date_fin or self.date_debut
+            if end_time and end_time < now:
+                self.statut = StatutEvenement.TERMINE
 
         super().save(*args, **kwargs)
 

@@ -3,10 +3,13 @@ Modèle InscriptionEvenement — inscriptions des utilisateurs aux événements.
 """
 import uuid
 from django.db import models
+from django.db.models import F
+from django.db.functions import Greatest
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from .enums import StatutInscription
+from .evenement import Evenement
 
 
 class InscriptionEvenement(models.Model):
@@ -152,8 +155,9 @@ class InscriptionEvenement(models.Model):
 
         # Mettre à jour le compteur de l'événement
         evenement = self.evenement
-        evenement.nombre_inscrits = max(0, evenement.nombre_inscrits - 1)
-        evenement.save(update_fields=["nombre_inscrits"])
+        Evenement.objects.filter(pk=evenement.pk).update(
+            nombre_inscrits=Greatest(F("nombre_inscrits") - 1, 0)
+        )
 
     def marquer_present(self):
         """Marque l'utilisateur comme présent (check-in)."""
@@ -165,8 +169,6 @@ class InscriptionEvenement(models.Model):
         ])
 
         # Mettre à jour le compteur de présents
-        evenement = self.evenement
-        evenement.nombre_presents = evenement.inscriptions.filter(
-            a_participe=True
-        ).count()
-        evenement.save(update_fields=["nombre_presents"])
+        Evenement.objects.filter(pk=self.evenement.pk).update(
+            nombre_presents=F("nombre_presents") + 1
+        )

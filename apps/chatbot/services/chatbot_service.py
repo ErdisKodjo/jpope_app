@@ -8,6 +8,7 @@ from typing import Optional
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 from apps.chatbot.models import (
@@ -119,17 +120,19 @@ class ChatbotService:
         )
 
         # 6. Mettre à jour la conversation
-        conversation.nombre_messages += 2
-        conversation.nombre_messages_utilisateur += 1
-        conversation.nombre_messages_assistant += 1
-        conversation.dernier_message_at = timezone.now()
-        conversation.tokens_utilises += tokens_total
+        Conversation.objects.filter(pk=conversation.pk).update(
+            nombre_messages=F("nombre_messages") + 2,
+            nombre_messages_utilisateur=F("nombre_messages_utilisateur") + 1,
+            nombre_messages_assistant=F("nombre_messages_assistant") + 1,
+            dernier_message_at=timezone.now(),
+            tokens_utilises=F("tokens_utilises") + tokens_total,
+        )
+        conversation.refresh_from_db()
 
         # Générer le titre si premier message
         if conversation.nombre_messages == 2 and not conversation.titre:
             conversation.titre = message_utilisateur[:100]
-
-        conversation.save()
+            conversation.save(update_fields=["titre"])
 
         return msg_assistant
 

@@ -16,6 +16,15 @@ class PaymentService:
     Orchestrateur de paiements mobile money (Flooz, TMoney).
     """
 
+    @staticmethod
+    def _build_metadata(metadata, plan, utilisateur):
+        """Construit les métadonnées du paiement de façon sûre."""
+        _meta = metadata.copy() if metadata else {}
+        _meta.setdefault("plan_id", str(plan.id))
+        _meta.setdefault("plan_code", plan.code)
+        _meta.setdefault("utilisateur_email", utilisateur.email)
+        return _meta
+
     @classmethod
     @transaction.atomic
     def initier_paiement(
@@ -48,9 +57,14 @@ class PaymentService:
         except PlanAbonnement.DoesNotExist:
             raise ValueError(f"Plan {plan_id} introuvable ou inactif.")
 
-        # Générer une référence unique
+        # Générer une référence unique avec retry
         today = timezone.now().strftime("%Y%m%d")
-        reference = f"PAY-{today}-{secrets.token_hex(4).upper()}"
+        for _ in range(5):
+            reference = f"PAY-{today}-{secrets.token_hex(6).upper()}"
+            if not Paiement.objects.filter(reference=reference).exists():
+                break
+        else:
+            raise ValueError("Impossible de générer une référence unique.")
 
         # Créer le paiement en attente
         paiement = Paiement.objects.create(
@@ -61,12 +75,7 @@ class PaymentService:
             provider=methode_paiement,
             reference=reference,
             description=description or f"Abonnement {plan.nom}",
-            metadata=metadata or {
-                "plan_id": str(plan.id),
-                "plan_code": plan.code,
-                "utilisateur_email": utilisateur.email,
-                "ip": metadata.get("ip", "") if metadata else "",
-            },
+            metadata=cls._build_metadata(metadata, plan, utilisateur),
         )
 
         result = {
@@ -129,19 +138,24 @@ class PaymentService:
         }
 
     @classmethod
+    @transaction.atomic
     def confirmer_paiement(cls, reference: str, transaction_id: str = "") -> bool:
-        """Confirme un paiement (callback du provider)."""
+        """Confirme un paiement (callback du provider). Idempotent."""
         from apps.payments.models import Paiement
 
         try:
-            paiement = Paiement.objects.get(reference=reference)
+            paiement = Paiement.objects.select_for_update().get(reference=reference)
         except Paiement.DoesNotExist:
             logger.error(f"Paiement {reference} introuvable pour confirmation")
             return False
 
         if paiement.statut == "COMPLETED":
-            logger.info(f"Paiement {reference} déjà confirmé")
+            logger.info(f"Paiement {reference} déjà confirmé (idempotent)")
             return True
+
+        if paiement.statut != "PENDING":
+            logger.warning(f"Paiement {reference} statut inattendu: {paiement.statut}")
+            return False
 
         paiement.statut = "COMPLETED"
         if transaction_id:
@@ -218,7 +232,28 @@ class PaymentService:
     def _verifier_aupres_provider(cls, paiement):
         """Vérifie le statut auprès du provider."""
         logger.debug(f"Vérification statut {paiement.reference} auprès du provider")
-        # Implémentation provider-spécifique
+        try:
+            if paiement.provider == "FLOOZ":
+                from apps.payments.services.flooz_service import FloozService
+                result = FloozService.verifier_statut(paiement.reference)
+            elif paiement.provider == "TMONEY":
+                from apps.payments.services.tmoney_service import TMoneyService
+                result = TMoneyService.verifier_statut(paiement.reference)
+            else:
+                return
+
+            if result.get("statut") == "COMPLETED":
+                cls.confirmer_paiement(
+                    paiement.reference,
+                    result.get("transaction_id", ""),
+                )
+            elif result.get("statut") == "FAILED":
+                cls.annuler_paiement(
+                    paiement.reference,
+                    "Échec confirmé par le provider",
+                )
+        except Exception as e:
+            logger.error(f"Erreur vérification provider pour {paiement.reference}: {e}")
 
     @classmethod
     def _activer_abonnement(cls, paiement):
@@ -238,7 +273,8 @@ class PaymentService:
             return
 
         now = timezone.now()
-        date_fin = now + timedelta(days=plan.duree_mois * 30)
+        from dateutil.relativedelta import relativedelta
+        date_fin = now + relativedelta(months=plan.duree_mois)
 
         abonnement, created = Abonnement.objects.get_or_create(
             utilisateur=paiement.user,

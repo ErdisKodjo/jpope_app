@@ -5,7 +5,7 @@ from django.urls import reverse, NoReverseMatch
 class ProfileCompletionMiddleware:
     """Redirige vers la complétion du profil si incomplet."""
 
-    EXEMPT_PATHS = ["/admin/", "/api/", "/static/", "/media/", "/__reload__/", "/__debug__/", "/silk/"]
+    EXEMPT_PATHS = ["/admin/", "/api/", "/static/", "/media/", "/__reload__/", "/__debug__/", "/silk/", "/ws/"]
     EXEMPT_NAMES = ["accounts:logout", "accounts:profile_edit", "accounts:login", "accounts:register"]
 
     def __init__(self, get_response):

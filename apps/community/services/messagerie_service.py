@@ -3,6 +3,7 @@ Service de gestion de la messagerie privée.
 """
 import logging
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -34,7 +35,7 @@ class MessagerieService:
         ParticipantConversation.objects.filter(
             conversation=conversation,
         ).exclude(utilisateur=auteur).update(
-            nombre_non_lus=models.F("nombre_non_lus") + 1
+            nombre_non_lus=F("nombre_non_lus") + 1
         )
 
         logger.info(

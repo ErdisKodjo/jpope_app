@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Q
+from django.db.models import F, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import DetailView, ListView, View
 from django.contrib import messages
@@ -52,8 +52,7 @@ class InscriptionView(LoginRequiredMixin, View):
             evenement=evenement,
         )
         if created:
-            evenement.nombre_inscrits += 1
-            evenement.save(update_fields=["nombre_inscrits"])
+            Evenement.objects.filter(pk=evenement.pk).update(nombre_inscrits=F("nombre_inscrits") + 1)
             messages.success(request, "Inscription confirmée !")
         else:
             messages.info(request, "Vous êtes déjà inscrit à cet événement.")

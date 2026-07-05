@@ -12,7 +12,10 @@ class TimezoneMiddleware:
         if request.user.is_authenticated:
             tzname = getattr(request.user, "timezone", "Africa/Lome")
         if tzname:
-            timezone.activate(zoneinfo.ZoneInfo(tzname))
+            try:
+                timezone.activate(zoneinfo.ZoneInfo(tzname))
+            except zoneinfo.ZoneInfoNotFoundError:
+                timezone.activate(zoneinfo.ZoneInfo("Africa/Lome"))
         else:
             timezone.deactivate()
         return self.get_response(request)

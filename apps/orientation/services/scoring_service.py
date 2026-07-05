@@ -68,7 +68,7 @@ class ScoringService:
         # 3. Normaliser (0-100)
         scores_normalises = cls._normaliser_scores(
             scores_bruts,
-            details.count(),
+            details,
             reponse.test,
         )
 
@@ -138,17 +138,24 @@ class ScoringService:
             question = detail.question
             poids = question.poids
 
+            # Compute THIS detail's contribution only
+            detail_contribution = {}
+
             if question.type == TypeQuestion.ECHELLE_LIKERT:
                 # Scoring Likert : valeur × poids × coefficient dimension
                 valeur = detail.valeur_echelle or 0
                 for dim, coef in (question.dimensions or {}).items():
-                    scores[dim] = scores.get(dim, 0) + (valeur * poids * coef)
+                    contribution = valeur * poids * coef
+                    detail_contribution[dim] = round(contribution, 4)
+                    scores[dim] = scores.get(dim, 0) + contribution
 
             elif question.type in [TypeQuestion.CHOIX_UNIQUE, TypeQuestion.CHOIX_MULTIPLE]:
                 # Scoring par choix : points du choix × poids
                 if detail.choice_selectionne:
                     for dim, points in (detail.choice_selectionne.scores or {}).items():
-                        scores[dim] = scores.get(dim, 0) + (points * poids)
+                        contribution = points * poids
+                        detail_contribution[dim] = round(contribution, 4)
+                        scores[dim] = scores.get(dim, 0) + contribution
 
                 # Choix multiples
                 if detail.choices_selectionnes:
@@ -156,18 +163,20 @@ class ScoringService:
                     choices = Choice.objects.filter(id__in=detail.choices_selectionnes)
                     for choice in choices:
                         for dim, points in (choice.scores or {}).items():
-                            scores[dim] = scores.get(dim, 0) + (points * poids)
+                            contribution = points * poids
+                            detail_contribution[dim] = round(detail_contribution.get(dim, 0) + contribution, 4)
+                            scores[dim] = scores.get(dim, 0) + contribution
 
             elif question.type == TypeQuestion.SITUATIONNELLE:
                 # Même logique que choix unique
                 if detail.choice_selectionne:
                     for dim, points in (detail.choice_selectionne.scores or {}).items():
-                        scores[dim] = scores.get(dim, 0) + (points * poids)
+                        contribution = points * poids
+                        detail_contribution[dim] = round(contribution, 4)
+                        scores[dim] = scores.get(dim, 0) + contribution
 
-            # Sauvegarder le score calculé sur le détail
-            detail.score_calcule = {
-                dim: scores.get(dim, 0) for dim in (question.dimensions or {})
-            }
+            # Save THIS detail's contribution (not cumulative)
+            detail.score_calcule = detail_contribution
             detail.save(update_fields=["score_calcule"])
 
         return scores
@@ -176,24 +185,50 @@ class ScoringService:
     def _normaliser_scores(
         cls,
         scores_bruts: Dict[str, float],
-        nb_questions: int,
+        details,
         test,
     ) -> Dict[str, float]:
         """
         Normalise les scores bruts sur une échelle 0-100.
 
         Méthode : score_normalisé = (score_brut / score_max_possible) × 100
+        Utilise le score max réel par dimension plutôt qu'une estimation théorique.
         """
-        if not scores_bruts or nb_questions == 0:
+        if not scores_bruts:
             return {}
 
-        # Estimer le score max théorique
-        score_max_theorique = max(nb_questions * 5 * 1.5, 1)  # Estimation conservative
+        # Compute actual max possible score per dimension
+        max_possible = {}
+        for detail in details:
+            question = detail.question
+            if question.type == TypeQuestion.ECHELLE_LIKERT:
+                max_val = question.echelle_max if hasattr(question, 'echelle_max') else 5
+            elif question.type in (TypeQuestion.CHOIX_UNIQUE, TypeQuestion.SITUATIONNELLE, TypeQuestion.CHOIX_MULTIPLE):
+                if question.type == TypeQuestion.CHOIX_MULTIPLE and detail.choices_selectionnes:
+                    # For multiple choice, max = sum of max points across all active choices
+                    from apps.orientation.models import Choice
+                    max_val = sum(
+                        max((c.scores or {}).values(), default=0)
+                        for c in question.choices.filter(is_active=True)
+                    )
+                elif detail.choice_selectionne:
+                    # For single/situational, max = max points among active choices
+                    max_val = max(
+                        (max((c.scores or {}).values(), default=0) for c in question.choices.filter(is_active=True)),
+                        default=5,
+                    )
+                else:
+                    max_val = 5
+            else:
+                max_val = 5
+            poids = question.poids or 1
+            for dim, coef in (question.dimensions or {}).items():
+                max_possible[dim] = max_possible.get(dim, 0) + (max_val * poids * coef)
 
         normalises = {}
         for dim, score in scores_bruts.items():
-            normalise = min(round((score / score_max_theorique) * 100, 1), 100)
-            normalises[dim] = max(normalise, 0)
+            max_score = max(max_possible.get(dim, 1), 1)
+            normalises[dim] = min(round((score / max_score) * 100, 1), 100)
 
         return normalises
 
@@ -251,18 +286,25 @@ class ScoringService:
             "ENV": "Vous êtes sensible à l'Environnement : l'agronomie, les énergies renouvelables et le développement durable correspondent à vos valeurs.",
         }
 
-        # Générer l'interprétation
+        # Parse the code into dimension tokens (handles multi-char like "ENV" and dashed codes like "N-ENV-I")
+        if "-" in code_holland:
+            dims = [d.strip() for d in code_holland.split("-") if d.strip()]
+        else:
+            dims = list(code_holland)
+
         lignes = [f"Votre profil d'orientation est : {code_holland}\n"]
+        for dim in dims:
+            if dim in dim_descriptions:
+                score = scores.get(dim, 0)
+                lignes.append(f"\n{dim} ({score}/100) : {dim_descriptions[dim]}")
 
-        for lettre in code_holland:
-            if lettre in dim_descriptions:
-                score = scores.get(lettre, 0)
-                lignes.append(f"\n{lettre} ({score}/100) : {dim_descriptions[lettre]}")
-
-        lignes.append(
-            "\nConseil : Consultez les recommandations ci-dessous pour découvrir "
-            "les formations et métiers les plus compatibles avec votre profil."
-        )
+        if len(lignes) == 1:
+            lignes.append("\nProfil atypique — consultez un conseiller pour une analyse personnalisée.")
+        else:
+            lignes.append(
+                "\nConseil : Consultez les recommandations ci-dessous pour découvrir "
+                "les formations et métiers les plus compatibles avec votre profil."
+            )
 
         return "\n".join(lignes)
 

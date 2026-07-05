@@ -10,8 +10,9 @@ def custom_exception_handler(exc, context):
     response = exception_handler(exc, context)
 
     if response is not None:
-        response.data["status_code"] = response.status_code
-        response.data["error_type"] = exc.__class__.__name__
+        if isinstance(response.data, dict):
+            response.data["status_code"] = response.status_code
+            response.data["error_type"] = exc.__class__.__name__
     else:
         logger.exception("Erreur non gérée dans l'API", exc_info=exc)
         response = Response(

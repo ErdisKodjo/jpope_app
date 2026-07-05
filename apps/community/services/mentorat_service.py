@@ -3,6 +3,7 @@ Service de gestion du mentorat.
 """
 import logging
 from django.db import transaction
+from django.db.models import F
 from django.utils import timezone
 
 logger = logging.getLogger(__name__)
@@ -30,8 +31,8 @@ class MentoratService:
 
         # Mettre à jour le compteur du mentor
         ProfilMentor.objects.filter(pk=relation.mentor.pk).update(
-            nombre_mentores_actuels=models.F("nombre_mentores_actuels") + 1,
-            nombre_mentores_total=models.F("nombre_mentores_total") + 1,
+            nombre_mentores_actuels=F("nombre_mentores_actuels") + 1,
+            nombre_mentores_total=F("nombre_mentores_total") + 1,
         )
 
         logger.info(
@@ -62,7 +63,6 @@ class MentoratService:
     def terminer_relation(cls, relation):
         """Termine une relation de mentorat."""
         from apps.community.models import RelationMentorat, StatutMentorat, ProfilMentor
-        import django.db.models as models
 
         relation.statut = StatutMentorat.TERMINE
         relation.date_fin = timezone.now()
@@ -70,7 +70,7 @@ class MentoratService:
 
         # Décrémenter le compteur du mentor
         ProfilMentor.objects.filter(pk=relation.mentor.pk).update(
-            nombre_mentores_actuels=models.F("nombre_mentores_actuels") - 1,
+            nombre_mentores_actuels=F("nombre_mentores_actuels") - 1,
         )
 
         logger.info(f"Mentorat terminé: {relation.mentor} → {relation.mentoré}")

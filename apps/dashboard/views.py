@@ -9,6 +9,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic import (
     CreateView, DetailView, ListView, TemplateView, UpdateView,
@@ -559,7 +560,10 @@ class ToggleFavoriView(VerifiedAccountMixin, View):
         }
         if type_entite not in field_map:
             messages.error(request, "Type de favori non reconnu.")
-            return redirect(request.META.get("HTTP_REFERER", "/"))
+            next_url = request.META.get("HTTP_REFERER", "/")
+            if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+                next_url = "/"
+            return redirect(next_url)
 
         field_name, model_path = field_map[type_entite]
         app_label, model_name = model_path.split(".")
@@ -569,7 +573,10 @@ class ToggleFavoriView(VerifiedAccountMixin, View):
             entity = get_object_or_404(Model, pk=pk)
         except Exception:
             messages.error(request, "Élément introuvable.")
-            return redirect(request.META.get("HTTP_REFERER", "/"))
+            next_url = request.META.get("HTTP_REFERER", "/")
+            if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+                next_url = "/"
+            return redirect(next_url)
 
         existing = Favori.objects.filter(utilisateur=user, type_entite=type_entite, **{field_name: entity}).first()
         if existing:
@@ -579,7 +586,10 @@ class ToggleFavoriView(VerifiedAccountMixin, View):
             Favori.objects.create(utilisateur=user, type_entite=type_entite, **{field_name: entity})
             messages.success(request, "Ajouté à vos favoris.")
 
-        return redirect(request.META.get("HTTP_REFERER", "/"))
+        next_url = request.META.get("HTTP_REFERER", "/")
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+            next_url = "/"
+        return redirect(next_url)
 
     def get(self, request, type_entite, pk):
         return redirect("dashboard:mes-favoris")

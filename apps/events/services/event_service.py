@@ -68,8 +68,7 @@ class EventService:
 
         # Mettre à jour le compteur si pas en liste d'attente
         if statut == StatutInscription.INSCRIT:
-            evenement.nombre_inscrits += 1
-            evenement.save(update_fields=["nombre_inscrits"])
+            Evenement.objects.filter(pk=evenement.pk).update(nombre_inscrits=F("nombre_inscrits") + 1)
 
         # Créer un événement dans l'agenda personnel de l'utilisateur
         cls._creer_entree_agenda(utilisateur, evenement, inscription)
@@ -161,8 +160,7 @@ class EventService:
         if premier_liste:
             premier_liste.statut = StatutInscription.INSCRIT
             premier_liste.save(update_fields=["statut", "updated_at"])
-            evenement.nombre_inscrits += 1
-            evenement.save(update_fields=["nombre_inscrits"])
+            Evenement.objects.filter(pk=evenement.pk).update(nombre_inscrits=F("nombre_inscrits") + 1)
 
             logger.info(
                 f"Promotion liste attente: {premier_liste.utilisateur.email} "

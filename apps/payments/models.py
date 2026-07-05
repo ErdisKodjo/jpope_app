@@ -84,7 +84,7 @@ class Paiement(models.Model):
         _("montant"),
         max_digits=12,
         decimal_places=2,
-        validators=[MinValueValidator(0)],
+        validators=[MinValueValidator(1)],
     )
     devise = models.CharField(_("devise"), max_length=10, default="XOF")
 
@@ -458,7 +458,7 @@ class Transaction(models.Model):
         )
 
     def save(self, *args, **kwargs):
-        if not self.montant_net and self.montant:
+        if self.montant_net is None and self.montant is not None:
             self.montant_net = self.montant - self.frais_transaction
         super().save(*args, **kwargs)
 
@@ -556,9 +556,20 @@ class Facture(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.numero:
-            today = timezone.now().strftime("%Y%m%d")
             import secrets
-            self.numero = f"FAC-{today}-{secrets.token_hex(4).upper()}"
+            today = timezone.now().strftime("%Y%m%d")
+            for _ in range(5):
+                numero = f"FAC-{today}-{secrets.token_hex(4).upper()}"
+                if not Facture.objects.filter(numero=numero).exists():
+                    self.numero = numero
+                    break
+            else:
+                raise ValueError("Impossible de générer un numéro de facture unique.")
+        # Auto-calcul TVA et TTC
+        recalculate = kwargs.pop("recalculate", True)
+        if recalculate:
+            self.montant_tva = (self.montant_ht * self.taux_tva) / 100
+            self.montant_ttc = self.montant_ht + self.montant_tva - self.remise
         super().save(*args, **kwargs)
 
 
@@ -642,5 +653,11 @@ class RistourneConseiller(models.Model):
         if not self.reference:
             import secrets
             today = timezone.now().strftime("%Y%m%d")
-            self.reference = f"RST-{today}-{secrets.token_hex(3).upper()}"
+            for _ in range(5):
+                ref = f"RST-{today}-{secrets.token_hex(5).upper()}"
+                if not RistourneConseiller.objects.filter(reference=ref).exists():
+                    self.reference = ref
+                    break
+            else:
+                raise ValueError("Impossible de générer une référence unique.")
         super().save(*args, **kwargs)

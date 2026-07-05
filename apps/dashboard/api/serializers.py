@@ -5,15 +5,23 @@ from ..models import Favori, Voeu, DemarcheInscription, EvenementAgenda, Checkli
 class FavoriSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favori
-        fields = "__all__"
-        read_only_fields = ("id", "utilisateur", "created_at")
+        exclude = ("utilisateur",)
+        read_only_fields = ("id", "created_at")
 
 
 class VoeuSerializer(serializers.ModelSerializer):
     class Meta:
         model = Voeu
-        fields = "__all__"
-        read_only_fields = ("id", "utilisateur", "created_at", "updated_at")
+        fields = [
+            "id", "formation", "priorite", "niveau_priorite", "statut",
+            "lettre_motivation", "notes_etudiant", "date_soumission",
+            "date_reponse", "numero_candidature", "commentaire_etablissement",
+            "motif_refus", "est_principal", "created_at", "updated_at",
+        ]
+        read_only_fields = [
+            "id", "date_soumission", "date_reponse", "numero_candidature",
+            "commentaire_etablissement", "motif_refus", "created_at", "updated_at",
+        ]
 
 
 class DemarcheSerializer(serializers.ModelSerializer):

@@ -11,6 +11,7 @@ from .enums import NiveauFormation, ImportanceStrategique, ModaliteFormation
 from .domaine import Domaine
 from .etablissement import Etablissement
 from .metier import Metier
+from ..managers import FormationManager
 
 
 class Formation(models.Model):
@@ -201,6 +202,8 @@ class Formation(models.Model):
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    objects = FormationManager()
 
     class Meta:
         verbose_name = _("formation")

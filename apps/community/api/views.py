@@ -2,6 +2,7 @@
 Vues API pour l'app community.
 """
 from django.db.models import F
+from django.db.functions import Greatest
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -53,17 +54,23 @@ class ForumViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def subscribe(self, request, slug=None):
         forum = self.get_object()
-        AbonnementForum.objects.get_or_create(
+        created, _ = AbonnementForum.objects.get_or_create(
             utilisateur=request.user, forum=forum
         )
+        if created:
+            Forum.objects.filter(pk=forum.pk).update(nombre_abonnes=F("nombre_abonnes") + 1)
         return Response({"message": "Abonnement enregistré."})
 
     @action(detail=True, methods=["post"], permission_classes=[IsAuthenticated])
     def unsubscribe(self, request, slug=None):
         forum = self.get_object()
-        AbonnementForum.objects.filter(
+        deleted, _ = AbonnementForum.objects.filter(
             utilisateur=request.user, forum=forum
         ).delete()
+        if deleted:
+            Forum.objects.filter(pk=forum.pk).update(
+                nombre_abonnes=Greatest(F("nombre_abonnes") - 1, 0)
+            )
         return Response({"message": "Désabonnement enregistré."})
 
 
@@ -211,13 +218,15 @@ class MessageForumLikeView(APIView):
             MessageForum.objects.filter(pk=message.pk).update(
                 nombre_likes=F("nombre_likes") + 1
             )
-            return Response({"liked": True, "nombre_likes": message.nombre_likes + 1})
+            message.refresh_from_db()
+            return Response({"liked": True, "nombre_likes": message.nombre_likes})
         else:
             like.delete()
             MessageForum.objects.filter(pk=message.pk).update(
-                nombre_likes=F("nombre_likes") - 1
+                nombre_likes=Greatest(F("nombre_likes") - 1, 0)
             )
-            return Response({"liked": False, "nombre_likes": max(0, message.nombre_likes - 1)})
+            message.refresh_from_db()
+            return Response({"liked": False, "nombre_likes": message.nombre_likes})
 
 
 # ──────────────────────────────────────────────
@@ -287,12 +296,6 @@ class MentoratViewSet(viewsets.ModelViewSet):
     serializer_class = RelationMentoratSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ["get", "post", "patch", "delete"]
-
-    def get_queryset(self):
-        user = self.request.user
-        return RelationMentorat.objects.filter(
-            models.Q(mentor__utilisateur=user) | models.Q(mentoré=user)
-        ) if hasattr(self, 'request') else RelationMentorat.objects.none()
 
     def get_queryset(self):
         from django.db.models import Q

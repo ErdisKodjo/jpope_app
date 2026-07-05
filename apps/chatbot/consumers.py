@@ -173,7 +173,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         """Sauvegarde le feedback en base de données."""
         from apps.chatbot.models import Message
         try:
-            message = Message.objects.get(id=message_id)
+            message = Message.objects.get(id=message_id, conversation__utilisateur=self.user)
             message.feedbackpositif = (feedback == "positive")
             message.save(update_fields=["feedbackpositif"])
         except Message.DoesNotExist:

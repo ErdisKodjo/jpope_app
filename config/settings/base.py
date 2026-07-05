@@ -244,6 +244,8 @@ CORS_ALLOWED_ORIGINS = os.environ.get(
 ).split(",")
 CORS_ALLOW_CREDENTIALS = True
 
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+
 # ──────────────────────────────────────────────
 # CACHE & SESSIONS (Redis)
 # ──────────────────────────────────────────────
@@ -309,7 +311,16 @@ CHATBOT = {
 # ──────────────────────────────────────────────
 PAYMENTS = {
     "FLOOZ_API_KEY": os.environ.get("FLOOZ_API_KEY", ""),
+    "FLOOZ_API_SECRET": os.environ.get("FLOOZ_API_SECRET", ""),
+    "FLOOZ_MERCHANT_CODE": os.environ.get("FLOOZ_MERCHANT_CODE", ""),
+    "FLOOZ_API_URL": os.environ.get("FLOOZ_API_URL", "https://api.togocom.tg/flooz/v1"),
+    "FLOOZ_CALLBACK_URL": os.environ.get("FLOOZ_CALLBACK_URL", ""),
+    "FLOOZ_MOCK_MODE": os.environ.get("FLOOZ_MOCK_MODE", "True") == "True",
     "TMONEY_API_KEY": os.environ.get("TMONEY_API_KEY", ""),
+    "TMONEY_MERCHANT_ID": os.environ.get("TMONEY_MERCHANT_ID", ""),
+    "TMONEY_API_URL": os.environ.get("TMONEY_API_URL", "https://api.tmoney.tg/v1"),
+    "TMONEY_CALLBACK_URL": os.environ.get("TMONEY_CALLBACK_URL", ""),
+    "TMONEY_MOCK_MODE": os.environ.get("TMONEY_MOCK_MODE", "True") == "True",
     "CURRENCY": "XOF",
 }
 

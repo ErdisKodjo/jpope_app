@@ -100,11 +100,14 @@ class CanViewStudentProfile(BasePermission):
         if request.user.role == UserRole.ADMIN or request.user.is_superuser:
             return True
 
-        # Conseiller
+        # Conseiller — vérifier s'il suit cet étudiant via un accompagnement
         if request.user.role == UserRole.COUNSELOR:
-            # Vérifier si le conseiller suit cet étudiant
-            # (logique à définir selon le modèle de mentorat)
-            return True
+            from apps.orientation.models import DemandeAccompagnement
+            return DemandeAccompagnement.objects.filter(
+                conseiller=request.user,
+                etudiant=obj.user,
+                statut__in=["ACCEPTÉE", "EN_COURS"],
+            ).exists()
 
         # Parent
         if request.user.role == UserRole.PARENT:

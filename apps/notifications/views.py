@@ -3,7 +3,9 @@ Vues web pour l'app notifications.
 """
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.generic import ListView
 
@@ -38,7 +40,8 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
         if notif:
             notif.marquer_comme_lue()
         next_url = request.POST.get("next") or request.META.get("HTTP_REFERER") or "/"
-        from django.shortcuts import redirect
+        if not url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+            next_url = "/"
         return redirect(next_url)
 
 

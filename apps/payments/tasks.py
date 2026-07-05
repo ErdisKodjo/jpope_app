@@ -63,7 +63,18 @@ def verifier_abonnements_expires():
     ).update(statut=StatutAbonnement.EXPIRE)
 
     logger.info(f"{nb_expires} abonnements marqués comme expirés")
-    return nb_expires
+
+    # Also handle expired auto-renew subscriptions
+    nb_auto_expires = Abonnement.objects.filter(
+        statut=StatutAbonnement.ACTIF,
+        date_fin__lte=timezone.now(),
+        renouvellement_auto=True,
+    ).update(statut=StatutAbonnement.EN_RETARD_PAIEMENT)
+
+    if nb_auto_expires:
+        logger.info(f"{nb_auto_expires} abonnements auto-renouvelables en retard de paiement")
+
+    return nb_expires + nb_auto_expires
 
 
 @shared_task(queue="payments")
@@ -120,20 +131,18 @@ def renouveler_abonnements_auto():
         date_fin__gt=timezone.now(),
     ).select_related("utilisateur", "plan")
 
-    nb_renouveles = 0
     for abonnement in abonnements:
         try:
             # TODO: Implémenter le prélèvement automatique
-            logger.info(
-                f"Renouvellement automatique à traiter : "
+            logger.warning(
+                f"Renouvellement automatique NON implémenté : "
                 f"{abonnement.utilisateur.email} — {abonnement.plan.nom}"
             )
-            nb_renouveles += 1
         except Exception as e:
             logger.error(f"Erreur renouvellement auto: {e}")
 
-    logger.info(f"{nb_renouveles} renouvellements traités")
-    return nb_renouveles
+    logger.info(f"{len(abonnements)} renouvellements à traiter (non implémenté)")
+    return 0
 
 
 @shared_task(queue="payments")
@@ -159,13 +168,17 @@ def statistiques_paiements():
 
     aujourdhui = timezone.now().date()
 
-    stats_jour = Paiement.objects.filter(
+    from django.db.models import Sum, Count as DbCount
+
+    agg = Paiement.objects.filter(
         statut="COMPLETED",
         updated_at__date=aujourdhui,
+    ).aggregate(
+        nb_transactions=DbCount("id"),
+        total_fcfa=Sum("montant"),
     )
-
-    nb_transactions = stats_jour.count()
-    total_fcfa = sum(p.montant for p in stats_jour)
+    nb_transactions = agg["nb_transactions"] or 0
+    total_fcfa = agg["total_fcfa"] or 0
 
     logger.info(
         f"Stats paiements aujourd'hui : "

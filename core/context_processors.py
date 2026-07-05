@@ -7,7 +7,7 @@ def global_context(request):
         "PROJECT_NAME": "AvenSU-Orienta",
         "PROJECT_VERSION": "1.0.0",
         "DEBUG": settings.DEBUG,
-        "CHATBOT_ENABLED": bool(settings.CHATBOT.get("OPENAI_API_KEY")),
+        "CHATBOT_ENABLED": bool(getattr(settings, "CHATBOT", {}).get("OPENAI_API_KEY")),
         "unread_notifications_count": 0,
     }
     if request.user.is_authenticated:

@@ -7,6 +7,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 from apps.payments.models import (
     PlanAbonnement, Abonnement, Paiement, Facture,
 )
@@ -42,13 +46,13 @@ class PlanAbonnementViewSet(viewsets.ReadOnlyModelViewSet):
         """Plans mis en avant."""
         plans = PlanAbonnement.objects.filter(
             is_active=True, is_public=True, is_featured=True
-        )
+        ).order_by("ordre", "prix_fcfa")
         return Response(PlanAbonnementSerializer(plans, many=True).data)
 
     @action(detail=False, methods=["get"])
     def par_type(self, request):
         """Plans groupés par type."""
-        types = ["ETUDIANT", "CONSEILLER", "ETABLISSEMENT"]
+        types = [t[0] for t in PlanAbonnement.TYPE_CHOICES]
         result = {}
         for type_ab in types:
             plans = PlanAbonnement.objects.filter(
@@ -103,6 +107,10 @@ class InitierPaiementView(APIView):
 
         data = serializer.validated_data
 
+        # Get real client IP
+        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+        client_ip = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.META.get("REMOTE_ADDR", "")
+
         try:
             result = PaymentService.initier_paiement(
                 utilisateur=request.user,
@@ -110,7 +118,7 @@ class InitierPaiementView(APIView):
                 methode_paiement=data["methode_paiement"],
                 telephone=data.get("telephone", ""),
                 metadata={
-                    "ip": request.META.get("REMOTE_ADDR", ""),
+                    "ip": client_ip,
                     "user_agent": request.META.get("HTTP_USER_AGENT", "")[:200],
                     "payment_method_id": data.get("payment_method_id", ""),
                 },
@@ -123,6 +131,7 @@ class InitierPaiementView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
+            logger.exception(f"Erreur initiation paiement: {e}")
             return Response(
                 {"error": "Erreur lors de l'initiation du paiement."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -138,6 +147,22 @@ class VerifierStatutView(APIView):
         serializer.is_valid(raise_exception=True)
 
         reference = serializer.validated_data["reference"]
+
+        try:
+            from apps.payments.models import Paiement
+            paiement = Paiement.objects.get(reference=reference)
+        except Paiement.DoesNotExist:
+            return Response(
+                {"error": "Transaction introuvable."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        # Vérification de propriété
+        if paiement.user != request.user and not request.user.is_staff:
+            return Response(
+                {"error": "Accès non autorisé."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
 
         try:
             result = PaymentService.verifier_statut(reference)

@@ -7,6 +7,7 @@ from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
 from apps.analytics.models import (
@@ -24,6 +25,7 @@ from .serializers import (
 class TrackPageViewAPIView(APIView):
     """Endpoint de tracking côté client (page views)."""
     permission_classes = []
+    throttle_classes = [AnonRateThrottle]
 
     def post(self, request):
         serializer = TrackPageViewSerializer(data=request.data)

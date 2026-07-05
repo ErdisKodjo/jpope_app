@@ -33,6 +33,11 @@ class EvenementViewSet(viewsets.ModelViewSet):
     ordering = ["-date_debut"]
     lookup_field = "slug"
 
+    def get_permissions(self):
+        if self.action in ("create", "update", "partial_update", "destroy"):
+            return [IsAuthenticated()]
+        return [AllowAny()]
+
     def get_queryset(self):
         qs = super().get_queryset()
 
@@ -300,6 +305,12 @@ class CheckinView(APIView):
         inscription = EventService.checkin_inscription(qr_token)
 
         if inscription:
+            # Verify the requesting user is the event organizer or admin/staff
+            if not (request.user == inscription.evenement.createur or request.user.is_staff or request.user.role == "ADMIN"):
+                return Response(
+                    {"error": "Seul l'organisateur ou un admin peut effectuer le check-in."},
+                    status=status.HTTP_403_FORBIDDEN,
+                )
             return Response({
                 "message": f"Bienvenue {inscription.utilisateur.get_full_name()} !",
                 "utilisateur": {
