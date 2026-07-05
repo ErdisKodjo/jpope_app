@@ -15,6 +15,7 @@ from apps.payments.models import (
     PlanAbonnement, Abonnement, Paiement, Facture,
 )
 from apps.payments.services import PaymentService
+from core.utils import get_client_ip
 
 from .serializers import (
     PlanAbonnementSerializer,
@@ -107,9 +108,7 @@ class InitierPaiementView(APIView):
 
         data = serializer.validated_data
 
-        # Get real client IP
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        client_ip = x_forwarded_for.split(",")[0].strip() if x_forwarded_for else request.META.get("REMOTE_ADDR", "")
+        client_ip = get_client_ip(request)
 
         try:
             result = PaymentService.initier_paiement(

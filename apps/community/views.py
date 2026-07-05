@@ -10,18 +10,11 @@ from django.urls import reverse
 from django.utils import timezone
 from django.views.generic import CreateView, DetailView, ListView, View
 
+from core.utils import notify_silent as _notify
 from .forms import MessageForm, ThreadForm
 from .models import Forum, LikeMessageForum, MessageForum, Thread
 
 logger = logging.getLogger(__name__)
-
-
-def _notify(user, titre, message, type_notif="INFO", action_url=""):
-    try:
-        from apps.notifications.utils import notify
-        notify(user=user, titre=titre, message=message, type_notif=type_notif, action_url=action_url)
-    except Exception:
-        pass
 
 
 class ForumListView(ListView):

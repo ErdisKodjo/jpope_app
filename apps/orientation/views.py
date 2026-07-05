@@ -6,14 +6,15 @@ import logging
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseNotAllowed
 from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import ListView, DetailView, TemplateView, FormView, CreateView
 
-from apps.accounts.mixins import VerifiedAccountMixin, CounselorOrAdminMixin, CounselorRequiredMixin, AdminRequiredMixin
+from apps.accounts.mixins import VerifiedAccountMixin, CounselorOrAdminMixin, CounselorRequiredMixin, AdminRequiredMixin, StudentRequiredMixin
+from core.utils import notify_silent as _notify
+from core.views import PostOnlyMixin
 from .models import (
     TestOrientation, ResultatTest, Recommandation, StatutTest,
     ReponseUtilisateur, DetailReponse, Question, Choice,
@@ -28,15 +29,6 @@ from .forms import (
 from .services.scoring_service import ScoringService
 
 logger = logging.getLogger(__name__)
-
-
-def _notify(user, titre, message, type_notif="INFO", action_url=""):
-    """Wrapper silencieux pour les notifications in-app."""
-    try:
-        from apps.notifications.utils import notify
-        notify(user=user, titre=titre, message=message, type_notif=type_notif, action_url=action_url)
-    except Exception:
-        pass
 
 
 class OrientationHomeView(TemplateView):
@@ -217,7 +209,7 @@ class TakeTestView(VerifiedAccountMixin, DetailView):
         return self.render_to_response(ctx)
 
 
-class SubmitTestView(VerifiedAccountMixin, View):
+class SubmitTestView(PostOnlyMixin, VerifiedAccountMixin, View):
     """Traite la soumission des réponses d'un test."""
 
     def post(self, request, slug):
@@ -290,16 +282,8 @@ class SubmitTestView(VerifiedAccountMixin, View):
             resultat = ScoringService.calculer_resultat(str(session.id))
 
             # Generate recommendations
-            from apps.orientation.services.recommendation_engine import RecommendationEngine
-            try:
-                profile = getattr(request.user, "student_profile", None)
-                RecommendationEngine.generer_recommandations(
-                    resultat=resultat,
-                    budget_max=profile.budget_max_annuel if profile else None,
-                    villes_preferees=profile.villes_preferees if profile else None,
-                )
-            except Exception as rec_exc:
-                logger.error(f"Erreur génération recommandations: {rec_exc}")
+            from apps.orientation.services.recommendation_utils import generate_recommendations_for_resultat
+            generate_recommendations_for_resultat(resultat, user=request.user)
 
             messages.success(request, "Test terminé ! Voici vos résultats.")
             return redirect("orientation:resultat-detail", pk=resultat.pk)
@@ -308,24 +292,17 @@ class SubmitTestView(VerifiedAccountMixin, View):
             messages.error(request, "Une erreur est survenue lors du calcul. Réessayez.")
             return redirect("orientation:test-detail", slug=slug)
 
-    def get(self, request, slug):
-        return HttpResponseNotAllowed(["POST"])
-
 
 # ─────────────────────────────────────────────────────────────────
 # PHASE 2 — ACCOMPAGNEMENT CONSEILLER
 # ─────────────────────────────────────────────────────────────────
 
-class DemandeAccompagnementCreateView(VerifiedAccountMixin, FormView):
+class DemandeAccompagnementCreateView(StudentRequiredMixin, VerifiedAccountMixin, FormView):
     """Étudiant crée une demande d'accompagnement."""
     template_name = "orientation/accompagnement_create.html"
     form_class = DemandeAccompagnementForm
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and not request.user.is_student:
-            messages.error(request, _("Seuls les étudiants peuvent demander un accompagnement."))
-            return redirect("orientation:home")
-        return super().dispatch(request, *args, **kwargs)
+    student_denied_url = "orientation:home"
+    student_denied_message = _("Seuls les étudiants peuvent demander un accompagnement.")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -417,7 +394,7 @@ class DemandeDetailView(VerifiedAccountMixin, DetailView):
         return ctx
 
 
-class EnvoyerMessageView(VerifiedAccountMixin, View):
+class EnvoyerMessageView(PostOnlyMixin, VerifiedAccountMixin, View):
     """Envoie un message dans une session d'accompagnement."""
 
     def post(self, request, pk):
@@ -451,11 +428,8 @@ class EnvoyerMessageView(VerifiedAccountMixin, View):
                 )
         return redirect("orientation:demande-detail", pk=pk)
 
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
-
-class EvaluerConseillerView(VerifiedAccountMixin, View):
+class EvaluerConseillerView(PostOnlyMixin, VerifiedAccountMixin, View):
     """L'étudiant évalue le conseiller et clôture la demande."""
 
     def post(self, request, pk):
@@ -537,9 +511,6 @@ class EvaluerConseillerView(VerifiedAccountMixin, View):
         except Exception as exc:
             logger.warning("Erreur génération ristourne: %s", exc)
 
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
-
 
 # ─────────────────────────────────────────────────────────────────
 # PHASE 2 — VUES CONSEILLERS
@@ -571,7 +542,7 @@ class DemandesConseillerView(CounselorRequiredMixin, ListView):
         return ctx
 
 
-class AccepterDemandeView(CounselorRequiredMixin, View):
+class AccepterDemandeView(PostOnlyMixin, CounselorRequiredMixin, View):
     """Le conseiller accepte une demande d'accompagnement."""
 
     def post(self, request, pk):
@@ -601,11 +572,8 @@ class AccepterDemandeView(CounselorRequiredMixin, View):
             messages.success(request, _("Demande acceptée. Vous pouvez maintenant échanger avec l'étudiant."))
         return redirect("orientation:demande-detail", pk=pk)
 
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
-
-class RefuserDemandeView(CounselorRequiredMixin, View):
+class RefuserDemandeView(PostOnlyMixin, CounselorRequiredMixin, View):
     """Le conseiller refuse une demande d'accompagnement."""
 
     def post(self, request, pk):
@@ -626,9 +594,6 @@ class RefuserDemandeView(CounselorRequiredMixin, View):
             )
             messages.info(request, _("Demande refusée."))
         return redirect("orientation:conseiller-demandes")
-
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
 
 class QuestionProposerView(CounselorRequiredMixin, FormView):
@@ -686,7 +651,7 @@ class AdminQuestionsProposees(AdminRequiredMixin, ListView):
         return ctx
 
 
-class AdminApprouverQuestion(AdminRequiredMixin, View):
+class AdminApprouverQuestion(PostOnlyMixin, AdminRequiredMixin, View):
     """Admin approuve une question proposée et la crée dans le test cible."""
 
     def post(self, request, pk):
@@ -731,11 +696,8 @@ class AdminApprouverQuestion(AdminRequiredMixin, View):
         ))
         return redirect("orientation:admin-questions-proposees")
 
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
-
-class AdminRejeterQuestion(AdminRequiredMixin, View):
+class AdminRejeterQuestion(PostOnlyMixin, AdminRequiredMixin, View):
     """Admin rejette une question proposée."""
 
     def post(self, request, pk):
@@ -756,9 +718,6 @@ class AdminRejeterQuestion(AdminRequiredMixin, View):
             )
             messages.info(request, _("Question rejetée."))
         return redirect("orientation:admin-questions-proposees")
-
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
 
 class AdminRistournesView(AdminRequiredMixin, ListView):
@@ -789,7 +748,7 @@ class AdminRistournesView(AdminRequiredMixin, ListView):
         return ctx
 
 
-class AdminPayerRistourneView(AdminRequiredMixin, View):
+class AdminPayerRistourneView(PostOnlyMixin, AdminRequiredMixin, View):
     """Admin marque une ristourne comme payée."""
 
     def post(self, request, pk):
@@ -816,9 +775,6 @@ class AdminPayerRistourneView(AdminRequiredMixin, View):
         )
         messages.success(request, _(f"Ristourne {ristourne.reference} marquée comme payée."))
         return redirect("orientation:admin-ristournes")
-
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
 
 def models_max(field):
@@ -898,7 +854,7 @@ class MesRendezVousView(VerifiedAccountMixin, View):
         })
 
 
-class ProposerRendezVousView(VerifiedAccountMixin, View):
+class ProposerRendezVousView(PostOnlyMixin, VerifiedAccountMixin, View):
     """Propose un nouveau créneau RDV dans une session d'accompagnement active."""
 
     def post(self, request, pk):
@@ -934,11 +890,8 @@ class ProposerRendezVousView(VerifiedAccountMixin, View):
 
         return redirect("orientation:demande-detail", pk=pk)
 
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
-
-class ConfirmerRendezVousView(VerifiedAccountMixin, View):
+class ConfirmerRendezVousView(PostOnlyMixin, VerifiedAccountMixin, View):
     """L'autre partie confirme un RDV proposé."""
 
     def post(self, request, pk):
@@ -966,11 +919,8 @@ class ConfirmerRendezVousView(VerifiedAccountMixin, View):
         messages.success(request, _("Rendez-vous confirmé !"))
         return redirect("orientation:demande-detail", pk=demande.pk)
 
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])
 
-
-class AnnulerRendezVousView(VerifiedAccountMixin, View):
+class AnnulerRendezVousView(PostOnlyMixin, VerifiedAccountMixin, View):
     """Annuler un RDV (l'un ou l'autre des participants)."""
 
     def post(self, request, pk):
@@ -1000,6 +950,3 @@ class AnnulerRendezVousView(VerifiedAccountMixin, View):
             )
         messages.info(request, _("Rendez-vous annulé."))
         return redirect("orientation:demande-detail", pk=demande.pk)
-
-    def get(self, request, pk):
-        return HttpResponseNotAllowed(["POST"])

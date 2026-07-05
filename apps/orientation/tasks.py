@@ -12,35 +12,18 @@ def calculer_resultat_et_recommandations(reponse_id: str):
     """
     Tâche asynchrone : calcule le résultat d'un test puis génère les recommandations.
     """
-    from apps.orientation.services import ScoringService, RecommendationEngine
+    from apps.orientation.services import ScoringService
     from apps.orientation.models import ReponseUtilisateur
 
     try:
         # 1. Calculer le résultat
         resultat = ScoringService.calculer_resultat(reponse_id)
 
-        # 2. Récupérer les préférences de l'étudiant
-        reponse = ReponseUtilisateur.objects.select_related(
-            "etudiant__student_profile"
-        ).get(id=reponse_id)
+        # 2. Générer les recommandations (shared helper handles profile extraction)
+        from apps.orientation.services.recommendation_utils import generate_recommendations_for_resultat
+        recommandations = generate_recommendations_for_resultat(resultat) or []
 
-        profile = getattr(reponse.etudiant, "student_profile", None)
-        budget_max = None
-        villes_preferees = None
-
-        if profile:
-            budget_max = (
-                int(profile.budget_max_annuel) if profile.budget_max_annuel else None
-            )
-            villes_preferees = profile.villes_preferees or None
-
-        # 3. Générer les recommandations
-        recommandations = RecommendationEngine.generer_recommandations(
-            resultat=resultat,
-            budget_max=budget_max,
-            villes_preferees=villes_preferees,
-        )
-
+        reponse = ReponseUtilisateur.objects.select_related("etudiant").get(id=reponse_id)
         logger.info(
             f"Test traité : {reponse.etudiant.email} -> "
             f"{len(recommandations)} recommandations"
