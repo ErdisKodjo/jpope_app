@@ -2,9 +2,10 @@
 Service T-Money — paiements Mobile Money Togo.
 """
 import logging
-import re
 
 from django.conf import settings
+
+from .utils import normaliser_telephone
 
 logger = logging.getLogger(__name__)
 
@@ -19,23 +20,19 @@ class TMoneyService:
         return getattr(settings, "PAYMENTS", {})
 
     @classmethod
-    @property
-    def API_URL(cls):
+    def _get_api_url(cls):
         return cls._get_settings().get("TMONEY_API_URL", "https://api.tmoney.tg/v1")
 
     @classmethod
-    @property
-    def API_KEY(cls):
+    def _get_api_key(cls):
         return cls._get_settings().get("TMONEY_API_KEY", "")
 
     @classmethod
-    @property
-    def MERCHANT_ID(cls):
+    def _get_merchant_id(cls):
         return cls._get_settings().get("TMONEY_MERCHANT_ID", "")
 
     @classmethod
-    @property
-    def MOCK_MODE(cls):
+    def _is_mock_mode(cls):
         return cls._get_settings().get("TMONEY_MOCK_MODE", False)
 
     @classmethod
@@ -46,9 +43,9 @@ class TMoneyService:
         Returns:
             dict avec code_ussd, telephone, message
         """
-        telephone_normalized = cls._normaliser_telephone(telephone)
+        telephone_normalized = normaliser_telephone(telephone)
 
-        if cls.MOCK_MODE or not cls.API_KEY:
+        if cls._is_mock_mode() or not cls._get_api_key():
             return cls._mock_paiement(paiement, telephone_normalized)
 
         try:
@@ -60,14 +57,14 @@ class TMoneyService:
     @classmethod
     def verifier_statut(cls, reference: str) -> dict:
         """Vérifie le statut d'une transaction T-Money."""
-        if cls.MOCK_MODE or not cls.API_KEY:
+        if cls._is_mock_mode() or not cls._get_api_key():
             return {"statut": "PENDING", "message": "Mode mock actif"}
 
         try:
             import requests
             response = requests.get(
-                f"{cls.API_URL}/transactions/{reference}",
-                headers={"X-API-Key": cls.API_KEY},
+                f"{cls._get_api_url()}/transactions/{reference}",
+                headers={"X-API-Key": cls._get_api_key()},
                 timeout=10,
             )
             if response.status_code == 200:
@@ -88,20 +85,20 @@ class TMoneyService:
         import requests
 
         payload = {
-            "merchant_id": cls.MERCHANT_ID,
+            "merchant_id": cls._get_merchant_id(),
             "msisdn": telephone,
             "amount": int(paiement.montant),
             "currency": "XOF",
             "order_id": paiement.reference,
             "description": paiement.description or "Abonnement AvenSU-Orienta",
-            "callback_url": getattr(settings, "TMONEY_CALLBACK_URL", ""),
+            "callback_url": cls._get_settings().get("TMONEY_CALLBACK_URL", ""),
         }
 
         response = requests.post(
-            f"{cls.API_URL}/payment/request",
+            f"{cls._get_api_url()}/payment/request",
             json=payload,
             headers={
-                "X-API-Key": cls.API_KEY,
+                "X-API-Key": cls._get_api_key(),
                 "Content-Type": "application/json",
             },
             timeout=30,
@@ -139,27 +136,6 @@ class TMoneyService:
                 f"pour confirmer le paiement de {int(paiement.montant)} XOF."
             ),
         }
-
-    @classmethod
-    def _normaliser_telephone(cls, telephone: str) -> str:
-        """Normalise un numéro au format international (+228XXXXXXXX)."""
-        # Remove all non-digit characters except leading +
-        cleaned = re.sub(r"[\s\-\.\(\)]", "", telephone)
-        if cleaned.startswith("+"):
-            cleaned_digits = cleaned[1:]
-        else:
-            cleaned_digits = cleaned
-
-        if cleaned_digits.startswith("00228"):
-            return "+228" + cleaned_digits[5:]
-        if cleaned_digits.startswith("228"):
-            return "+228" + cleaned_digits[3:]
-        if cleaned_digits.startswith("0"):
-            return "+228" + cleaned_digits[1:]
-        if len(cleaned_digits) == 8 and cleaned_digits.isdigit():
-            return "+228" + cleaned_digits
-        # Already international format
-        return "+" + cleaned_digits
 
     @staticmethod
     def _mapper_statut(statut_api: str) -> str:

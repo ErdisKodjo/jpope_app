@@ -86,9 +86,9 @@ class AuthService:
 
         # Générer un token
         token = secrets.token_urlsafe(32)
-        user.email_verification_token = token
-        user.email_verification_token_expires = timezone.now() + timedelta(hours=1)
-        user.save(update_fields=["email_verification_token", "email_verification_token_expires"])
+        user.password_reset_token = token
+        user.password_reset_token_expires = timezone.now() + timedelta(hours=1)
+        user.save(update_fields=["password_reset_token", "password_reset_token_expires"])
 
         frontend_url = getattr(settings, "FRONTEND_URL", "")
         reset_url = f"{frontend_url}/reset-password?token={token}" if frontend_url else ""
@@ -116,15 +116,15 @@ class AuthService:
     def reset_password_with_token(token, new_password):
         """Réinitialise le mot de passe avec un token."""
         try:
-            user = User.objects.get(email_verification_token=token)
+            user = User.objects.get(password_reset_token=token)
         except User.DoesNotExist:
             return False
 
-        if user.email_verification_token_expires < timezone.now():
+        if user.password_reset_token_expires < timezone.now():
             return False
 
         user.set_password(new_password)
-        user.email_verification_token = None
-        user.email_verification_token_expires = None
+        user.password_reset_token = None
+        user.password_reset_token_expires = None
         user.save()
         return True

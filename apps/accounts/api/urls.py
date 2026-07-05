@@ -19,6 +19,7 @@ urlpatterns = [
     path("auth/refresh/", views.CustomTokenRefreshView.as_view(), name="token_refresh"),
     path("auth/password/reset/", views.PasswordResetRequestView.as_view(), name="password_reset"),
     path("auth/email/verify/", views.EmailVerificationView.as_view(), name="email_verify"),
+    path("auth/password/reset/confirm/", views.PasswordResetConfirmView.as_view(), name="password_reset_confirm"),
 
     # Utilisateur courant
     path("me/", views.CurrentUserView.as_view(), name="current_user"),

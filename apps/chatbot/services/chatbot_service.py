@@ -79,7 +79,7 @@ class ChatbotService:
         )
 
         # 2. Construire l'historique pour le LLM
-        historique = self._construire_historique(conversation)
+        historique = self._construire_historique(conversation, limit=10, user_msg_pk=msg_user.pk)
 
         # 3. Appeler le LLM
         try:
@@ -136,7 +136,7 @@ class ChatbotService:
 
         return msg_assistant
 
-    def _construire_historique(self, conversation: Conversation, limit: int = 10) -> list:
+    def _construire_historique(self, conversation: Conversation, limit: int = 10, user_msg_pk=None) -> list:
         """
         Construit l'historique de la conversation pour le LLM.
         """
@@ -154,12 +154,13 @@ class ChatbotService:
                 messages[0]["content"] += f"\n\n{contexte}"
 
         # Historique des messages (limité aux N derniers)
-        historique_db = list(
-            Message.objects.filter(
-                conversation=conversation,
-                role__in=[RoleMessage.USER, RoleMessage.ASSISTANT],
-            ).order_by("-created_at")[:limit]
+        qs = Message.objects.filter(
+            conversation=conversation,
+            role__in=[RoleMessage.USER, RoleMessage.ASSISTANT],
         )
+        if user_msg_pk:
+            qs = qs.exclude(pk=user_msg_pk)
+        historique_db = list(qs.order_by("-created_at")[:limit])
         historique_db.reverse()
 
         for msg in historique_db:

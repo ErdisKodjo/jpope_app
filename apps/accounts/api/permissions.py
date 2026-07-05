@@ -46,6 +46,16 @@ class IsSchoolRep(BasePermission):
         )
 
 
+class IsParent(BasePermission):
+    """Réservé aux parents/tuteurs."""
+
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.role == UserRole.PARENT
+        )
+
+
 class IsAdminRole(BasePermission):
     """Réservé aux administrateurs."""
 

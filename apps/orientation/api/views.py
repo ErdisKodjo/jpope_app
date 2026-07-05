@@ -354,14 +354,13 @@ class EvolutionProfilView(APIView):
 
 class OrientationStatsView(APIView):
     """Statistiques globales de l'orientation (admin/conseiller)."""
-    from rest_framework.permissions import IsAdminUser
+    permission_classes = [IsAuthenticated]
 
     def check_permissions(self, request):
-        # Allow admins and counselors (is_staff or has counselor profile)
+        from apps.accounts.models.enums import UserRole
         if request.user and (request.user.is_staff or request.user.is_superuser):
             return
-        profile = getattr(request.user, 'counselor_profile', None)
-        if profile:
+        if request.user.role == UserRole.COUNSELOR:
             return
         from rest_framework.exceptions import PermissionDenied
         raise PermissionDenied()

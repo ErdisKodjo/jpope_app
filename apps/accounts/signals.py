@@ -30,11 +30,3 @@ def create_user_profile(sender, instance, created, **kwargs):
                 logging.getLogger(__name__).error(
                     f"Erreur création profil pour {instance.email}: {e}"
                 )
-
-
-@receiver(post_save, sender=User)
-def save_user_profile(sender, instance, **kwargs):
-    """Sauvegarde le profil associé si existant."""
-    profile = instance.profile
-    if profile:
-        profile.save()

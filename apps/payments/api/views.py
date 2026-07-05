@@ -194,3 +194,49 @@ class FactureListView(generics.ListAPIView):
         return Facture.objects.filter(
             utilisateur=self.request.user
         ).order_by("-date_emission")
+
+
+class PaymentCallbackView(APIView):
+    """Endpoint de callback pour les paiements Mobile Money (Flooz/TMoney)."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        import json
+        try:
+            data = json.loads(request.body) if isinstance(request.body, bytes) else request.data
+        except Exception:
+            data = request.data
+
+        reference = data.get("reference") or data.get("order_id")
+        transaction_id = data.get("transaction_id", "")
+        statut = data.get("status", "")
+
+        if not reference:
+            return Response(
+                {"error": "Référence manquante."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        statut_mappe = "PENDING"
+        if str(statut).upper() in ["SUCCESSFUL", "SUCCESS", "COMPLETED", "CONFIRMED"]:
+            statut_mappe = "COMPLETED"
+        elif str(statut).upper() in ["FAILED", "TIMEOUT", "EXPIRED", "CANCELLED"]:
+            statut_mappe = "FAILED"
+
+        try:
+            if statut_mappe == "COMPLETED":
+                PaymentService.confirmer_paiement(reference, transaction_id)
+                logger.info(f"Callback paiement confirmé : {reference}")
+            elif statut_mappe == "FAILED":
+                PaymentService.annuler_paiement(reference, f"Callback provider: {statut}")
+                logger.info(f"Callback paiement échoué : {reference}")
+            else:
+                success = True
+
+            return Response({"status": "ok", "reference": reference})
+        except Exception as e:
+            logger.error(f"Erreur callback paiement {reference}: {e}")
+            return Response(
+                {"error": "Erreur de traitement."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

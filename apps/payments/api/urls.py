@@ -54,4 +54,11 @@ urlpatterns = [
         views.FactureListView.as_view(),
         name="factures-list",
     ),
+
+    # Callback Mobile Money (Flooz/TMoney)
+    path(
+        "callback/mobile-money/",
+        views.PaymentCallbackView.as_view(),
+        name="payment-callback",
+    ),
 ]

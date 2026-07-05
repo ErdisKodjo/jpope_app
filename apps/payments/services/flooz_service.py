@@ -2,9 +2,10 @@
 Service Flooz (Togocom) — paiements Mobile Money Togo.
 """
 import logging
-import re
 
 from django.conf import settings
+
+from .utils import normaliser_telephone
 
 logger = logging.getLogger(__name__)
 
@@ -20,28 +21,23 @@ class FloozService:
         return getattr(settings, "PAYMENTS", {})
 
     @classmethod
-    @property
-    def API_URL(cls):
+    def _get_api_url(cls):
         return cls._get_settings().get("FLOOZ_API_URL", "https://api.togocom.tg/flooz/v1")
 
     @classmethod
-    @property
-    def API_KEY(cls):
+    def _get_api_key(cls):
         return cls._get_settings().get("FLOOZ_API_KEY", "")
 
     @classmethod
-    @property
-    def API_SECRET(cls):
+    def _get_api_secret(cls):
         return cls._get_settings().get("FLOOZ_API_SECRET", "")
 
     @classmethod
-    @property
-    def MERCHANT_CODE(cls):
+    def _get_merchant_code(cls):
         return cls._get_settings().get("FLOOZ_MERCHANT_CODE", "")
 
     @classmethod
-    @property
-    def MOCK_MODE(cls):
+    def _is_mock_mode(cls):
         return cls._get_settings().get("FLOOZ_MOCK_MODE", False)
 
     @classmethod
@@ -52,9 +48,9 @@ class FloozService:
         Returns:
             dict avec code_ussd, telephone, message
         """
-        telephone_normalized = cls._normaliser_telephone(telephone)
+        telephone_normalized = normaliser_telephone(telephone)
 
-        if cls.MOCK_MODE or not cls.API_KEY:
+        if cls._is_mock_mode() or not cls._get_api_key():
             return cls._mock_paiement(paiement, telephone_normalized)
 
         try:
@@ -67,14 +63,14 @@ class FloozService:
     @classmethod
     def verifier_statut(cls, reference: str) -> dict:
         """Vérifie le statut d'une transaction Flooz."""
-        if cls.MOCK_MODE or not cls.API_KEY:
+        if cls._is_mock_mode() or not cls._get_api_key():
             return {"statut": "PENDING", "message": "Mode mock actif"}
 
         try:
             import requests
             response = requests.get(
-                f"{cls.API_URL}/transactions/{reference}",
-                headers={"Authorization": f"Bearer {cls.API_KEY}"},
+                f"{cls._get_api_url()}/transactions/{reference}",
+                headers={"Authorization": f"Bearer {cls._get_api_key()}"},
                 timeout=10,
             )
             if response.status_code == 200:
@@ -95,20 +91,20 @@ class FloozService:
         import requests
 
         payload = {
-            "merchant_code": cls.MERCHANT_CODE,
+            "merchant_code": cls._get_merchant_code(),
             "phone": telephone,
             "amount": int(paiement.montant),
             "currency": paiement.devise,
             "reference": paiement.reference,
             "description": paiement.description or "Abonnement AvenSU-Orienta",
-            "callback_url": getattr(settings, "FLOOZ_CALLBACK_URL", ""),
+            "callback_url": cls._get_settings().get("FLOOZ_CALLBACK_URL", ""),
         }
 
         response = requests.post(
-            f"{cls.API_URL}/payments/initiate",
+            f"{cls._get_api_url()}/payments/initiate",
             json=payload,
             headers={
-                "Authorization": f"Bearer {cls.API_KEY}",
+                "Authorization": f"Bearer {cls._get_api_key()}",
                 "Content-Type": "application/json",
             },
             timeout=30,
@@ -143,27 +139,6 @@ class FloozService:
                 f"pour confirmer le paiement de {int(paiement.montant)} XOF."
             ),
         }
-
-    @classmethod
-    def _normaliser_telephone(cls, telephone: str) -> str:
-        """Normalise un numéro au format international (+228XXXXXXXX)."""
-        # Remove all non-digit characters except leading +
-        cleaned = re.sub(r"[\s\-\.\(\)]", "", telephone)
-        if cleaned.startswith("+"):
-            cleaned_digits = cleaned[1:]
-        else:
-            cleaned_digits = cleaned
-
-        if cleaned_digits.startswith("00228"):
-            return "+228" + cleaned_digits[5:]
-        if cleaned_digits.startswith("228"):
-            return "+228" + cleaned_digits[3:]
-        if cleaned_digits.startswith("0"):
-            return "+228" + cleaned_digits[1:]
-        if len(cleaned_digits) == 8 and cleaned_digits.isdigit():
-            return "+228" + cleaned_digits
-        # Already international format
-        return "+" + cleaned_digits
 
     @staticmethod
     def _mapper_statut(statut_api: str) -> str:

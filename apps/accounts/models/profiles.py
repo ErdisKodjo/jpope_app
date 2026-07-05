@@ -29,7 +29,7 @@ class StudentProfile(models.Model):
         _("année du bac"),
         blank=True,
         null=True,
-        validators=[MinValueValidator(2000), MaxValueValidator(2030)],
+        validators=[MinValueValidator(2000), MaxValueValidator(2040)],
     )
     moyenne_generale = models.DecimalField(
         _("moyenne générale"),

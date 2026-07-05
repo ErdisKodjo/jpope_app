@@ -192,13 +192,13 @@ class StudentProfileUpdateSerializer(serializers.ModelSerializer):
 
 
 class CounselorProfileSerializer(serializers.ModelSerializer):
-    """Serializer du profil conseiller."""
+    """Serializer du profil conseiller (données financières masquées)."""
     user = UserMinimalSerializer(read_only=True)
 
     class Meta:
         model = CounselorProfile
-        fields = "__all__"
-        read_only_fields = ["user", "created_at", "updated_at"]
+        exclude = ["solde_ristournes"]
+        read_only_fields = ["user", "created_at", "updated_at", "taux_ristourne"]
 
 
 class SchoolRepProfileSerializer(serializers.ModelSerializer):
@@ -265,6 +265,12 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {"new_password_confirm": _("Les mots de passe ne correspondent pas.")}
             )
+
+        try:
+            validate_password(attrs["new_password"])
+        except DjangoValidationError as e:
+            raise serializers.ValidationError({"new_password": list(e.messages)})
+
         return attrs
 
 

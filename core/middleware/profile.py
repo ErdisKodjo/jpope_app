@@ -5,11 +5,11 @@ from django.urls import reverse, NoReverseMatch
 class ProfileCompletionMiddleware:
     """Redirige vers la complétion du profil si incomplet."""
 
-    EXEMPT_PATHS = ["/admin/", "/api/", "/static/", "/media/", "/__reload__/", "/__debug__/", "/silk/", "/ws/"]
-    EXEMPT_NAMES = ["accounts:logout", "accounts:profile_edit", "accounts:login", "accounts:register"]
+    EXEMPT_PATHS = ["/admin/", "/api/", "/static/", "/media/", "/__reload__/", "/__debug__/", "/silk/", "/ws/", "/i18n/"]
 
     def __init__(self, get_response):
         self.get_response = get_response
+        self._exempt_urls_cache = None
 
     def __call__(self, request):
         if request.user.is_authenticated and not self._is_exempt(request):
@@ -20,19 +20,27 @@ class ProfileCompletionMiddleware:
                     pass
         return self.get_response(request)
 
+    def _get_exempt_urls(self):
+        """Calcule et cache les URLs nommées une seule fois."""
+        if self._exempt_urls_cache is not None:
+            return self._exempt_urls_cache
+
+        urls = []
+        for name in ["accounts:logout", "accounts:profile_edit", "accounts:login", "accounts:register"]:
+            try:
+                urls.append(reverse(name))
+            except NoReverseMatch:
+                pass
+        self._exempt_urls_cache = urls
+        return urls
+
     def _is_exempt(self, request):
-        # Check path prefixes
         for prefix in self.EXEMPT_PATHS:
             if request.path.startswith(prefix):
                 return True
-        # Check named URLs
-        for name in self.EXEMPT_NAMES:
-            try:
-                url = reverse(name)
-                if request.path.startswith(url):
-                    return True
-            except NoReverseMatch:
-                pass
+        for url in self._get_exempt_urls():
+            if request.path.startswith(url):
+                return True
         return False
 
     def _profile_complete(self, user):

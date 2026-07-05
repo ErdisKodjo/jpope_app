@@ -96,6 +96,17 @@ class User(AbstractUser):
         null=True,
     )
 
+    # Token de réinitialisation de mot de passe (séparé du token email)
+    password_reset_token = models.CharField(
+        max_length=255,
+        blank=True,
+        null=True,
+    )
+    password_reset_token_expires = models.DateTimeField(
+        blank=True,
+        null=True,
+    )
+
     # Métadonnées
     last_login_ip = models.GenericIPAddressField(
         _("dernière IP de connexion"),

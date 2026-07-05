@@ -22,6 +22,7 @@ from .serializers import (
     ParentProfileSerializer,
     ChangePasswordSerializer,
     PasswordResetRequestSerializer,
+    PasswordResetConfirmSerializer,
     EmailVerificationSerializer,
 )
 from .permissions import (
@@ -29,6 +30,7 @@ from .permissions import (
     IsStudent,
     IsCounselor,
     IsSchoolRep,
+    IsParent,
     IsAdminRole,
 )
 from apps.accounts.models import (
@@ -215,13 +217,37 @@ class EmailVerificationView(APIView):
         )
 
 
+class PasswordResetConfirmView(APIView):
+    """Confirmation de réinitialisation de mot de passe."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        success = AuthService.reset_password_with_token(
+            serializer.validated_data["token"],
+            serializer.validated_data["new_password"],
+        )
+
+        if success:
+            return Response(
+                {"message": "Mot de passe réinitialisé avec succès."},
+                status=status.HTTP_200_OK,
+            )
+        return Response(
+            {"error": "Token invalide ou expiré."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
 # ──────────────────────────────────────────────
 # Profils
 # ──────────────────────────────────────────────
 
 class StudentProfileView(generics.RetrieveUpdateAPIView):
     """Récupère ou met à jour le profil étudiant."""
-    permission_classes = [IsAuthenticated, IsStudent | IsOwner | IsAdminRole]
+    permission_classes = [IsAuthenticated, IsStudent]
 
     def get_serializer_class(self):
         if self.request.method in ["PUT", "PATCH"]:
@@ -261,7 +287,7 @@ class SchoolRepProfileView(generics.RetrieveUpdateAPIView):
 class ParentProfileView(generics.RetrieveUpdateAPIView):
     """Récupère ou met à jour le profil parent."""
     serializer_class = ParentProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsParent | IsAdminRole]
 
     def get_object(self):
         return self.request.user.parent_profile
@@ -302,4 +328,23 @@ class UserAdminViewSet(viewsets.ModelViewSet):
 
         user.role = new_role
         user.save(update_fields=["role"])
+
+        # Créer le profil pour le nouveau rôle si nécessaire
+        from apps.accounts.models import (
+            StudentProfile, CounselorProfile,
+            SchoolRepProfile, ParentProfile,
+        )
+        profile_map = {
+            UserRole.STUDENT: StudentProfile,
+            UserRole.COUNSELOR: CounselorProfile,
+            UserRole.SCHOOL_REP: SchoolRepProfile,
+            UserRole.PARENT: ParentProfile,
+        }
+        profile_cls = profile_map.get(new_role)
+        if profile_cls:
+            try:
+                profile_cls.objects.get_or_create(user=user)
+            except Exception:
+                pass
+
         return Response(UserSerializer(user).data)

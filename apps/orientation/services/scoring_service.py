@@ -62,8 +62,19 @@ class ScoringService:
         if not details.exists():
             raise ValueError("Aucune réponse trouvée pour cette session")
 
+        # Pré-charger les choices pour les questions à choix multiple (éviter N+1)
+        choix_multiples_ids = set()
+        for detail in details:
+            if detail.choices_selectionnes:
+                choix_multiples_ids.update(detail.choices_selectionnes)
+        choices_cache = {}
+        if choix_multiples_ids:
+            from apps.orientation.models import Choice
+            for c in Choice.objects.filter(id__in=choix_multiples_ids):
+                choices_cache[str(c.id)] = c
+
         # 2. Calculer les scores bruts par dimension
-        scores_bruts = cls._calculer_scores_bruts(details, reponse.test.methode_scoring)
+        scores_bruts = cls._calculer_scores_bruts(details, reponse.test.methode_scoring, choices_cache)
 
         # 3. Normaliser (0-100)
         scores_normalises = cls._normaliser_scores(
@@ -130,6 +141,7 @@ class ScoringService:
         cls,
         details: "QuerySet",
         methode: str,
+        choices_cache: dict = None,
     ) -> Dict[str, float]:
         """Calcule les scores bruts par dimension RIASEC."""
         scores: Dict[str, float] = {}
@@ -159,13 +171,13 @@ class ScoringService:
 
                 # Choix multiples
                 if detail.choices_selectionnes:
-                    from apps.orientation.models import Choice
-                    choices = Choice.objects.filter(id__in=detail.choices_selectionnes)
-                    for choice in choices:
-                        for dim, points in (choice.scores or {}).items():
-                            contribution = points * poids
-                            detail_contribution[dim] = round(detail_contribution.get(dim, 0) + contribution, 4)
-                            scores[dim] = scores.get(dim, 0) + contribution
+                    for choice_id in detail.choices_selectionnes:
+                        choice = choices_cache.get(str(choice_id)) if choices_cache else None
+                        if choice:
+                            for dim, points in (choice.scores or {}).items():
+                                contribution = points * poids
+                                detail_contribution[dim] = round(detail_contribution.get(dim, 0) + contribution, 4)
+                                scores[dim] = scores.get(dim, 0) + contribution
 
             elif question.type == TypeQuestion.SITUATIONNELLE:
                 # Même logique que choix unique

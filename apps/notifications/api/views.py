@@ -71,15 +71,11 @@ class NotificationMarkReadView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        notifications = Notification.objects.filter(
+        count = Notification.objects.filter(
             id__in=ids,
             user=request.user,
-        )
-
-        count = 0
-        for notif in notifications:
-            notif.marquer_comme_lue()
-            count += 1
+            is_read=False,
+        ).update(is_read=True, read_at=timezone.now())
 
         return Response({"message": f"{count} notification(s) marquée(s) comme lue(s)."})
 
