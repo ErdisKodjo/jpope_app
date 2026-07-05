@@ -95,10 +95,10 @@ QUESTIONS_RIASEC = [
 
 USERS_DEMO = [
     # (first_name, last_name, email, role, statut_compte, password)
-    ("Admin",      "AvenSU",    "admin@avensu.tg",      "ADMIN",    "VERIFIE", "AdminAvenSU2026!"),
-    ("Kofi",       "Mensah",    "conseiller1@avensu.tg","COUNSELOR","VERIFIE", "Conseil2026!"),
-    ("Ama",        "Koffi",     "conseiller2@avensu.tg","COUNSELOR","VERIFIE", "Conseil2026!"),
-    ("Yao",        "Agbeko",    "etudiant1@avensu.tg",  "STUDENT",  "VERIFIE", "Etudiant2026!"),
+    ("Admin",      "AvenSU",    "admin@avensu.tg",      "ADMIN",    "ACTIF", "AdminAvenSU2026!"),
+    ("Kofi",       "Mensah",    "conseiller1@avensu.tg","COUNSELOR","ACTIF", "Conseil2026!"),
+    ("Ama",        "Koffi",     "conseiller2@avensu.tg","COUNSELOR","ACTIF", "Conseil2026!"),
+    ("Yao",        "Agbeko",    "etudiant1@avensu.tg",  "STUDENT",  "ACTIF", "Etudiant2026!"),
 ]
 
 

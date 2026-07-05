@@ -41,13 +41,13 @@
                 {% csrf_token %}
 
                 <div class="form-group mb-4">
-                    <label class="form_label" for="id_email">Adresse e-mail</label>
-                    <input type="email" name="email" id="id_email"
-                           class="input_field {% if form.email.errors %}border-danger{% endif %}"
+                    <label class="form_label" for="id_username">Email ou téléphone</label>
+                    <input type="text" name="username" id="id_username"
+                           class="input_field {% if form.username.errors %}border-danger{% endif %}"
                            placeholder="exemple@email.com"
-                           value="{{ form.email.value|default:'' }}" required>
-                    {% if form.email.errors %}
-                    <small class="text-danger">{{ form.email.errors|join:", " }}</small>
+                           value="{{ form.username.value|default:'' }}" required>
+                    {% if form.username.errors %}
+                    <small class="text-danger">{{ form.username.errors|join:", " }}</small>
                     {% endif %}
                 </div>
 

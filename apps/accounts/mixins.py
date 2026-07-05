@@ -29,12 +29,11 @@ class CounselorRequiredMixin(VerifiedAccountMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        result = super().dispatch(request, *args, **kwargs)
         if not request.user.is_authenticated:
-            return result
+            return self.handle_no_permission()
         if request.user.role != UserRole.COUNSELOR:
             raise PermissionDenied
-        return result
+        return super().dispatch(request, *args, **kwargs)
 
 
 class CounselorOrAdminMixin(VerifiedAccountMixin):
@@ -43,12 +42,11 @@ class CounselorOrAdminMixin(VerifiedAccountMixin):
     """
 
     def dispatch(self, request, *args, **kwargs):
-        result = super().dispatch(request, *args, **kwargs)
         if not request.user.is_authenticated:
-            return result
+            return self.handle_no_permission()
         if request.user.role not in (UserRole.COUNSELOR, UserRole.ADMIN):
             raise PermissionDenied
-        return result
+        return super().dispatch(request, *args, **kwargs)
 
 
 class AdminRequiredMixin(LoginRequiredMixin):

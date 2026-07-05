@@ -2,6 +2,7 @@
 Vues dashboard — tableau de bord étudiant + workflow évaluation conseiller.
 """
 import logging
+from datetime import timedelta
 
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -35,15 +36,20 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         user = self.request.user
-
+        # Importer les services dédiés
+        from apps.dashboard.services import auth, score, recommendation, conseiller, visibility
+        # Profil tableau de bord limité aux champs pertinents
+        ctx.update(auth.get_dashboard_profile(user))
+        # Scores et recommandations pour les étudiants
         if user.is_student:
-            ctx["evaluation_validee"] = (
-                EvaluationConseiller.objects
-                .filter(etudiant=user, statut=StatutEvaluation.VALIDEE)
-                .select_related("conseiller")
-                .order_by("-date_traitement")
-                .first()
-            )
+            # Calcul du score à partir des résultats de test
+            from apps.orientation.models import ResultatTest
+            test_qs = ResultatTest.objects.filter(reponse_utilisateur__etudiant=user)
+            ctx["score"] = score.calculate_test_score(test_qs)
+            ctx["recommendations"] = recommendation.generate_recommendations(user, ctx["score"])
+            # Conseiller assigné
+            ctx["conseiller"] = conseiller.assign_conseiller(user)
+            # Autres données spécifiques déjà présentes (vœux, démarches, notifications…) restent inchangées
             # Vœux
             voeux = Voeu.objects.filter(etudiant=user)
             ctx["voeux_recents"] = voeux.select_related("formation__etablissement").order_by("priorite")[:3]
@@ -55,7 +61,7 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                 statut__in=[StatutDemarche.A_FAIRE, StatutDemarche.EN_COURS],
                 date_echeance__isnull=False,
                 date_echeance__gte=timezone.now(),
-                date_echeance__lte=timezone.now() + timezone.timedelta(days=14),
+                date_echeance__lte=timezone.now() + timedelta(days=14),
             ).order_by("date_echeance")[:5]
             ctx["demarches_count"] = DemarcheInscription.objects.filter(
                 etudiant=user,
@@ -66,7 +72,7 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                 statut__in=[StatutDemarche.A_FAIRE, StatutDemarche.EN_COURS],
                 date_echeance__lt=timezone.now(),
             ).count()
-            # Dernier résultat de test
+            # Dernier résultat de test et recommandations top
             try:
                 from apps.orientation.models import ResultatTest, Recommandation
                 ctx["dernier_resultat"] = ResultatTest.objects.filter(
@@ -93,7 +99,6 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                 ctx["notifs_recentes"] = Notification.objects.filter(user=user).order_by("-created_at")[:5]
             except Exception:
                 pass
-
         elif user.is_counselor:
             qs = EvaluationConseiller.objects.filter(conseiller=user)
             ctx["nb_brouillons"] = qs.filter(statut=StatutEvaluation.BROUILLON).count()
@@ -109,7 +114,6 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                 ).count()
             except Exception:
                 pass
-
         elif user.is_admin_role:
             ctx["nb_evaluations_en_attente"] = (
                 EvaluationConseiller.objects
@@ -128,7 +132,8 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                 ctx["nb_ristournes_en_attente"] = RistourneConseiller.objects.filter(statut="EN_ATTENTE").count()
             except Exception:
                 pass
-
+        # Appliquer la visibilité / filtrage des options selon le rôle et l'état
+        visibility.filter_options(user, ctx)
         return ctx
 
 
@@ -313,7 +318,7 @@ class AdminEvalReviewView(AdminRequiredMixin, View):
 # PHASE 3 — VOEUX
 # ──────────────────────────────────────────────────────────
 
-class MesVoeuxView(LoginRequiredMixin, ListView):
+class MesVoeuxView(VerifiedAccountMixin, ListView):
     template_name = "dashboard/mes_voeux.html"
     context_object_name = "voeux"
 
@@ -332,7 +337,7 @@ class MesVoeuxView(LoginRequiredMixin, ListView):
         return ctx
 
 
-class VoeuCreateView(LoginRequiredMixin, CreateView):
+class VoeuCreateView(VerifiedAccountMixin, CreateView):
     model = Voeu
     form_class = VoeuForm
     template_name = "dashboard/voeu_form.html"
@@ -385,7 +390,7 @@ class VoeuCreateView(LoginRequiredMixin, CreateView):
         return redirect("dashboard:mes-voeux")
 
 
-class VoeuUpdateView(LoginRequiredMixin, UpdateView):
+class VoeuUpdateView(VerifiedAccountMixin, UpdateView):
     model = Voeu
     form_class = VoeuForm
     template_name = "dashboard/voeu_form.html"
@@ -406,7 +411,7 @@ class VoeuUpdateView(LoginRequiredMixin, UpdateView):
         return redirect("dashboard:mes-voeux")
 
 
-class VoeuUpdateStatutView(LoginRequiredMixin, View):
+class VoeuUpdateStatutView(VerifiedAccountMixin, View):
     def post(self, request, pk):
         voeu = get_object_or_404(Voeu, pk=pk, etudiant=request.user)
         form = VoeuStatutForm(request.POST, instance=voeu)
@@ -419,7 +424,7 @@ class VoeuUpdateStatutView(LoginRequiredMixin, View):
         return redirect("dashboard:mes-voeux")
 
 
-class VoeuDeleteView(LoginRequiredMixin, View):
+class VoeuDeleteView(VerifiedAccountMixin, View):
     def post(self, request, pk):
         voeu = get_object_or_404(Voeu, pk=pk, etudiant=request.user)
         if voeu.statut != StatutVoeu.BROUILLON:
@@ -438,7 +443,7 @@ class VoeuDeleteView(LoginRequiredMixin, View):
 # PHASE 3 — DEMARCHES
 # ──────────────────────────────────────────────────────────
 
-class MesDemarchesView(LoginRequiredMixin, ListView):
+class MesDemarchesView(VerifiedAccountMixin, ListView):
     template_name = "dashboard/mes_demarches.html"
     context_object_name = "demarches"
     paginate_by = 20
@@ -464,7 +469,7 @@ class MesDemarchesView(LoginRequiredMixin, ListView):
         return ctx
 
 
-class DemarcheCreateView(LoginRequiredMixin, CreateView):
+class DemarcheCreateView(VerifiedAccountMixin, CreateView):
     model = DemarcheInscription
     form_class = DemarcheForm
     template_name = "dashboard/demarche_form.html"
@@ -491,7 +496,7 @@ class DemarcheCreateView(LoginRequiredMixin, CreateView):
         return redirect("dashboard:mes-demarches")
 
 
-class DemarcheUpdateView(LoginRequiredMixin, UpdateView):
+class DemarcheUpdateView(VerifiedAccountMixin, UpdateView):
     model = DemarcheInscription
     form_class = DemarcheForm
     template_name = "dashboard/demarche_form.html"
@@ -517,7 +522,7 @@ class DemarcheUpdateView(LoginRequiredMixin, UpdateView):
 # PHASE 3 — FAVORIS
 # ──────────────────────────────────────────────────────────
 
-class MesFavorisView(LoginRequiredMixin, ListView):
+class MesFavorisView(VerifiedAccountMixin, ListView):
     template_name = "dashboard/mes_favoris.html"
     context_object_name = "favoris"
 
@@ -541,7 +546,7 @@ class MesFavorisView(LoginRequiredMixin, ListView):
         return ctx
 
 
-class ToggleFavoriView(LoginRequiredMixin, View):
+class ToggleFavoriView(VerifiedAccountMixin, View):
     """Ajoute ou retire un élément des favoris (POST idempotent)."""
 
     def post(self, request, type_entite, pk):
@@ -550,6 +555,7 @@ class ToggleFavoriView(LoginRequiredMixin, View):
             "FORMATION": ("formation", "catalog.Formation"),
             "METIER": ("metier", "catalog.Metier"),
             "ETABLISSEMENT": ("etablissement", "catalog.Etablissement"),
+            "EVENEMENT": ("evenement", "events.Evenement"),
         }
         if type_entite not in field_map:
             messages.error(request, "Type de favori non reconnu.")

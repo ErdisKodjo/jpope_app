@@ -59,7 +59,7 @@ urlpatterns += i18n_patterns(
 # Debug / dev
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    if "debug_toolbar" in settings.INSTALLED_APPS:
+    if settings.DEBUG and "debug_toolbar" in settings.INSTALLED_APPS:
         urlpatterns += [path("__debug__/", include("debug_toolbar.urls"))]
     if "django_browser_reload" in settings.INSTALLED_APPS:
         urlpatterns += [path("__reload__/", include("django_browser_reload.urls"))]

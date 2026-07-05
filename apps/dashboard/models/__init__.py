@@ -10,6 +10,8 @@ from .enums import (
     TypeEvenementAgenda, StatutRappel, CanalNotification,
 )
 
+from .counselor import Counselor
+
 __all__ = [
     "Favori",
     "Voeu",

@@ -20,6 +20,7 @@ def etudiant(db):
         role=UserRole.STUDENT,
         statut_compte=StatutCompte.ACTIF,
         is_active=True,
+        profile_complete=True,
     )
 
 
@@ -33,6 +34,7 @@ def conseiller(db):
         role=UserRole.COUNSELOR,
         statut_compte=StatutCompte.ACTIF,
         is_active=True,
+        profile_complete=True,
     )
 
 

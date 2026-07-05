@@ -31,7 +31,7 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # Désactiver les apps optionnelles non installées (et django.contrib.postgres qui nécessite psycopg2)
 INSTALLED_APPS = [app for app in INSTALLED_APPS if app not in [  # noqa: F405
-    "debug_toolbar",
+    # "debug_toolbar",
     "django_browser_reload",
     "silk",
     "django.contrib.postgres",

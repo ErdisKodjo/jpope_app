@@ -328,8 +328,7 @@ class DemandeAccompagnementCreateView(VerifiedAccountMixin, FormView):
         User = get_user_model()
         ctx["conseillers_disponibles"] = User.objects.filter(
             role="COUNSELOR",
-            counselor_profile__is_available=True,
-        ).select_related("counselor_profile").order_by("-counselor_profile__note_moyenne")[:10]
+                    ).select_related("counselor_profile").order_by("-counselor_profile__note_moyenne")[:10]
         return ctx
 
     def get_form_kwargs(self):
@@ -501,12 +500,9 @@ class EvaluerConseillerView(VerifiedAccountMixin, View):
         if not demande.conseiller or demande.ristourne_generee:
             return
         try:
-            from payments.models import RistourneConseiller
+            from apps.payments.models import RistourneConseiller
         except ImportError:
-            try:
-                from apps.payments.models import RistourneConseiller
-            except ImportError:
-                return
+            return
         try:
             profile = demande.conseiller.counselor_profile
             tarif = float(profile.tarif_consultation or 0)
@@ -759,10 +755,7 @@ class AdminRistournesView(AdminRequiredMixin, ListView):
     paginate_by = 30
 
     def get_queryset(self):
-        try:
-            from apps.payments.models import RistourneConseiller
-        except ImportError:
-            from payments.models import RistourneConseiller
+        from apps.payments.models import RistourneConseiller
         statut = self.request.GET.get("statut", "EN_ATTENTE")
         qs = RistourneConseiller.objects.select_related(
             "conseiller", "demande_accompagnement__etudiant"
@@ -773,10 +766,7 @@ class AdminRistournesView(AdminRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        try:
-            from apps.payments.models import RistourneConseiller, StatutRistourne
-        except ImportError:
-            from payments.models import RistourneConseiller, StatutRistourne
+        from apps.payments.models import RistourneConseiller
         ctx["statut_filtre"] = self.request.GET.get("statut", "EN_ATTENTE")
         ctx["total_en_attente"] = RistourneConseiller.objects.filter(statut="EN_ATTENTE").count()
         from django.db.models import Sum
@@ -790,11 +780,7 @@ class AdminPayerRistourneView(AdminRequiredMixin, View):
     """Admin marque une ristourne comme payée."""
 
     def post(self, request, pk):
-        try:
-            from apps.payments.models import RistourneConseiller
-        except ImportError:
-            from payments.models import RistourneConseiller
-
+        from apps.payments.models import RistourneConseiller
         ristourne = get_object_or_404(RistourneConseiller, pk=pk, statut="EN_ATTENTE")
         ristourne.statut = "PAYEE"
         ristourne.date_paiement = timezone.now()
@@ -844,9 +830,8 @@ class ListeConseillersView(View):
         User = get_user_model()
         qs = User.objects.filter(
             role="COUNSELOR",
-            statut_compte="VERIFIE",
-            counselor_profile__is_available=True,
-        ).select_related("counselor_profile").order_by("-counselor_profile__note_moyenne")
+            statut_compte="ACTIF",
+                    ).select_related("counselor_profile").order_by("-counselor_profile__note_moyenne")
 
         q = request.GET.get("q", "").strip()
         if q:

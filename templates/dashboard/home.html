@@ -405,25 +405,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-<script>
-fetch('/api/v1/dashboard/', {
-    headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Accept': 'application/json' }
-})
-.then(r => r.json())
-.then(function(data) {
-    ['favoris-count','voeux-count','demarches-count'].forEach(function(id) {
-        var key = id.replace('-count', '_count');
-        var el = document.getElementById(id);
-        if (el) el.textContent = data[key] !== undefined ? data[key] : 0;
-    });
-})
-.catch(function() {
-    ['favoris-count','voeux-count','demarches-count'].forEach(function(id) {
-        var el = document.getElementById(id);
-        if (el) el.textContent = '0';
-    });
-});
-</script>
-{% endblock %}

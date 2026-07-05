@@ -159,9 +159,9 @@
                             </a>
                             {% if request.user.is_authenticated %}
                             <div class="main_nav_dropdown_divider"></div>
-                            <a href="{% url 'community:forum-list' %}" class="main_nav_dropdown_item">
+                            <a href="{% url 'community:forum-list' %}#choisir-forum" class="main_nav_dropdown_item">
                                 <i class="fas fa-pen mr-2" style="color:var(--color-accent); width:16px;"></i>
-                                Nouvelle discussion
+                                Poster dans un forum
                             </a>
                             {% endif %}
                         </div>

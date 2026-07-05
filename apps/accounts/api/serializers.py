@@ -128,7 +128,7 @@ class LoginSerializer(serializers.Serializer):
         from django.contrib.auth import authenticate
 
         user = authenticate(
-            email=attrs["email"],
+            username=attrs["email"],
             password=attrs["password"],
         )
 
