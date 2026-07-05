@@ -2,7 +2,7 @@
 Vues API pour l'app community.
 """
 from django.db.models import F
-from django.db.functions import Greatest
+from django.db.models.functions import Greatest
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny

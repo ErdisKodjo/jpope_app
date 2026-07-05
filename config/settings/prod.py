@@ -6,9 +6,24 @@ from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.celery import CeleryIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
 
+from django.core.exceptions import ImproperlyConfigured
+
 from .base import *  # noqa
 
 DEBUG = False
+
+# Refuser de démarrer en production avec une SECRET_KEY par défaut / non définie.
+_INSECURE_SECRET_KEYS = {"", "change-me-in-production"}
+if SECRET_KEY in _INSECURE_SECRET_KEYS or SECRET_KEY.startswith("django-insecure-"):  # noqa: F405
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY doit être défini avec une valeur secrète unique en production."
+    )
+
+# En production, ALLOWED_HOSTS doit être explicitement configuré.
+if not any(h.strip() for h in ALLOWED_HOSTS):  # noqa: F405
+    raise ImproperlyConfigured(
+        "DJANGO_ALLOWED_HOSTS doit être défini en production."
+    )
 
 # Render termine le SSL au load balancer et transmet en HTTP en interne.
 # Sans cela, SECURE_SSL_REDIRECT crée une boucle infinie de redirections.
