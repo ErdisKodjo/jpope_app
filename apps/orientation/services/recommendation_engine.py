@@ -5,6 +5,7 @@ import logging
 from dataclasses import dataclass
 from typing import List, Optional
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import transaction
 from django.db.models import Q
 
@@ -300,8 +301,9 @@ class RecommendationEngine:
             if cat and cat in profil:
                 score += profil[cat] * 12
                 has_data = True
-        except Exception:
-            pass
+        except (ObjectDoesNotExist, AttributeError):
+            # Données de notes absentes pour cet étudiant : score neutre.
+            logger.debug("Notes académiques indisponibles pour l'étudiant %s", getattr(etudiant, "pk", etudiant))
 
         # Série BAC (0-8 pts)
         try:
@@ -312,8 +314,9 @@ class RecommendationEngine:
                 if cat and cat in affinite:
                     score += affinite[cat] * 8
                     has_data = True
-        except Exception:
-            pass
+        except (ObjectDoesNotExist, AttributeError):
+            # Profil étudiant / série BAC absent : score neutre.
+            logger.debug("Profil étudiant indisponible pour l'étudiant %s", getattr(etudiant, "pk", etudiant))
 
         if not has_data:
             return 10.0  # score neutre sans données

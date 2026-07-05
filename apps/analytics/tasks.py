@@ -43,6 +43,7 @@ def aggreger_stats_quotidiennes():
             date_joined__date=hier
         ).count()
     except Exception:
+        logger.exception("Échec du comptage des nouveaux utilisateurs pour %s", hier)
         nouveaux_utilisateurs = 0
 
     tests_demarres = ActionLog.objects.filter(

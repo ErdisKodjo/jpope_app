@@ -1,4 +1,8 @@
+import logging
+
 from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 def global_context(request):
@@ -18,5 +22,9 @@ def global_context(request):
                 is_read=False,
             ).count()
         except Exception:
-            pass
+            logger.exception(
+                "Impossible de récupérer le nombre de notifications non lues "
+                "pour l'utilisateur %s",
+                request.user.pk,
+            )
     return ctx

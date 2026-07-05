@@ -36,7 +36,10 @@ def _notify(user, titre, message, type_notif="INFO", action_url=""):
         from apps.notifications.utils import notify
         notify(user=user, titre=titre, message=message, type_notif=type_notif, action_url=action_url)
     except Exception:
-        pass
+        logger.exception(
+            "Échec de notification in-app pour l'utilisateur %s",
+            getattr(user, "pk", user),
+        )
 
 
 class OrientationHomeView(TemplateView):
@@ -507,7 +510,10 @@ class EvaluerConseillerView(VerifiedAccountMixin, View):
                 profile.nombre_accompagnements_actifs -= 1
             profile.save(update_fields=["note_moyenne", "nombre_evaluations", "nombre_accompagnements_total", "nombre_accompagnements_actifs"])
         except Exception:
-            pass
+            logger.exception(
+                "Échec de mise à jour de la note du conseiller %s",
+                getattr(conseiller, "pk", conseiller),
+            )
 
     def _generer_ristourne(self, demande, note):
         if not demande.conseiller or demande.ristourne_generee:
@@ -589,7 +595,10 @@ class AccepterDemandeView(CounselorRequiredMixin, View):
                 profile.nombre_accompagnements_actifs += 1
                 profile.save(update_fields=["nombre_accompagnements_actifs"])
             except Exception:
-                pass
+                logger.exception(
+                    "Échec d'incrémentation des accompagnements actifs pour le conseiller %s",
+                    request.user.pk,
+                )
 
             _notify(
                 demande.etudiant,
@@ -805,7 +814,10 @@ class AdminPayerRistourneView(AdminRequiredMixin, View):
             profile.solde_ristournes = max(0, float(profile.solde_ristournes) - float(ristourne.montant))
             profile.save(update_fields=["solde_ristournes"])
         except Exception:
-            pass
+            logger.exception(
+                "Échec de déduction du solde de ristournes pour la ristourne %s",
+                ristourne.pk,
+            )
 
         _notify(
             ristourne.conseiller,

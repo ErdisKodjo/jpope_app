@@ -1,6 +1,8 @@
 """
 Vues web pour l'app accounts.
 """
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -24,6 +26,8 @@ from .mixins import AdminRequiredMixin
 from .models.enums import StatutCompte, UserRole
 from .models.verification import DocumentVerification
 from .services.auth_service import AuthService
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -137,7 +141,10 @@ class RegisterView(FormView):
         try:
             AuthService.send_verification_email(user.id)
         except Exception:
-            pass
+            logger.exception(
+                "Échec d'envoi de l'email de vérification à l'utilisateur %s",
+                user.id,
+            )
 
         if needs_verification:
             messages.success(
@@ -184,7 +191,9 @@ class PasswordResetRequestView(FormView):
         try:
             AuthService.send_password_reset_email(email)
         except Exception:
-            pass
+            logger.exception(
+                "Échec d'envoi de l'email de réinitialisation de mot de passe"
+            )
 
         messages.info(
             self.request,
@@ -345,7 +354,10 @@ class NotesEtudiantView(LoginRequiredMixin, FormView):
                     villes_preferees=profile.villes_preferees if profile else None,
                 )
         except Exception:
-            pass
+            logger.exception(
+                "Échec de régénération des recommandations pour l'utilisateur %s",
+                self.request.user.pk,
+            )
 
 
 # ─────────────────────────────────────────────────────
