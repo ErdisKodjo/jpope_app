@@ -83,7 +83,10 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                     etudiant=user
                 ).order_by("-taux_compatibilite")[:3]
             except Exception:
-                pass
+                logger.exception(
+                    "Échec de chargement du dernier résultat / recommandations pour l'étudiant %s",
+                    user.pk,
+                )
             # Accompagnement actif
             try:
                 from apps.orientation.models import DemandeAccompagnement
@@ -92,14 +95,20 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                     statut__in=["ACCEPTEE", "EN_COURS"],
                 ).select_related("conseiller").first()
             except Exception:
-                pass
+                logger.exception(
+                    "Échec de chargement de l'accompagnement actif pour l'étudiant %s",
+                    user.pk,
+                )
             # Notifications non lues
             try:
                 from apps.notifications.models import Notification
                 ctx["nb_notifs_non_lues"] = Notification.objects.filter(user=user, is_read=False).count()
                 ctx["notifs_recentes"] = Notification.objects.filter(user=user).order_by("-created_at")[:5]
             except Exception:
-                pass
+                logger.exception(
+                    "Échec de chargement des notifications pour l'étudiant %s",
+                    user.pk,
+                )
         elif user.is_counselor:
             qs = EvaluationConseiller.objects.filter(conseiller=user)
             ctx["nb_brouillons"] = qs.filter(statut=StatutEvaluation.BROUILLON).count()
@@ -114,7 +123,10 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                     conseiller__isnull=True, statut="EN_ATTENTE"
                 ).count()
             except Exception:
-                pass
+                logger.exception(
+                    "Échec de chargement des demandes d'accompagnement pour le conseiller %s",
+                    user.pk,
+                )
         elif user.is_admin_role:
             ctx["nb_evaluations_en_attente"] = (
                 EvaluationConseiller.objects
@@ -127,12 +139,12 @@ class DashboardHomeView(LoginRequiredMixin, TemplateView):
                     statut=StatutQuestionProposee.EN_ATTENTE
                 ).count()
             except Exception:
-                pass
+                logger.exception("Échec de comptage des questions proposées en attente")
             try:
                 from apps.payments.models import RistourneConseiller
                 ctx["nb_ristournes_en_attente"] = RistourneConseiller.objects.filter(statut="EN_ATTENTE").count()
             except Exception:
-                pass
+                logger.exception("Échec de comptage des ristournes en attente")
         # Appliquer la visibilité / filtrage des options selon le rôle et l'état
         visibility.filter_options(user, ctx)
         return ctx

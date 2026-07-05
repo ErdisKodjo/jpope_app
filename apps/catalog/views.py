@@ -1,12 +1,16 @@
 """
 Vues web pour l'application catalog.
 """
+import logging
+
 from django.db.models import Q
 from django.views.generic import ListView, DetailView, TemplateView, View
 from django.shortcuts import render
 
 from .models import Domaine, Etablissement, Formation, Metier
 from .services import CatalogService
+
+logger = logging.getLogger(__name__)
 
 
 class DomaineListView(ListView):
@@ -282,5 +286,6 @@ class RechercheView(View):
                 ).exclude(statut="SUPPRIME").select_related("forum", "auteur").order_by("-created_at")[:4]
                 ctx["nb_total"] += len(ctx["threads"])
             except Exception:
+                logger.exception("Échec de recherche des threads communautaires pour la requête %r", q)
                 ctx["threads"] = []
         return render(request, self.template_name, ctx)

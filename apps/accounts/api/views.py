@@ -1,6 +1,8 @@
 """
 Vues API pour l'app accounts.
 """
+import logging
+
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from rest_framework import generics, status, viewsets
@@ -41,6 +43,8 @@ from apps.accounts.models import (
 )
 from apps.accounts.models.enums import UserRole
 from apps.accounts.services.auth_service import AuthService
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -345,6 +349,10 @@ class UserAdminViewSet(viewsets.ModelViewSet):
             try:
                 profile_cls.objects.get_or_create(user=user)
             except Exception:
-                pass
+                logger.exception(
+                    "Échec de création du profil %s pour l'utilisateur %s",
+                    profile_cls.__name__,
+                    user.pk,
+                )
 
         return Response(UserSerializer(user).data)

@@ -21,7 +21,10 @@ def _notify(user, titre, message, type_notif="INFO", action_url=""):
         from apps.notifications.utils import notify
         notify(user=user, titre=titre, message=message, type_notif=type_notif, action_url=action_url)
     except Exception:
-        pass
+        logger.exception(
+            "Échec de notification in-app pour l'utilisateur %s",
+            getattr(user, "pk", user),
+        )
 
 
 class ForumListView(ListView):
