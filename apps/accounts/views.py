@@ -20,7 +20,7 @@ from .forms import (
     RejectVerificationForm,
     NotesEtudiantForm,
 )
-from .mixins import AdminRequiredMixin
+from .mixins import AdminRequiredMixin, StudentRequiredMixin
 from .models.enums import StatutCompte, UserRole
 from .models.verification import DocumentVerification
 from .services.auth_service import AuthService
@@ -248,17 +248,11 @@ class ProfileEditView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-class StudentProfileEditView(LoginRequiredMixin, FormView):
+class StudentProfileEditView(StudentRequiredMixin, FormView):
     """Vue de modification du profil étudiant."""
     template_name = "accounts/student_profile_edit.html"
     form_class = StudentProfileForm
     success_url = reverse_lazy("accounts:profile")
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and not request.user.is_student:
-            messages.error(request, _("Accès réservé aux étudiants."))
-            return redirect("accounts:profile")
-        return super().dispatch(request, *args, **kwargs)
 
     def get_initial(self):
         profile = getattr(self.request.user, "student_profile", None)
@@ -287,17 +281,11 @@ class StudentProfileEditView(LoginRequiredMixin, FormView):
         return super().form_valid(form)
 
 
-class NotesEtudiantView(LoginRequiredMixin, FormView):
+class NotesEtudiantView(StudentRequiredMixin, FormView):
     """Vue de saisie des notes académiques (étudiants uniquement)."""
     template_name = "accounts/notes_etudiant.html"
     form_class = NotesEtudiantForm
     success_url = reverse_lazy("accounts:notes_etudiant")
-
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and not request.user.is_student:
-            messages.error(request, _("Accès réservé aux étudiants."))
-            return redirect("accounts:profile")
-        return super().dispatch(request, *args, **kwargs)
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -328,7 +316,7 @@ class NotesEtudiantView(LoginRequiredMixin, FormView):
         """Relance le moteur de recommandation avec le nouveau profil académique."""
         try:
             from apps.orientation.models import ReponseUtilisateur
-            from apps.orientation.services.recommendation_engine import RecommendationEngine
+            from apps.orientation.services.recommendation_utils import generate_recommendations_for_resultat
 
             dernier_resultat = (
                 ReponseUtilisateur.objects
@@ -338,11 +326,8 @@ class NotesEtudiantView(LoginRequiredMixin, FormView):
                 .first()
             )
             if dernier_resultat and hasattr(dernier_resultat, "resultat"):
-                profile = getattr(self.request.user, "student_profile", None)
-                RecommendationEngine.generer_recommandations(
-                    resultat=dernier_resultat.resultat,
-                    budget_max=profile.budget_max_annuel if profile else None,
-                    villes_preferees=profile.villes_preferees if profile else None,
+                generate_recommendations_for_resultat(
+                    dernier_resultat.resultat, user=self.request.user
                 )
         except Exception:
             pass

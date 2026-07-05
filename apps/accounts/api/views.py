@@ -11,6 +11,8 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
+from core.utils import get_client_ip
+
 from .serializers import (
     UserSerializer,
     RegisterSerializer,
@@ -87,7 +89,7 @@ class LoginView(APIView):
 
         # Mettre à jour la dernière connexion
         user.last_login = timezone.now()
-        user.last_login_ip = self.get_client_ip(request)
+        user.last_login_ip = get_client_ip(request)
         user.save(update_fields=["last_login", "last_login_ip"])
         user.update_last_activity()
 
@@ -102,12 +104,6 @@ class LoginView(APIView):
             },
             status=status.HTTP_200_OK,
         )
-
-    def get_client_ip(self, request):
-        x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
-        if x_forwarded_for:
-            return x_forwarded_for.split(",")[0].strip()
-        return request.META.get("REMOTE_ADDR")
 
 
 class LogoutView(APIView):

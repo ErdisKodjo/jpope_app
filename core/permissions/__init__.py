@@ -1,19 +1,14 @@
-from rest_framework.permissions import BasePermission
+"""
+Shared DRF permission classes.
 
-class IsStudent(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "STUDENT"
-
-class IsCounselor(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "COUNSELOR"
-
-class IsSchoolRep(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.role == "SCHOOL_REP"
-
-class IsAdminOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        if request.method in ("GET", "HEAD", "OPTIONS"):
-            return True
-        return request.user.is_authenticated and request.user.role == "ADMIN"
+Re-exports from the canonical definitions in ``apps.accounts.api.permissions``
+to avoid the previous duplication where identical ``IsStudent``,
+``IsCounselor``, ``IsSchoolRep``, and ``IsAdminOrReadOnly`` classes existed
+in both ``core/permissions`` and ``apps/accounts/api/permissions``.
+"""
+from apps.accounts.api.permissions import (  # noqa: F401
+    IsStudent,
+    IsCounselor,
+    IsSchoolRep,
+    IsAdminOrReadOnly,
+)
