@@ -2,6 +2,7 @@ from .domaine import Domaine
 from .metier import Metier
 from .etablissement import Etablissement
 from .formation import Formation
+from .admission_simulator import AdmissionHistorique, ResultatSimulateur
 from .enums import (
     TypeEtablissement,
     StatutEtablissement,
@@ -18,6 +19,8 @@ __all__ = [
     "Metier",
     "Etablissement",
     "Formation",
+    "AdmissionHistorique",
+    "ResultatSimulateur",
     "TypeEtablissement",
     "StatutEtablissement",
     "NiveauFormation",

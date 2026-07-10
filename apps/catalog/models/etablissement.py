@@ -224,6 +224,33 @@ class Etablissement(models.Model):
         blank=True,
     )
 
+    # ─── VISITES VIRTUELLES 3D (cahier des charges — section 2.1 Découverte immersive) ───
+    visite_virtuelle_url = models.URLField(
+        _("URL de visite virtuelle 3D"),
+        blank=True,
+        help_text=_("Lien vers une visite 360° ou un modèle 3D (Matterport, Sketchfab, etc.)"),
+    )
+    galerie_3d = models.JSONField(
+        _("galerie 3D / immersive"),
+        default=list,
+        blank=True,
+        help_text=_(
+            "Liste de scènes 3D. Format: [{"
+            "'titre': 'Campus principal', 'type': 'matterport'|'sketchfab'|'360', "
+            "'url': 'https://...', 'vignette': 'https://...'}]"
+        ),
+    )
+    video_presentation_url = models.URLField(
+        _("URL vidéo de présentation"),
+        blank=True,
+        help_text=_("Lien YouTube/Vimeo d'une vidéo immersive de présentation"),
+    )
+    ateliers_virtuels_disponibles = models.BooleanField(
+        _("ateliers virtuels disponibles"),
+        default=False,
+        help_text=_("Indique si l'établissement propose des ateliers virtuels interactifs"),
+    )
+
     # STATUT
     is_active = models.BooleanField(_("actif"), default=True)
     is_verified = models.BooleanField(
