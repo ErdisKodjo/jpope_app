@@ -63,6 +63,10 @@ LOCAL_APPS = [
     "apps.notifications",
     "apps.analytics",
     "apps.payments",
+    "apps.compliance",
+    "apps.library",
+    "apps.roadmap",
+    "apps.marketing",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -84,6 +88,7 @@ MIDDLEWARE = [
     "auditlog.middleware.AuditlogMiddleware",
     "core.middleware.timezone.TimezoneMiddleware",
     "core.middleware.profile.ProfileCompletionMiddleware",
+    "apps.accounts.middleware.two_factor.TwoFactorEnforcementMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

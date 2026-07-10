@@ -8,6 +8,7 @@ from .profiles import (
 from .enums import UserRole, SerieBac, Genre, StatutCompte
 from .verification import DocumentVerification, StatutVerification, TypeDocument
 from .notes import NotesEtudiant
+from .two_factor import TOTPDevice, TwoFactorChallenge, is_2fa_required, has_active_2fa
 
 __all__ = [
     "User",
@@ -23,4 +24,8 @@ __all__ = [
     "StatutVerification",
     "TypeDocument",
     "NotesEtudiant",
+    "TOTPDevice",
+    "TwoFactorChallenge",
+    "is_2fa_required",
+    "has_active_2fa",
 ]
