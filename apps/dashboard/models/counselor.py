@@ -7,7 +7,7 @@ class Counselor(models.Model):
     It links to the user representing the counselor.
     """
 
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="counselor_profile")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="dashboard_counselor_profile")
 
     def __str__(self):
         return f"Counselor {self.user.username}"
