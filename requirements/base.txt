@@ -46,6 +46,12 @@ django-auditlog==3.0.0
 django-storages[s3]==1.14.4
 boto3==1.35.73
 
+# ──────────── Sécurité & RGPD (cahier des charges — section 3) ────────────
+pyotp==2.10.0              # 2FA TOTP pour Établissements et Conseillers
+qrcode==8.2                # Génération QR codes pour app d'authentification
+django-otp==1.7.0          # Framework 2FA Django
+django-cryptography==1.1   # Chiffrement champ-level (RGPD données sensibles)
+
 # ──────────── Monitoring ────────────
 sentry-sdk[django]==2.19.0
 django-silk==5.3.1
