@@ -29,6 +29,10 @@ urlpatterns = [
     path("api/v1/", include(("apps.chatbot.api.urls", "chatbot-api"), namespace="chatbot-api")),
     path("api/v1/", include(("apps.notifications.api.urls", "notifications-api"), namespace="notifications-api")),
     path("api/v1/", include(("apps.payments.api.urls", "payments-api"), namespace="payments-api")),
+    path("api/v1/rgpd/", include(("apps.compliance.api.urls", "compliance-api"), namespace="compliance-api")),
+    path("api/v1/bibliotheque/", include(("apps.library.api.urls", "library-api"), namespace="library-api")),
+    path("api/v1/roadmap/", include(("apps.roadmap.api.urls", "roadmap-api"), namespace="roadmap-api")),
+    path("api/v1/marketing/", include(("apps.marketing.api.urls", "marketing-api"), namespace="marketing-api")),
 
     # Documentation API
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
