@@ -5,6 +5,11 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .ikigai_views import (
+    IkigaiResultatView,
+    RapportCombineView,
+    ListeTestsIkigaiView,
+)
 
 app_name = "orientation-api"
 
@@ -20,6 +25,11 @@ urlpatterns = [
     # Résultats
     path("resultats/", views.ResultatTestListView.as_view(), name="resultats-list"),
     path("resultats/<uuid:pk>/", views.ResultatTestDetailView.as_view(), name="resultat-detail"),
+
+    # Ikigai (cahier des charges — Test Ikigai combiné)
+    path("ikigai/tests/", ListeTestsIkigaiView.as_view(), name="ikigai-tests"),
+    path("ikigai/resultat/", IkigaiResultatView.as_view(), name="ikigai-resultat"),
+    path("rapport-combine/", RapportCombineView.as_view(), name="rapport-combine"),
 
     # Recommandations
     path("recommandations/", views.RecommandationListView.as_view(), name="recommandations"),

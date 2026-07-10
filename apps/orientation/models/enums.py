@@ -10,8 +10,17 @@ class TypeTest(models.TextChoices):
     PERSONNALITE = "PERSONNALITE", _("Test de personnalité")
     COMPETENCES = "COMPETENCES", _("Test de compétences")
     VALEURS = "VALEURS", _("Test de valeurs professionnelles")
-    MIXTE = "MIXTE", _("Test mixte (combiné)")
+    IKIGAI = "IKIGAI", _("Test Ikigai (4 piliers)")
+    MIXTE = "MIXTE", _("Test mixte (combiné RIASEC + Ikigai)")
     DIAGNOSTIC = "DIAGNOSTIC", _("Diagnostic rapide")
+
+
+class PilierIkigai(models.TextChoices):
+    """Les 4 piliers de l'Ikigai japonais."""
+    PASSION = "PASSION", _("Ce que j'aime (Passion)")
+    MISSION = "MISSION", _("Ce dont le monde a besoin (Mission)")
+    VOCATION = "VOCATION", _("Ce pour quoi je peux être payé (Vocation)")
+    PROFESSION = "PROFESSION", _("Ce en quoi je suis doué (Profession)")
 
 class TypeQuestion(models.TextChoices):
     """Type de question."""
