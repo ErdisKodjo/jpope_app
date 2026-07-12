@@ -1,0 +1,21 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+.env
+.env.local
+*.tsbuildinfo
+coverage/
+.vscode/
+.idea/
+.android/
+.ios/
+
+# EAS
+.easignore
+
+# Build artifacts
+android/
+ios/
