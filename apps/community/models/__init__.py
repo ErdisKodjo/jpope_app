@@ -4,6 +4,7 @@ from .message import MessageForum, LikeMessageForum, Reponse
 from .mentorat import ProfilMentor, RelationMentorat, SeanceMentorat
 from .messagerie import ConversationPrivee, ParticipantConversation, MessagePrive
 from .moderation import Signalement, BlocageUtilisateur
+from .avis_alumni import AvisAlumni, StatutAvis
 from .enums import (
     TypeForum, StatutThread, TypeMessageForum,
     StatutMentorat, TypeMentor, StatutMessagerie,
@@ -17,6 +18,7 @@ __all__ = [
     "ProfilMentor", "RelationMentorat", "SeanceMentorat",
     "ConversationPrivee", "ParticipantConversation", "MessagePrive",
     "Signalement", "BlocageUtilisateur",
+    "AvisAlumni", "StatutAvis",
     "TypeForum", "StatutThread", "TypeMessageForum",
     "StatutMentorat", "TypeMentor", "StatutMessagerie",
     "TypeSignalement", "StatutSignalement", "NiveauBlocage",

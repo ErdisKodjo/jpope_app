@@ -5,8 +5,10 @@ from .resultat import ResultatTest
 from .recommandation import Recommandation
 from .accompagnement import DemandeAccompagnement, MessageAccompagnement, QuestionProposee
 from .rdv import RendezVous, StatutRendezVous, FormatRendezVous
+from .session_collective import SessionCollective, InscriptionSession, FormatSession, StatutSession, TypeSession
 from .enums import (
     TypeTest,
+    PilierIkigai,
     TypeQuestion,
     TypeDimension,
     PlanRecommandation,
@@ -32,7 +34,13 @@ __all__ = [
     "RendezVous",
     "StatutRendezVous",
     "FormatRendezVous",
+    "SessionCollective",
+    "InscriptionSession",
+    "FormatSession",
+    "StatutSession",
+    "TypeSession",
     "TypeTest",
+    "PilierIkigai",
     "TypeQuestion",
     "TypeDimension",
     "PlanRecommandation",
