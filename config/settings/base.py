@@ -48,6 +48,12 @@ THIRD_PARTY_APPS = [
     "modeltranslation",
     "storages",
     "channels",
+    # Auth sociale Google + Apple (cahier des charges section 2.1)
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.apple",
 ]
 
 LOCAL_APPS = [
@@ -89,6 +95,7 @@ MIDDLEWARE = [
     "core.middleware.timezone.TimezoneMiddleware",
     "core.middleware.profile.ProfileCompletionMiddleware",
     "apps.accounts.middleware.two_factor.TwoFactorEnforcementMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -147,8 +154,56 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
     "apps.accounts.backends.EmailOrPhoneBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+# ──────────────────────────────────────────────
+# AUTH SOCIALE (django-allauth)
+# ──────────────────────────────────────────────
+ACCOUNT_ADAPTER = "apps.accounts.social_adapters.AvenSUAccountAdapter"
+SOCIALACCOUNT_ADAPTER = "apps.accounts.social_adapters.AvenSUSocialAccountAdapter"
+
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+ACCOUNT_LOGOUT_ON_PASSWORD_CHANGE = True
+
+SOCIALACCOUNT_QUERY_EMAIL = True
+SOCIALACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_AUTO_SIGNUP = True
+
+# Provider Google
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.environ.get("GOOGLE_OAUTH_CLIENT_ID", ""),
+            "secret": os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET", ""),
+            "key": "google",
+        },
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    },
+    "apple": {
+        "APP": {
+            "client_id": os.environ.get("APPLE_OAUTH_CLIENT_ID", ""),
+            "secret": os.environ.get("APPLE_OAUTH_CLIENT_SECRET", ""),
+            "key": "apple",
+        },
+        "SCOPE": ["name", "email"],
+    },
+}
+
+# ──────────────────────────────────────────────
+# STRIPE (paiement carte bancaire — cahier des charges business plan P-5)
+# ──────────────────────────────────────────────
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.environ.get("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_CURRENCY = "XOF"  # FCFA
 
 # ──────────────────────────────────────────────
 # INTERNATIONALISATION

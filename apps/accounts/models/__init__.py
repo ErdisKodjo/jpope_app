@@ -9,6 +9,7 @@ from .enums import UserRole, SerieBac, Genre, StatutCompte
 from .verification import DocumentVerification, StatutVerification, TypeDocument
 from .notes import NotesEtudiant
 from .two_factor import TOTPDevice, TwoFactorChallenge, is_2fa_required, has_active_2fa
+from .parental_consent import ConsentementParental, StatutConsentementParental
 
 __all__ = [
     "User",
@@ -28,4 +29,6 @@ __all__ = [
     "TwoFactorChallenge",
     "is_2fa_required",
     "has_active_2fa",
+    "ConsentementParental",
+    "StatutConsentementParental",
 ]
