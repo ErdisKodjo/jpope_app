@@ -1,10 +1,15 @@
 """
 Modèles ConversationPrivee, ParticipantConversation, MessagePrive — messagerie privée.
+
+🔒 Sécurité : le contenu des messages privés est chiffré au repos (Fernet).
+Conformément au cahier des charges (section 3 — Sécurité) :
+"Chiffrement de bout en bout des données sensibles (notes scolaires, rapports psychologiques)."
 """
 import uuid
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from apps.compliance.encryption_fields import EncryptedTextField
 from .enums import StatutMessagerie
 
 
@@ -130,7 +135,7 @@ class MessagePrive(models.Model):
         verbose_name=_("auteur"),
     )
 
-    contenu = models.TextField(_("contenu"))
+    contenu = EncryptedTextField(_("contenu"))
     type_contenu = models.CharField(
         _("type de contenu"),
         max_length=20,

@@ -1,10 +1,16 @@
 """
 Modèle Résultat de test avec analyse détaillée.
+
+🔒 Sécurité : l'interprétation et les scores par dimension sont chiffrés au repos (Fernet).
+Conformément au cahier des charges (section 3 — Sécurité) :
+"Chiffrement de bout en bout des données sensibles (notes scolaires, rapports psychologiques)."
 """
 import uuid
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.translation import gettext_lazy as _
+
+from apps.compliance.encryption_fields import EncryptedTextField, EncryptedJSONField
 
 class ResultatTest(models.Model):
     """
@@ -31,7 +37,7 @@ class ResultatTest(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         default=0,
     )
-    scores_par_dimension = models.JSONField(
+    scores_par_dimension = EncryptedJSONField(
         _("scores par dimension (0-100 chacun)"),
         default=dict,
         help_text=_(
@@ -58,10 +64,10 @@ class ResultatTest(models.Model):
     )
 
     # Interprétation
-    interpretation = models.TextField(
+    interpretation = EncryptedTextField(
         _("interprétation du résultat"),
         blank=True,
-        help_text=_("Texte explicatif généré pour l'étudiant"),
+        help_text=_("Texte explicatif généré pour l'étudiant (chiffré au repos)"),
     )
     forces = models.JSONField(
         _("forces identifiées"),

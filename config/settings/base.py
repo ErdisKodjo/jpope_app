@@ -54,6 +54,12 @@ THIRD_PARTY_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.google",
     "allauth.socialaccount.providers.apple",
+    # Sécurité — lockout après N tentatives échouées (cahier des charges §3)
+    "axes",
+    # 2FA admin Django (django-otp)
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "django_otp.plugins.otp_static",
 ]
 
 LOCAL_APPS = [
@@ -84,11 +90,14 @@ MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    # Axes doit être après AuthenticationMiddleware pour accéder à l'utilisateur
+    "axes.middleware.AxesMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_otp.middleware.OTPMiddleware",  # 2FA admin
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "auditlog.middleware.AuditlogMiddleware",
@@ -154,10 +163,25 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",  # Doit être en premier pour bloquer les IPs lockoutées
     "django.contrib.auth.backends.ModelBackend",
     "apps.accounts.backends.EmailOrPhoneBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
+
+# ──────────────────────────────────────────────
+# AXES — Lockout compte (cahier des charges §3 Sécurité)
+# ──────────────────────────────────────────────
+AXES_FAILURE_LIMIT = 5                  # 5 tentatives échouées max
+AXES_COOLOFF_TIME = 1                   # 1 heure de lockout
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]  # lock par user+IP
+AXES_RESET_ON_SUCCESS = True            # reset compteur après succès
+AXES_LOCKOUT_TEMPLATE = "axes/lockout.html"
+AXES_VERBOSE = True
+AXES_CACHE = "default"                  # utilise Redis en prod
+AXES_LOCKOUT_CALLABLE = None            # fonction custom si besoin (email alerte, etc.)
+AXES_IPWARE_PROXY_COUNT = 1             # nombre de proxies attendus
+AXES_IPWARE_META_PRECEDENCE_ORDER = ("HTTP_X_FORWARDED_FOR", "REMOTE_ADDR")
 
 # ──────────────────────────────────────────────
 # AUTH SOCIALE (django-allauth)

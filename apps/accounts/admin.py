@@ -7,6 +7,8 @@ from django.utils.translation import gettext_lazy as _
 
 from .models import User, StudentProfile, CounselorProfile, SchoolRepProfile, ParentProfile
 
+# Configuration 2FA admin (voir apps/accounts/otp_admin.py pour activation complète)
+
 
 class StudentProfileInline(admin.StackedInline):
     model = StudentProfile

@@ -23,6 +23,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from apps.compliance.encryption_fields import EncryptedCharField
+
 
 class StatutConsentementParental(models.TextChoices):
     EN_ATTENTE = "EN_ATTENTE", _("En attente — email envoyé au parent")
@@ -60,11 +62,11 @@ class ConsentementParental(models.Model):
         _("email du parent"),
         help_text=_("Email saisi par l'étudiant mineur lors de l'inscription"),
     )
-    nom_parent = models.CharField(
+    nom_parent = EncryptedCharField(
         _("nom du parent"),
         max_length=255,
         blank=True,
-        help_text=_("Nom saisi par l'étudiant (prénom + nom)"),
+        help_text=_("Nom saisi par l'étudiant (prénom + nom) — chiffré au repos"),
     )
     relation = models.CharField(
         _("relation avec l'étudiant"),

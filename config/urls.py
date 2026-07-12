@@ -39,7 +39,7 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
 
-    # Admin
+    # Admin (avec 2FA django-otp en prod via OTPAdminSite)
     path("admin/", admin.site.urls),
 
     # i18n
