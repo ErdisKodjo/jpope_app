@@ -5,6 +5,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
 from . import views
+from .stripe_views import (
+    StripePaymentIntentView,
+    StripeSubscribeView,
+    StripeCancelView,
+    StripeSubscriptionDetailView,
+    StripePortalView,
+    StripePlansView,
+    StripeWebhookView,
+)
 
 app_name = "payments-api"
 
@@ -31,7 +40,7 @@ urlpatterns = [
         name="abonnement-courant",
     ),
 
-    # Paiements
+    # Paiements Mobile Money (Flooz/TMoney)
     path(
         "paiements/initier/",
         views.InitierPaiementView.as_view(),
@@ -60,5 +69,42 @@ urlpatterns = [
         "callback/mobile-money/",
         views.PaymentCallbackView.as_view(),
         name="payment-callback",
+    ),
+
+    # Stripe (carte bancaire — cahier des charges business plan P-5)
+    path(
+        "stripe/payment-intent/",
+        StripePaymentIntentView.as_view(),
+        name="stripe-payment-intent",
+    ),
+    path(
+        "stripe/subscribe/",
+        StripeSubscribeView.as_view(),
+        name="stripe-subscribe",
+    ),
+    path(
+        "stripe/cancel/",
+        StripeCancelView.as_view(),
+        name="stripe-cancel",
+    ),
+    path(
+        "stripe/subscription/<str:subscription_id>/",
+        StripeSubscriptionDetailView.as_view(),
+        name="stripe-subscription-detail",
+    ),
+    path(
+        "stripe/portal/",
+        StripePortalView.as_view(),
+        name="stripe-portal",
+    ),
+    path(
+        "stripe/plans/",
+        StripePlansView.as_view(),
+        name="stripe-plans",
+    ),
+    path(
+        "stripe/webhook/",
+        StripeWebhookView.as_view(),
+        name="stripe-webhook",
     ),
 ]
