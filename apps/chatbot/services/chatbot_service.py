@@ -217,7 +217,11 @@ class ChatbotService:
 
 class LLMService:
     """
-    Service d'abstraction LLM — supporte Anthropic (Claude), OpenAI et Ollama.
+    Service d'abstraction LLM — supporte Anthropic (Claude), OpenAI, Ollama,
+    DeepSeek (V4 Pro) et Gemini Pro.
+
+    DeepSeek V4 Pro et Gemini Pro sont accessibles via une API compatible OpenAI,
+    on factorise donc l'appel via _appeler_openai_compatible().
     """
 
     def __init__(self):
@@ -241,6 +245,10 @@ class LLMService:
             return self._appeler_anthropic(messages)
         elif self.provider == "openai":
             return self._appeler_openai(messages)
+        elif self.provider == "deepseek":
+            return self._appeler_deepseek(messages)
+        elif self.provider == "gemini":
+            return self._appeler_gemini(messages)
         else:
             return self._appeler_ollama(messages)
 
@@ -357,4 +365,110 @@ class LLMService:
             raise
         except Exception as e:
             logger.error(f"Erreur Ollama: {e}")
+            raise
+
+    # ──────────────────────────────────────────────────────────────
+    # DEEPSEEK V4 PRO
+    # API OpenAI-compatible : https://api.deepseek.com/v1
+    # Doc : https://api-docs.deepseek.com/
+    # ──────────────────────────────────────────────────────────────
+
+    def _appeler_deepseek(self, messages: list) -> dict:
+        """
+        Appelle l'API DeepSeek V4 Pro.
+        DeepSeek est 100% compatible OpenAI — on réutilise le client openai
+        en pointant vers api.deepseek.com.
+
+        Modèles disponibles :
+        - deepseek-chat (V4 Pro, généraliste)
+        - deepseek-reasoner (R1, raisonnement avancé)
+        """
+        try:
+            import openai
+
+            api_key = CHATBOT_SETTINGS.get("DEEPSEEK_API_KEY", "")
+            model = CHATBOT_SETTINGS.get("DEEPSEEK_MODEL", "deepseek-chat")
+            base_url = CHATBOT_SETTINGS.get(
+                "DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"
+            )
+
+            if not api_key:
+                raise ValueError(
+                    "DEEPSEEK_API_KEY manquant. Obtenez-le sur https://platform.deepseek.com/api_keys"
+                )
+
+            client = openai.OpenAI(api_key=api_key, base_url=base_url)
+
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+
+            return {
+                "content": response.choices[0].message.content,
+                "tokens_total": response.usage.total_tokens,
+                "model": f"deepseek:{model}",
+            }
+
+        except ImportError:
+            logger.error("Package 'openai' non installé. Installez avec: pip install openai")
+            raise
+        except Exception as e:
+            logger.error(f"Erreur API DeepSeek: {e}")
+            raise
+
+    # ──────────────────────────────────────────────────────────────
+    # GEMINI PRO (Google)
+    # API OpenAI-compatible : https://generativelanguage.googleapis.com/v1beta/openai/
+    # Doc : https://ai.google.dev/gemini-api/docs
+    # ──────────────────────────────────────────────────────────────
+
+    def _appeler_gemini(self, messages: list) -> dict:
+        """
+        Appelle l'API Gemini Pro de Google.
+        Gemini expose un endpoint OpenAI-compatible — on utilise donc le client openai.
+
+        Modèles disponibles :
+        - gemini-2.0-flash (rapide, économique)
+        - gemini-2.0-pro (plus puissant)
+        - gemini-1.5-pro (gros contexte 2M tokens)
+        - gemini-1.5-flash (rapide, contexte 1M tokens)
+        """
+        try:
+            import openai
+
+            api_key = CHATBOT_SETTINGS.get("GEMINI_API_KEY", "")
+            model = CHATBOT_SETTINGS.get("GEMINI_MODEL", "gemini-2.0-flash")
+            base_url = CHATBOT_SETTINGS.get(
+                "GEMINI_BASE_URL",
+                "https://generativelanguage.googleapis.com/v1beta/openai/",
+            )
+
+            if not api_key:
+                raise ValueError(
+                    "GEMINI_API_KEY manquant. Obtenez-le sur https://aistudio.google.com/app/apikey"
+                )
+
+            client = openai.OpenAI(api_key=api_key, base_url=base_url)
+
+            response = client.chat.completions.create(
+                model=model,
+                messages=messages,
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+
+            return {
+                "content": response.choices[0].message.content,
+                "tokens_total": response.usage.total_tokens,
+                "model": f"gemini:{model}",
+            }
+
+        except ImportError:
+            logger.error("Package 'openai' non installé. Installez avec: pip install openai")
+            raise
+        except Exception as e:
+            logger.error(f"Erreur API Gemini: {e}")
             raise

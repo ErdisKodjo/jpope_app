@@ -375,19 +375,45 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@avensu-orienta.tg")
 
 # ──────────────────────────────────────────────
-# CHATBOT / IA
+# CHATBOT / IA — supporte 5 providers
+# anthropic | openai | ollama | deepseek | gemini
 # ──────────────────────────────────────────────
 CHATBOT = {
-    "PROVIDER": os.environ.get("CHATBOT_PROVIDER", "anthropic"),  # anthropic | openai | ollama
+    # Provider principal (cf. CHATBOT_PROVIDER dans .env)
+    "PROVIDER": os.environ.get("CHATBOT_PROVIDER", "ollama"),
+
+    # ─── Anthropic Claude (cloud, payant) ───
     "ANTHROPIC_API_KEY": os.environ.get("ANTHROPIC_API_KEY", ""),
-    "ANTHROPIC_MODEL": os.environ.get("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001"),
+    "ANTHROPIC_MODEL": os.environ.get("ANTHROPIC_MODEL", "claude-3-5-sonnet-20241022"),
+
+    # ─── OpenAI GPT (cloud, payant) ───
     "OPENAI_API_KEY": os.environ.get("OPENAI_API_KEY", ""),
     "OPENAI_MODEL": os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
-    "OLLAMA_BASE_URL": os.environ.get("OLLAMA_BASE_URL", "http://ollama:11434"),
+
+    # ─── Ollama (local, gratuit, privé) ───
+    "OLLAMA_BASE_URL": os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
     "OLLAMA_MODEL": os.environ.get("OLLAMA_MODEL", "llama3.1:8b"),
-    "TEMPERATURE": 0.3,
-    "MAX_TOKENS": 800,
-    "RAG_TOP_K": 5,
+
+    # ─── DeepSeek V4 Pro (cloud, très économique — 0.27$/M input, 1.10$/M output) ───
+    # API keys : https://platform.deepseek.com/api_keys
+    "DEEPSEEK_API_KEY": os.environ.get("DEEPSEEK_API_KEY", ""),
+    "DEEPSEEK_MODEL": os.environ.get("DEEPSEEK_MODEL", "deepseek-chat"),  # ou deepseek-reasoner (R1)
+    "DEEPSEEK_BASE_URL": os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
+
+    # ─── Gemini Pro (Google — cloud, gratuit jusqu'à 15 req/min) ───
+    # API keys : https://aistudio.google.com/app/apikey
+    "GEMINI_API_KEY": os.environ.get("GEMINI_API_KEY", ""),
+    "GEMINI_MODEL": os.environ.get("GEMINI_MODEL", "gemini-2.0-flash"),
+    # Options : gemini-2.0-flash, gemini-2.0-pro, gemini-1.5-pro (2M ctx), gemini-1.5-flash
+    "GEMINI_BASE_URL": os.environ.get(
+        "GEMINI_BASE_URL",
+        "https://generativelanguage.googleapis.com/v1beta/openai/",
+    ),
+
+    # ─── Paramètres généraux ───
+    "TEMPERATURE": float(os.environ.get("CHATBOT_TEMPERATURE", "0.3")),
+    "MAX_TOKENS": int(os.environ.get("CHATBOT_MAX_TOKENS", "800")),
+    "RAG_TOP_K": int(os.environ.get("CHATBOT_RAG_TOP_K", "5")),
 }
 
 # ──────────────────────────────────────────────
